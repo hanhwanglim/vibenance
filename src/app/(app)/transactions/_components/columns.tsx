@@ -35,6 +35,7 @@ export type Transaction = {
   category: string;
   reference: string;
   notes: string;
+  subTransactions?: Transaction[];
 };
 
 export const columns: ColumnDef<Transaction>[] = [
@@ -52,15 +53,20 @@ export const columns: ColumnDef<Transaction>[] = [
         />
       </div>
     ),
-    cell: ({ row }) => (
-      <div className="flex items-center justify-center">
-        <Checkbox
-          checked={row.getIsSelected()}
-          onCheckedChange={(value) => row.toggleSelected(!!value)}
-          aria-label="Select row"
-        />
-      </div>
-    ),
+    cell: ({ row }) => {
+      console.log(row.depth);
+      return (
+        <div
+          className={`flex items-center justify-center pl-${row.depth * 10}`}
+        >
+          <Checkbox
+            checked={row.getIsSelected()}
+            onCheckedChange={(value) => row.toggleSelected(!!value)}
+            aria-label="Select row"
+          />
+        </div>
+      );
+    },
     enableSorting: false,
     enableHiding: false,
   },
@@ -152,30 +158,17 @@ export const columns: ColumnDef<Transaction>[] = [
     ),
   },
   {
-    id: "actions",
+    id: "expand",
     cell: ({ row }) => {
-      if (row.original.account === "Monzo") return null;
-
-      return (
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button
-              variant="ghost"
-              className="data-[state=open]:bg-muted text-muted-foreground flex size-8"
-              size="icon"
-            >
-              <ChevronDown />
-              <span className="sr-only">Open menu</span>
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-32">
-            <DropdownMenuItem>Edit</DropdownMenuItem>
-            <DropdownMenuItem>Make a copy</DropdownMenuItem>
-            <DropdownMenuItem>Favorite</DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem variant="destructive">Delete</DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+      return row.getCanExpand() ? (
+        <button
+          onClick={row.getToggleExpandedHandler()}
+          style={{ cursor: "pointer" }}
+        >
+          {row.getIsExpanded() ? "👇" : "👉"}
+        </button>
+      ) : (
+        ""
       );
     },
   },
