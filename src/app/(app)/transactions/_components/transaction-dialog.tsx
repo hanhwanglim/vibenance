@@ -10,7 +10,9 @@ import {
 import { Transaction } from "./columns";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { PencilIcon, XIcon } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { FormEvent, useEffect, useRef, useState } from "react";
+import { formatTime } from "@/lib/formatter";
+import { Input } from "@/components/ui/input";
 
 export default function TransactionDrawer({
   item,
@@ -20,6 +22,7 @@ export default function TransactionDrawer({
   isOpen: boolean;
 }) {
   const [editingState, setEditingState] = useState(false);
+  const [tabsValue, setTabsValue] = useState("details");
   const prevIsOpenRef = useRef(isOpen);
   useEffect(() => {
     if (prevIsOpenRef.current && !isOpen) {
@@ -37,17 +40,19 @@ export default function TransactionDrawer({
 
   return (
     <DrawerContent>
-      <Tabs defaultValue="details">
+      <Tabs defaultValue={tabsValue} onValueChange={setTabsValue}>
         <DrawerHeader className="gap-1 relative">
           <div className="absolute top-4 right-4 flex items-center">
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => setEditingState(true)}
-              disabled={isEditing}
-            >
-              <PencilIcon className="size-4" />
-            </Button>
+            {tabsValue === "details" && (
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setEditingState(true)}
+                disabled={isEditing}
+              >
+                <PencilIcon className="size-4" />
+              </Button>
+            )}
             <DrawerClose asChild>
               <Button variant="ghost" size="icon">
                 <XIcon className="size-4" />
@@ -100,30 +105,67 @@ export default function TransactionDrawer({
           </div>
         </TabsContent>
         <TabsContent value="comments">
-          <div className="grid grid-cols-2 gap-4">
-            <div className="flex flex-col">
-              <span>Comment</span>
-              <span>{item.notes}</span>
-            </div>
-            <div>
-              <span>Commenter</span>
-              <span>{item.notes}</span>
-            </div>
-          </div>
+          <CommentTab />
         </TabsContent>
       </Tabs>
-      <DrawerFooter>
-        {isEditing ? (
-          <Button variant="secondary" onClick={() => setEditingState(false)}>
-            Save changes
-          </Button>
-        ) : (
-          <div>
-            <span>Last updated:&nbsp;</span>
-            <span>today</span>
-          </div>
-        )}
-      </DrawerFooter>
+      {tabsValue === "details" && (
+        <DrawerFooter>
+          {isEditing ? (
+            <Button variant="secondary" onClick={() => setEditingState(false)}>
+              Save changes
+            </Button>
+          ) : (
+            <div>
+              <span className="text-gray-500 text-sm">Last updated:&nbsp;</span>
+              <span className="text-gray-500 text-sm">today</span>
+            </div>
+          )}
+        </DrawerFooter>
+      )}
     </DrawerContent>
+  );
+}
+
+const data = [
+  { id: 1, comment: "Wtf", createdAt: new Date(2025, 1, 15) },
+  { id: 2, comment: "Wtf", createdAt: new Date(2025, 1, 16) },
+  { id: 3, comment: "Wtf", createdAt: new Date(2025, 1, 17) },
+  { id: 4, comment: "Wtf", createdAt: new Date(2025, 1, 18) },
+  { id: 5, comment: "Wtf", createdAt: new Date(2025, 1, 19) },
+  { id: 6, comment: "Wtf", createdAt: new Date(2025, 1, 20) },
+];
+
+function CommentTab() {
+  const [comments] = useState(data);
+
+  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    console.log(e);
+  };
+
+  return (
+    <div className="flex  flex-col w-full">
+      <h3>Comments</h3>
+      <div className="flex flex-col justify-between w-full">
+        <div>
+          {comments.map((comment) => {
+            return (
+              <div key={comment.id} className="flex gap-6 items-center">
+                <span className="text-gray-500 text-sm">
+                  {formatTime(comment.createdAt)}
+                </span>
+                <p>{comment.comment}</p>
+              </div>
+            );
+          })}
+        </div>
+        <form onSubmit={handleSubmit}>
+          <div className="flex gap-1 items-center">
+            <Input placeholder="Add comment" />
+            <Button type="submit">Add</Button>
+          </div>
+        </form>
+      </div>
+    </div>
   );
 }
