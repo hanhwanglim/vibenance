@@ -20,7 +20,14 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { ChevronDown } from "lucide-react";
+import {
+  ChevronDown,
+  ChevronUp,
+  MoreHorizontal,
+  MoreHorizontalIcon,
+  MoreVertical,
+  MoreVerticalIcon,
+} from "lucide-react";
 import { toast } from "sonner";
 import TransactionDrawer from "./transaction-dialog";
 import { useState } from "react";
@@ -54,10 +61,10 @@ export const columns: ColumnDef<Transaction>[] = [
       </div>
     ),
     cell: ({ row }) => {
-      console.log(row.depth);
       return (
         <div
-          className={`flex items-center justify-center pl-${row.depth * 10}`}
+          className="flex items-center justify-center"
+          style={{ paddingLeft: `${row.depth * 4}rem` }}
         >
           <Checkbox
             checked={row.getIsSelected()}
@@ -165,11 +172,9 @@ export const columns: ColumnDef<Transaction>[] = [
           onClick={row.getToggleExpandedHandler()}
           style={{ cursor: "pointer" }}
         >
-          {row.getIsExpanded() ? "👇" : "👉"}
+          {row.getIsExpanded() ? <ChevronUp /> : <ChevronDown />}
         </button>
-      ) : (
-        ""
-      );
+      ) : null;
     },
   },
 ];
