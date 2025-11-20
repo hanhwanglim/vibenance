@@ -11,7 +11,6 @@ import {
 } from "@/components/ui/select";
 import { useState } from "react";
 import { DataTable } from "./_components/data-table";
-import { Transaction } from "./_components/columns";
 import { columns } from "./_components/columns";
 
 function SelectAccount({
@@ -41,102 +40,15 @@ function SelectAccount({
   );
 }
 
-function getData(): Transaction[] {
-  return [
-    {
-      id: "728ed52f",
-      account: "Monzo",
-      timestamp: "2025-01-01 12:00:00",
-      name: "John Doe",
-      currency: "USD",
-      amount: 100,
-      category: "Food",
-      reference: "1234567890",
-      notes: "This is a note",
-    },
-    {
-      id: "728ed52f",
-      account: "American Express",
-      timestamp: "2025-01-01 12:00:00",
-      name: "Jane Doe",
-      currency: "EUR",
-      amount: 200,
-      category: "Travel",
-      reference: "1234567890",
-      notes: "This is a note",
-      subTransactions: [
-        {
-          id: "728e8973",
-          account: "Chase",
-          timestamp: "2025-01-01 12:00:00",
-          name: "John Doe",
-          currency: "GBP",
-          amount: 100,
-          category: "Food",
-          reference: "1234567890",
-          notes: "This is a note",
-        },
-        {
-          id: "728e8567",
-          account: "Chase",
-          timestamp: "2025-01-01 12:00:00",
-          name: "John Cat",
-          currency: "GBP",
-          amount: 100,
-          category: "Food",
-          reference: "1234567890",
-          notes: "This is a note",
-        },
-      ],
-    },
-    {
-      id: "728ed52f",
-      account: "Chase",
-      timestamp: "2025-01-01 12:00:00",
-      name: "John Smith",
-      currency: "GBP",
-      amount: 100,
-      category: "Food",
-      reference: "1234567890",
-      notes: "This is a note",
-      subTransactions: [
-        {
-          id: "728e8973",
-          account: "Chase",
-          timestamp: "2025-01-01 12:00:00",
-          name: "John Doe",
-          currency: "GBP",
-          amount: 100,
-          category: "Food",
-          reference: "1234567890",
-          notes: "This is a note",
-        },
-        {
-          id: "728e8567",
-          account: "Chase",
-          timestamp: "2025-01-01 12:00:00",
-          name: "John Cat",
-          currency: "GBP",
-          amount: 100,
-          category: "Food",
-          reference: "1234567890",
-          notes: "This is a note",
-        },
-      ],
-    },
-  ];
-}
+const accounts = [
+  { id: 1, name: "Monzo" },
+  { id: 2, name: "American Express" },
+  { id: 3, name: "Chase" },
+  { id: 4, name: "Barclays" },
+];
 
-export default function TransactionPage() {
+export default function TransactionsPage() {
   const [, setSelectedAccount] = useState<string>("all");
-  const data = getData();
-
-  const accounts = [
-    { id: 1, name: "Monzo" },
-    { id: 2, name: "American Express" },
-    { id: 3, name: "Chase" },
-    { id: 4, name: "Barclays" },
-  ];
 
   return (
     <div>
@@ -145,7 +57,7 @@ export default function TransactionPage() {
         setSelectedAccount={setSelectedAccount}
       />
       <div className="container mx-auto py-10">
-        <DataTable columns={columns} data={data} />
+        <DataTable columns={columns} />
       </div>
     </div>
   );

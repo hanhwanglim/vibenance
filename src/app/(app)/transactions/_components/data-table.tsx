@@ -2,6 +2,7 @@
 
 import {
   ColumnDef,
+  ColumnFiltersState,
   flexRender,
   getCoreRowModel,
   getExpandedRowModel,
@@ -33,25 +34,162 @@ import {
   ChevronsRight,
   ChevronsLeft,
 } from "lucide-react";
+import { useState, useMemo, useEffect } from "react";
+import { Transaction } from "./columns";
 
-interface DataTableProps<TData, TValue> {
-  columns: ColumnDef<TData, TValue>[];
-  data: TData[];
+function getData(
+  pagination: { pageIndex: number; pageSize: number },
+  columnFilters: ColumnFiltersState,
+): { data: Transaction[]; rowCount: number } {
+  const data = [
+    {
+      id: "728ed52f",
+      account: "Monzo",
+      timestamp: "2025-01-01 12:00:00",
+      name: "John Doe",
+      currency: "USD",
+      amount: 100,
+      category: "Food",
+      reference: "1234567890",
+      notes: "This is a note",
+    },
+    {
+      id: "728ed52f",
+      account: "American Express",
+      timestamp: "2025-01-01 12:00:00",
+      name: "Jane Doe",
+      currency: "EUR",
+      amount: 200,
+      category: "Travel",
+      reference: "1234567890",
+      notes: "This is a note",
+      subTransactions: [
+        {
+          id: "728e8973",
+          account: "Chase",
+          timestamp: "2025-01-01 12:00:00",
+          name: "John Doe",
+          currency: "GBP",
+          amount: 100,
+          category: "Food",
+          reference: "1234567890",
+          notes: "This is a note",
+        },
+        {
+          id: "728e8567",
+          account: "Chase",
+          timestamp: "2025-01-01 12:00:00",
+          name: "John Cat",
+          currency: "GBP",
+          amount: 100,
+          category: "Food",
+          reference: "1234567890",
+          notes: "This is a note",
+        },
+      ],
+    },
+    {
+      id: "728ed52f",
+      account: "Chase",
+      timestamp: "2025-01-01 12:00:00",
+      name: "John Smith",
+      currency: "GBP",
+      amount: 100,
+      category: "Food",
+      reference: "1234567890",
+      notes: "This is a note",
+      subTransactions: [
+        {
+          id: "728e8973",
+          account: "Chase",
+          timestamp: "2025-01-01 12:00:00",
+          name: "John Doe",
+          currency: "GBP",
+          amount: 100,
+          category: "Food",
+          reference: "1234567890",
+          notes: "This is a note",
+        },
+        {
+          id: "728e8567",
+          account: "Chase",
+          timestamp: "2025-01-01 12:00:00",
+          name: "John Cat",
+          currency: "GBP",
+          amount: 100,
+          category: "Food",
+          reference: "1234567890",
+          notes: "This is a note",
+        },
+      ],
+    },
+  ];
+
+  let filteredData = data;
+
+  columnFilters.forEach((filter) => {
+    if (!filter.value) return;
+
+    filteredData = filteredData.filter((row: Transaction) => {
+      const value = row[filter.id as keyof Transaction];
+      if (typeof value !== "string" && value === filter.value) return true;
+      return String(value)
+        .toLowerCase()
+        .includes(String(filter.value).toLowerCase());
+    });
+  });
+
+  const start = pagination.pageIndex * pagination.pageSize;
+  const end = start + pagination.pageSize;
+
+  return {
+    data: filteredData.slice(start, end),
+    rowCount: filteredData.length,
+  };
 }
 
-export function DataTable<TData, TValue>({
-  columns,
-  data,
-}: DataTableProps<TData, TValue>) {
+export function DataTable({ columns }: { columns: ColumnDef<Transaction>[] }) {
   "use no memo";
+
+  const [pagination, setPagination] = useState({
+    pageIndex: 0,
+    pageSize: 10,
+  });
+  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
+
+  const { data, rowCount } = useMemo(
+    () => getData(pagination, columnFilters),
+    [pagination, columnFilters],
+  );
+
+  // Reset to first page when filters change
+  useEffect(() => {
+    setPagination((prev) => ({
+      pageIndex: 0,
+      pageSize: prev.pageSize,
+    }));
+  }, [columnFilters]);
 
   const table = useReactTable({
     data,
     columns,
-    getSubRows: (row) => row.subTransactions,
     getCoreRowModel: getCoreRowModel(),
-    getExpandedRowModel: getExpandedRowModel(),
+    getSubRows: (row) => row.subTransactions,
+
+    manualPagination: true,
     getPaginationRowModel: getPaginationRowModel(),
+    onPaginationChange: setPagination,
+    rowCount: rowCount,
+
+    manualFiltering: true,
+    onColumnFiltersChange: setColumnFilters,
+
+    getExpandedRowModel: getExpandedRowModel(),
+
+    state: {
+      columnFilters,
+      pagination,
+    },
   });
 
   return (
@@ -93,13 +231,6 @@ export function DataTable<TData, TValue>({
                       </TableCell>
                     ))}
                   </TableRow>
-                  {/*{row.getIsExpanded() && (
-                  <TableRow>
-                    <TableCell colSpan={row.getAllCells().length}>
-                      asdf
-                    </TableCell>
-                  </TableRow>
-                )}*/}
                 </Fragment>
               ))
             ) : (

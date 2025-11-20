@@ -1,6 +1,6 @@
 "use client";
 
-import { ColumnDef } from "@tanstack/react-table";
+import { Column, ColumnDef } from "@tanstack/react-table";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -13,21 +13,7 @@ import {
 } from "@/components/ui/select";
 import { Drawer, DrawerTrigger } from "@/components/ui/drawer";
 import { Checkbox } from "@/components/ui/checkbox";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import {
-  ChevronDown,
-  ChevronUp,
-  MoreHorizontal,
-  MoreHorizontalIcon,
-  MoreVertical,
-  MoreVerticalIcon,
-} from "lucide-react";
+import { ChevronDown, ChevronUp } from "lucide-react";
 import { toast } from "sonner";
 import TransactionDrawer from "./transaction-dialog";
 import { useState } from "react";
@@ -44,6 +30,72 @@ export type Transaction = {
   notes: string;
   subTransactions?: Transaction[];
 };
+
+// Helper component for filterable column headers
+function FilterableHeader({
+  column,
+  title,
+}: {
+  column: Column<Transaction>;
+  title: string;
+}) {
+  const [inputValue, setInputValue] = useState(() => {
+    return (column.getFilterValue() as string | undefined) ?? "";
+  });
+
+  return (
+    <div className="flex flex-col space-y-2">
+      <span>{title}</span>
+      <Input
+        placeholder={`Filter ${title}...`}
+        value={inputValue}
+        onChange={(e) => {
+          const value = e.target.value;
+          setInputValue(value);
+          column.setFilterValue(value || undefined);
+        }}
+        className="h-8 w-full"
+      />
+    </div>
+  );
+}
+
+// Helper component for selectable filter headers
+function SelectableFilterHeader({
+  column,
+  title,
+  options,
+}: {
+  column: Column<Transaction>;
+  title: string;
+  options: { value: string; label: string }[];
+}) {
+  const filterValue = column.getFilterValue() as string | undefined;
+
+  return (
+    <div className="flex flex-col space-y-2">
+      <span>{title}</span>
+      <Select
+        value={filterValue ?? "all"}
+        onValueChange={(value) =>
+          column.setFilterValue(value === "all" ? undefined : value)
+        }
+      >
+        <SelectTrigger className="h-8 w-full">
+          <SelectValue placeholder={`All ${title}`} />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="all">All {title}</SelectItem>
+          {options.map((option) => (
+            <SelectItem key={option.value} value={option.value}>
+              {option.label}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+    </div>
+  );
+}
 
 export const columns: ColumnDef<Transaction>[] = [
   {
@@ -79,16 +131,20 @@ export const columns: ColumnDef<Transaction>[] = [
   },
   {
     accessorKey: "account",
-    header: "Account",
+    header: ({ column }) => (
+      <FilterableHeader column={column} title="Account" />
+    ),
     enableHiding: true,
   },
   {
     accessorKey: "timestamp",
-    header: "Timestamp",
+    header: ({ column }) => (
+      <FilterableHeader column={column} title="Timestamp" />
+    ),
   },
   {
     accessorKey: "name",
-    header: "Name",
+    header: ({ column }) => <FilterableHeader column={column} title="Name" />,
     cell: ({ row }) => {
       return <TableCellViewer item={row.original} />;
     },
@@ -104,33 +160,20 @@ export const columns: ColumnDef<Transaction>[] = [
   },
   {
     accessorKey: "category",
-    header: "Category",
+    header: ({ column }) => (
+      <SelectableFilterHeader
+        column={column}
+        title="Category"
+        options={[
+          { value: "Food", label: "Food" },
+          { value: "Travel", label: "Travel" },
+          { value: "Shopping", label: "Shopping" },
+          { value: "Bills", label: "Bills" },
+          { value: "Other", label: "Other" },
+        ]}
+      />
+    ),
     enableHiding: true,
-    cell: ({ row }) => {
-      return (
-        <>
-          <Label htmlFor={`${row.original.id}-reviewer`} className="sr-only">
-            Category
-          </Label>
-          <Select>
-            <SelectTrigger
-              className="w-38 **:data-[slot=select-value]:block **:data-[slot=select-value]:truncate"
-              size="sm"
-              id={`${row.original.id}-category`}
-            >
-              <SelectValue placeholder="Category" />
-            </SelectTrigger>
-            <SelectContent align="end">
-              <SelectItem value="Food">Food</SelectItem>
-              <SelectItem value="Travel">Travel</SelectItem>
-              <SelectItem value="Shopping">Shopping</SelectItem>
-              <SelectItem value="Bills">Bills</SelectItem>
-              <SelectItem value="Other">Other</SelectItem>
-            </SelectContent>
-          </Select>
-        </>
-      );
-    },
   },
   {
     accessorKey: "reference",
