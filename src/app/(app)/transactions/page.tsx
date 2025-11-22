@@ -13,7 +13,7 @@ import { useState, useMemo } from "react";
 import { DataTable } from "./_components/data-table";
 import { columns } from "./_components/columns";
 import { SummaryCards } from "./_components/summary-cards";
-import { DateRangePicker, DateRange } from "./_components/date-range-picker";
+import { DatePicker } from "./_components/date-picker";
 import { GlobalSearch } from "./_components/global-search";
 import { ExportButton } from "./_components/export-button";
 import { BulkActions } from "./_components/bulk-actions";
@@ -132,7 +132,7 @@ export default function TransactionsPage() {
                     onChange={setGlobalSearch}
                   />
                 </div>
-                <DateRangePicker value={dateRange} onChange={setDateRange} />
+                <DatePicker />
                 <SelectAccount
                   accounts={accounts}
                   setSelectedAccount={setSelectedAccount}
