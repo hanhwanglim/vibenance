@@ -13,21 +13,14 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart";
-import { Pie, PieChart, Cell, Legend } from "recharts";
+import { Pie, PieChart, Label } from "recharts";
 import { Transaction } from "./columns";
 import { formatCurrency } from "@/lib/formatter";
+import { useMemo } from "react";
 
 type CategoryChartProps = {
   transactions: Transaction[];
 };
-
-const COLORS = [
-  "hsl(var(--chart-1))",
-  "hsl(var(--chart-2))",
-  "hsl(var(--chart-3))",
-  "hsl(var(--chart-4))",
-  "hsl(var(--chart-5))",
-];
 
 const chartConfig = {
   category: {
@@ -35,12 +28,11 @@ const chartConfig = {
   },
   amount: {
     label: "Amount",
-    color: "hsl(var(--chart-1))",
+    color: "var(--chart-1)",
   },
 } satisfies ChartConfig;
 
-export function CategoryChart({ transactions }: CategoryChartProps) {
-  // Flatten all transactions
+function calculateChartData(transactions: Transaction[]) {
   const allTransactions = transactions.flatMap((txn) => {
     const result = [txn];
     if (txn.subTransactions) {
@@ -61,16 +53,20 @@ export function CategoryChart({ transactions }: CategoryChartProps) {
       {} as Record<string, number>,
     );
 
-  // Convert to chart data
-  const chartData = Object.entries(expensesByCategory)
+  return Object.entries(expensesByCategory)
     .map(([category, amount]) => ({
       category,
       amount: Math.round(amount * 100) / 100,
-      fill: COLORS[
-        Object.keys(expensesByCategory).indexOf(category) % COLORS.length
-      ],
+      fill: `var(--chart-${(Object.keys(expensesByCategory).indexOf(category) % 5) + 1})`,
     }))
     .sort((a, b) => b.amount - a.amount);
+}
+
+export function CategoryChart({ transactions }: CategoryChartProps) {
+  const chartData = useMemo(
+    () => calculateChartData(transactions),
+    [transactions],
+  );
 
   if (chartData.length === 0) {
     return (
@@ -83,76 +79,66 @@ export function CategoryChart({ transactions }: CategoryChartProps) {
     );
   }
 
-  // Get primary currency
   const primaryCurrency =
-    allTransactions.find((txn) => txn.amount < 0)?.currency || "USD";
+    transactions.find((txn) => txn.amount < 0)?.currency || "USD";
 
   const totalExpenses = chartData.reduce((sum, item) => sum + item.amount, 0);
 
   return (
-    <Card>
-      <CardHeader>
+    <Card className="flex flex-col">
+      <CardHeader className="items-center pb-0">
         <CardTitle>Spending by Category</CardTitle>
         <CardDescription>
           Total expenses: {formatCurrency(totalExpenses, primaryCurrency)}
         </CardDescription>
       </CardHeader>
-      <CardContent>
-        <ChartContainer config={chartConfig} className="h-[300px]">
+      <CardContent className="flex-1 pb-0">
+        <ChartContainer
+          config={chartConfig}
+          className="mx-auto aspect-square max-h-[300px]"
+        >
           <PieChart>
             <ChartTooltip
-              content={({ active, payload }) => {
-                if (active && payload && payload.length) {
-                  const data = payload[0];
-                  return (
-                    <div className="rounded-lg border bg-background p-2 shadow-sm">
-                      <div className="grid gap-2">
-                        <div className="flex items-center justify-between gap-4">
-                          <span className="text-sm font-medium">
-                            {data.payload?.category}
-                          </span>
-                          <span className="text-sm font-bold">
-                            {formatCurrency(
-                              (data.value as number) || 0,
-                              primaryCurrency,
-                            )}
-                          </span>
-                        </div>
-                        <div className="text-xs text-muted-foreground">
-                          {(
-                            (((data.value as number) || 0) / totalExpenses) *
-                            100
-                          ).toFixed(1)}
-                          % of total
-                        </div>
-                      </div>
-                    </div>
-                  );
-                }
-                return null;
-              }}
+              cursor={false}
+              content={<ChartTooltipContent hideLabel />}
             />
             <Pie
               data={chartData}
-              cx="50%"
-              cy="50%"
-              labelLine={false}
-              label={({ category, percent }) =>
-                `${category} ${(percent * 100).toFixed(0)}%`
-              }
-              outerRadius={80}
-              fill="#8884d8"
               dataKey="amount"
+              nameKey="category"
+              innerRadius={80}
+              strokeWidth={5}
             >
-              {chartData.map((entry, index) => (
-                <Cell key={`cell-${index}`} fill={entry.fill} />
-              ))}
+              <Label
+                content={({ viewBox }) => {
+                  if (viewBox && "cx" in viewBox && "cy" in viewBox) {
+                    return (
+                      <text
+                        x={viewBox.cx}
+                        y={viewBox.cy}
+                        textAnchor="middle"
+                        dominantBaseline="middle"
+                      >
+                        <tspan
+                          x={viewBox.cx}
+                          y={viewBox.cy}
+                          className="fill-foreground text-3xl font-bold"
+                        >
+                          {formatCurrency(totalExpenses, primaryCurrency)}
+                        </tspan>
+                        <tspan
+                          x={viewBox.cx}
+                          y={(viewBox.cy || 0) + 24}
+                          className="fill-muted-foreground"
+                        >
+                          Total Expenses
+                        </tspan>
+                      </text>
+                    );
+                  }
+                }}
+              />
             </Pie>
-            <Legend
-              verticalAlign="bottom"
-              height={36}
-              formatter={(value) => value}
-            />
           </PieChart>
         </ChartContainer>
       </CardContent>

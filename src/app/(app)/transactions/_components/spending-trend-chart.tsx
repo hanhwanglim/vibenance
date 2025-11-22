@@ -13,9 +13,8 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart";
-import { Area, AreaChart, CartesianGrid, XAxis, YAxis } from "recharts";
+import { Bar, BarChart, CartesianGrid, XAxis } from "recharts";
 import { Transaction } from "./columns";
-import { formatCurrency } from "@/lib/formatter";
 
 type SpendingTrendChartProps = {
   transactions: Transaction[];
@@ -24,7 +23,7 @@ type SpendingTrendChartProps = {
 const chartConfig = {
   expenses: {
     label: "Expenses",
-    color: "hsl(var(--chart-1))",
+    color: "var(--chart-1)",
   },
 } satisfies ChartConfig;
 
@@ -74,9 +73,6 @@ export function SpendingTrendChart({ transactions }: SpendingTrendChartProps) {
     }))
     .sort((a, b) => a.date.localeCompare(b.date));
 
-  // Get primary currency
-  const primaryCurrency = expenses[0]?.currency || "USD";
-
   return (
     <Card>
       <CardHeader>
@@ -84,70 +80,22 @@ export function SpendingTrendChart({ transactions }: SpendingTrendChartProps) {
         <CardDescription>Daily expense trends over time</CardDescription>
       </CardHeader>
       <CardContent>
-        <ChartContainer config={chartConfig} className="h-[300px]">
-          <AreaChart data={chartData}>
-            <defs>
-              <linearGradient id="fillExpenses" x1="0" y1="0" x2="0" y2="1">
-                <stop
-                  offset="5%"
-                  stopColor="var(--color-expenses)"
-                  stopOpacity={1.0}
-                />
-                <stop
-                  offset="95%"
-                  stopColor="var(--color-expenses)"
-                  stopOpacity={0.1}
-                />
-              </linearGradient>
-            </defs>
+        <ChartContainer config={chartConfig}>
+          <BarChart accessibilityLayer data={chartData}>
             <CartesianGrid vertical={false} />
             <XAxis
               dataKey="date"
               tickLine={false}
+              tickMargin={10}
               axisLine={false}
-              tickMargin={8}
-              minTickGap={32}
-              tickFormatter={(value) => {
-                const date = new Date(value);
-                return date.toLocaleDateString("en-US", {
-                  month: "short",
-                  day: "numeric",
-                });
-              }}
-            />
-            <YAxis
-              tickLine={false}
-              axisLine={false}
-              tickMargin={8}
-              tickFormatter={(value) => {
-                return formatCurrency(value, primaryCurrency);
-              }}
+              tickFormatter={(value) => value.slice(0, 3)}
             />
             <ChartTooltip
               cursor={false}
-              content={
-                <ChartTooltipContent
-                  labelFormatter={(value) => {
-                    return new Date(value).toLocaleDateString("en-US", {
-                      month: "short",
-                      day: "numeric",
-                      year: "numeric",
-                    });
-                  }}
-                  indicator="dot"
-                  formatter={(value) =>
-                    formatCurrency(Number(value), primaryCurrency)
-                  }
-                />
-              }
+              content={<ChartTooltipContent hideLabel />}
             />
-            <Area
-              dataKey="expenses"
-              type="natural"
-              fill="url(#fillExpenses)"
-              stroke="var(--color-expenses)"
-            />
-          </AreaChart>
+            <Bar dataKey="expenses" fill="var(--chart-1)" radius={8} />
+          </BarChart>
         </ChartContainer>
       </CardContent>
     </Card>

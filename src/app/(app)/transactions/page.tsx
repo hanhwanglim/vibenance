@@ -10,11 +10,13 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useState, useMemo } from "react";
-import { type DateRange } from "react-day-picker";
 import { DataTable } from "./_components/data-table";
 import { columns } from "./_components/columns";
 import { SummaryCards } from "./_components/summary-cards";
-import { DatePicker } from "./_components/date-picker";
+import {
+  DateRangePicker,
+  type DateRange,
+} from "./_components/date-range-picker";
 import { GlobalSearch } from "./_components/global-search";
 import { ExportButton } from "./_components/export-button";
 import { BulkActions } from "./_components/bulk-actions";
@@ -26,13 +28,15 @@ import { IncomeExpensesChart } from "./_components/income-expenses-chart";
 
 function SelectAccount({
   accounts,
+  selectedAccount,
   setSelectedAccount,
 }: {
   accounts: { id: number; name: string }[];
+  selectedAccount: string;
   setSelectedAccount: (account: string) => void;
 }) {
   return (
-    <Select defaultValue="all" onValueChange={(e) => setSelectedAccount(e)}>
+    <Select value={selectedAccount} onValueChange={setSelectedAccount}>
       <SelectTrigger className="w-[180px]">
         <SelectValue placeholder="Accounts" />
       </SelectTrigger>
@@ -94,12 +98,29 @@ export default function TransactionsPage() {
     // Date range filter
     if (dateRange.from || dateRange.to) {
       filtered = filtered.filter((txn) => {
+        // Parse timestamp and normalize to start of day for comparison
         const txnDate = new Date(txn.timestamp);
-        if (dateRange.from && txnDate < dateRange.from) return false;
+        const txnDateOnly = new Date(
+          txnDate.getFullYear(),
+          txnDate.getMonth(),
+          txnDate.getDate(),
+        );
+
+        if (dateRange.from) {
+          const fromDateOnly = new Date(
+            dateRange.from.getFullYear(),
+            dateRange.from.getMonth(),
+            dateRange.from.getDate(),
+          );
+          if (txnDateOnly < fromDateOnly) return false;
+        }
         if (dateRange.to) {
-          const toDate = new Date(dateRange.to);
-          toDate.setHours(23, 59, 59, 999);
-          if (txnDate > toDate) return false;
+          const toDateOnly = new Date(
+            dateRange.to.getFullYear(),
+            dateRange.to.getMonth(),
+            dateRange.to.getDate(),
+          );
+          if (txnDateOnly > toDateOnly) return false;
         }
         return true;
       });
@@ -132,9 +153,10 @@ export default function TransactionsPage() {
               <div className="flex-1">
                 <GlobalSearch value={globalSearch} onChange={setGlobalSearch} />
               </div>
-              <DatePicker />
+              <DateRangePicker value={dateRange} onChange={setDateRange} />
               <SelectAccount
                 accounts={accounts}
+                selectedAccount={selectedAccount}
                 setSelectedAccount={setSelectedAccount}
               />
               <div className="flex gap-2">

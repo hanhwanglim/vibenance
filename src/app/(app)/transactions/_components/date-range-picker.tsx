@@ -10,7 +10,6 @@ import {
 } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Calendar, X } from "lucide-react";
 import { useState, useEffect } from "react";
 
 export type DateRange = {
@@ -71,13 +70,25 @@ function getQuickRangeDates(range: string): DateRange {
 export function DateRangePicker({ value, onChange }: DateRangePickerProps) {
   const [quickRange, setQuickRange] = useState<string>("month");
   const [isCustom, setIsCustom] = useState(false);
+  const [hasInitialized, setHasInitialized] = useState(false);
 
+  // Only initialize if value is not already set from parent
   useEffect(() => {
-    if (!isCustom && quickRange !== "custom") {
-      const dates = getQuickRangeDates(quickRange);
-      onChange(dates);
+    if (!hasInitialized) {
+      // If parent has already set a value, don't override it
+      if (value.from || value.to) {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
+        setHasInitialized(true);
+        return;
+      }
+      // Otherwise, initialize with default "month" range
+      if (!isCustom && quickRange !== "custom") {
+        const dates = getQuickRangeDates(quickRange);
+        onChange(dates);
+      }
+      setHasInitialized(true);
     }
-  }, [quickRange, isCustom, onChange]);
+  }, [hasInitialized, value.from, value.to, isCustom, quickRange, onChange]);
 
   const formatDateForInput = (date: Date | null): string => {
     if (!date) return "";
@@ -119,19 +130,16 @@ export function DateRangePicker({ value, onChange }: DateRangePickerProps) {
   };
 
   return (
-    <div className="flex flex-col gap-4 rounded-lg border p-4">
+    <div className="w-40">
       <div className="flex items-center gap-2">
-        <Calendar className="h-4 w-4 text-muted-foreground" />
-        <Label className="text-sm font-medium">Date Range</Label>
+        <Label className="text-sm font-medium sr-only">Date Range</Label>
         {(value.from || value.to) && (
           <Button
             variant="ghost"
             size="sm"
             className="ml-auto h-6 w-6 p-0"
             onClick={clearDates}
-          >
-            <X className="h-3 w-3" />
-          </Button>
+          ></Button>
         )}
       </div>
 

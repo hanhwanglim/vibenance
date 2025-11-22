@@ -13,9 +13,8 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart";
-import { Area, AreaChart, CartesianGrid, XAxis, YAxis } from "recharts";
+import { Area, AreaChart, CartesianGrid, XAxis } from "recharts";
 import { Transaction } from "./columns";
-import { formatCurrency } from "@/lib/formatter";
 
 type IncomeExpensesChartProps = {
   transactions: Transaction[];
@@ -24,11 +23,11 @@ type IncomeExpensesChartProps = {
 const chartConfig = {
   income: {
     label: "Income",
-    color: "hsl(var(--chart-2))",
+    color: "var(--chart-4)",
   },
   expenses: {
     label: "Expenses",
-    color: "hsl(var(--chart-1))",
+    color: "var(--chart-1)",
   },
 } satisfies ChartConfig;
 
@@ -102,13 +101,6 @@ export function IncomeExpensesChart({
     }))
     .sort((a, b) => a.date.localeCompare(b.date));
 
-  // Get primary currency
-  const primaryCurrency =
-    allTransactions[0]?.currency ||
-    income[0]?.currency ||
-    expenses[0]?.currency ||
-    "USD";
-
   return (
     <Card>
       <CardHeader>
@@ -116,41 +108,18 @@ export function IncomeExpensesChart({
         <CardDescription>Daily income and expense comparison</CardDescription>
       </CardHeader>
       <CardContent>
-        <ChartContainer config={chartConfig} className="h-[300px]">
-          <AreaChart data={chartData}>
-            <defs>
-              <linearGradient id="fillIncome" x1="0" y1="0" x2="0" y2="1">
-                <stop
-                  offset="5%"
-                  stopColor="var(--color-income)"
-                  stopOpacity={1.0}
-                />
-                <stop
-                  offset="95%"
-                  stopColor="var(--color-income)"
-                  stopOpacity={0.1}
-                />
-              </linearGradient>
-              <linearGradient id="fillExpenses" x1="0" y1="0" x2="0" y2="1">
-                <stop
-                  offset="5%"
-                  stopColor="var(--color-expenses)"
-                  stopOpacity={1.0}
-                />
-                <stop
-                  offset="95%"
-                  stopColor="var(--color-expenses)"
-                  stopOpacity={0.1}
-                />
-              </linearGradient>
-            </defs>
+        <ChartContainer config={chartConfig}>
+          <AreaChart
+            accessibilityLayer
+            data={chartData}
+            margin={{ left: 12, right: 12 }}
+          >
             <CartesianGrid vertical={false} />
             <XAxis
               dataKey="date"
               tickLine={false}
               axisLine={false}
               tickMargin={8}
-              minTickGap={32}
               tickFormatter={(value) => {
                 const date = new Date(value);
                 return date.toLocaleDateString("en-US", {
@@ -159,44 +128,22 @@ export function IncomeExpensesChart({
                 });
               }}
             />
-            <YAxis
-              tickLine={false}
-              axisLine={false}
-              tickMargin={8}
-              tickFormatter={(value) => {
-                return formatCurrency(value, primaryCurrency);
-              }}
-            />
             <ChartTooltip
               cursor={false}
-              content={
-                <ChartTooltipContent
-                  labelFormatter={(value) => {
-                    return new Date(value).toLocaleDateString("en-US", {
-                      month: "short",
-                      day: "numeric",
-                      year: "numeric",
-                    });
-                  }}
-                  indicator="dot"
-                  formatter={(value, name) => [
-                    formatCurrency(Number(value), primaryCurrency),
-                    name === "income" ? "Income" : "Expenses",
-                  ]}
-                />
-              }
+              content={<ChartTooltipContent indicator="line" />}
             />
             <Area
               dataKey="income"
               type="natural"
-              fill="url(#fillIncome)"
-              stroke="var(--color-income)"
+              fill="var(--chart-4)"
+              stroke="var(--chart-4)"
             />
             <Area
               dataKey="expenses"
               type="natural"
-              fill="url(#fillExpenses)"
-              stroke="var(--color-expenses)"
+              fill="var(--chart-1)"
+              stroke="var(--chart-1)"
+              clipPath="url(#clipIncomeExpenses)"
             />
           </AreaChart>
         </ChartContainer>
