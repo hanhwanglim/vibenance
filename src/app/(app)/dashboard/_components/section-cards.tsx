@@ -45,8 +45,10 @@ function StatCard({ data, isLoading, className }: StatCardProps) {
         <CardTitle className="text-2xl font-semibold tabular-nums @[250px]/card:text-3xl">
           {isLoading ? (
             <Skeleton className="h-8 w-32" />
-          ) : (
+          ) : data.currency ? (
             formatCurrency(data.value, data.currency)
+          ) : (
+            data.value.toLocaleString()
           )}
         </CardTitle>
         {data.change && (

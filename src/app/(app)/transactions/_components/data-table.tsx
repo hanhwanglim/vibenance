@@ -37,118 +37,17 @@ import {
 import { useState, useMemo, useEffect } from "react";
 import { Transaction } from "./columns";
 
-function getData(
-  pagination: { pageIndex: number; pageSize: number },
-  columnFilters: ColumnFiltersState,
-): { data: Transaction[]; rowCount: number } {
-  const data = [
-    {
-      id: "728ed52f",
-      account: "Monzo",
-      timestamp: "2025-01-01 12:00:00",
-      name: "John Doe",
-      currency: "USD",
-      amount: 100,
-      category: "Food",
-      reference: "1234567890",
-      notes: "This is a note",
-    },
-    {
-      id: "728ed52f",
-      account: "American Express",
-      timestamp: "2025-01-01 12:00:00",
-      name: "Jane Doe",
-      currency: "EUR",
-      amount: 200,
-      category: "Travel",
-      reference: "1234567890",
-      notes: "This is a note",
-      subTransactions: [
-        {
-          id: "728e8973",
-          account: "Chase",
-          timestamp: "2025-01-01 12:00:00",
-          name: "John Doe",
-          currency: "GBP",
-          amount: 100,
-          category: "Food",
-          reference: "1234567890",
-          notes: "This is a note",
-        },
-        {
-          id: "728e8567",
-          account: "Chase",
-          timestamp: "2025-01-01 12:00:00",
-          name: "John Cat",
-          currency: "GBP",
-          amount: 100,
-          category: "Food",
-          reference: "1234567890",
-          notes: "This is a note",
-        },
-      ],
-    },
-    {
-      id: "728ed52f",
-      account: "Chase",
-      timestamp: "2025-01-01 12:00:00",
-      name: "John Smith",
-      currency: "GBP",
-      amount: 100,
-      category: "Food",
-      reference: "1234567890",
-      notes: "This is a note",
-      subTransactions: [
-        {
-          id: "728e8973",
-          account: "Chase",
-          timestamp: "2025-01-01 12:00:00",
-          name: "John Doe",
-          currency: "GBP",
-          amount: 100,
-          category: "Food",
-          reference: "1234567890",
-          notes: "This is a note",
-        },
-        {
-          id: "728e8567",
-          account: "Chase",
-          timestamp: "2025-01-01 12:00:00",
-          name: "John Cat",
-          currency: "GBP",
-          amount: 100,
-          category: "Food",
-          reference: "1234567890",
-          notes: "This is a note",
-        },
-      ],
-    },
-  ];
+type DataTableProps = {
+  columns: ColumnDef<Transaction>[];
+  data: Transaction[];
+  onSelectedRowsChange?: (rows: Transaction[]) => void;
+};
 
-  let filteredData = data;
-
-  columnFilters.forEach((filter) => {
-    if (!filter.value) return;
-
-    filteredData = filteredData.filter((row: Transaction) => {
-      const value = row[filter.id as keyof Transaction];
-      if (typeof value !== "string" && value === filter.value) return true;
-      return String(value)
-        .toLowerCase()
-        .includes(String(filter.value).toLowerCase());
-    });
-  });
-
-  const start = pagination.pageIndex * pagination.pageSize;
-  const end = start + pagination.pageSize;
-
-  return {
-    data: filteredData.slice(start, end),
-    rowCount: filteredData.length,
-  };
-}
-
-export function DataTable({ columns }: { columns: ColumnDef<Transaction>[] }) {
+export function DataTable({
+  columns,
+  data: allData,
+  onSelectedRowsChange,
+}: DataTableProps) {
   "use no memo";
 
   const [pagination, setPagination] = useState({
@@ -156,11 +55,36 @@ export function DataTable({ columns }: { columns: ColumnDef<Transaction>[] }) {
     pageSize: 10,
   });
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
+  const [rowSelection, setRowSelection] = useState({});
 
-  const { data, rowCount } = useMemo(
-    () => getData(pagination, columnFilters),
-    [pagination, columnFilters],
-  );
+  // Apply column filters
+  const filteredData = useMemo(() => {
+    let result = [...allData];
+
+    columnFilters.forEach((filter) => {
+      if (!filter.value) return;
+
+      result = result.filter((row: Transaction) => {
+        const value = row[filter.id as keyof Transaction];
+        if (typeof value !== "string" && value === filter.value) return true;
+        return String(value)
+          .toLowerCase()
+          .includes(String(filter.value).toLowerCase());
+      });
+    });
+
+    return result;
+  }, [allData, columnFilters]);
+
+  // Paginate filtered data
+  const { data, rowCount } = useMemo(() => {
+    const start = pagination.pageIndex * pagination.pageSize;
+    const end = start + pagination.pageSize;
+    return {
+      data: filteredData.slice(start, end),
+      rowCount: filteredData.length,
+    };
+  }, [filteredData, pagination]);
 
   // Reset to first page when filters change
   useEffect(() => {
@@ -169,6 +93,33 @@ export function DataTable({ columns }: { columns: ColumnDef<Transaction>[] }) {
       pageSize: prev.pageSize,
     }));
   }, [columnFilters]);
+
+  // Notify parent of selected rows
+  useEffect(() => {
+    if (onSelectedRowsChange) {
+      const selectedRows = Object.keys(rowSelection)
+        .filter((key) => rowSelection[key as keyof typeof rowSelection])
+        .map((key) => {
+          // Find the row in all data (including sub-transactions)
+          const findTransaction = (
+            transactions: Transaction[],
+            id: string,
+          ): Transaction | null => {
+            for (const txn of transactions) {
+              if (txn.id === id) return txn;
+              if (txn.subTransactions) {
+                const found = findTransaction(txn.subTransactions, id);
+                if (found) return found;
+              }
+            }
+            return null;
+          };
+          return findTransaction(allData, key);
+        })
+        .filter((txn): txn is Transaction => txn !== null);
+      onSelectedRowsChange(selectedRows);
+    }
+  }, [rowSelection, allData, onSelectedRowsChange]);
 
   const table = useReactTable({
     data,
@@ -186,9 +137,13 @@ export function DataTable({ columns }: { columns: ColumnDef<Transaction>[] }) {
 
     getExpandedRowModel: getExpandedRowModel(),
 
+    enableRowSelection: true,
+    onRowSelectionChange: setRowSelection,
+
     state: {
       columnFilters,
       pagination,
+      rowSelection,
     },
   });
 
