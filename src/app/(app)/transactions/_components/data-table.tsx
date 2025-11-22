@@ -3,6 +3,7 @@
 import {
   ColumnDef,
   ColumnFiltersState,
+  VisibilityState,
   flexRender,
   getCoreRowModel,
   getExpandedRowModel,
@@ -41,12 +42,14 @@ type DataTableProps = {
   columns: ColumnDef<Transaction>[];
   data: Transaction[];
   onSelectedRowsChange?: (rows: Transaction[]) => void;
+  onTableReady?: (table: ReturnType<typeof useReactTable<Transaction>>) => void;
 };
 
 export function DataTable({
   columns,
   data: allData,
   onSelectedRowsChange,
+  onTableReady,
 }: DataTableProps) {
   "use no memo";
 
@@ -56,6 +59,7 @@ export function DataTable({
   });
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [rowSelection, setRowSelection] = useState({});
+  const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
 
   // Apply column filters
   const filteredData = useMemo(() => {
@@ -144,8 +148,17 @@ export function DataTable({
       columnFilters,
       pagination,
       rowSelection,
+      columnVisibility,
     },
+    onColumnVisibilityChange: setColumnVisibility,
   });
+
+  // Expose table instance to parent
+  useEffect(() => {
+    if (onTableReady) {
+      onTableReady(table);
+    }
+  }, [table, onTableReady]);
 
   return (
     <div className="overflow-hidden rounded-md border">

@@ -10,6 +10,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useState, useMemo } from "react";
+import type { Table as TanStackTable } from "@tanstack/react-table";
 import { DataTable } from "./_components/data-table";
 import { columns } from "./_components/columns";
 import { SummaryCards } from "./_components/summary-cards";
@@ -18,13 +19,15 @@ import {
   type DateRange,
 } from "./_components/date-range-picker";
 import { GlobalSearch } from "./_components/global-search";
-import { ExportButton } from "./_components/export-button";
 import { BulkActions } from "./_components/bulk-actions";
+import { TableToolbar } from "./_components/table-toolbar";
 import { getAllTransactions } from "./_components/transaction-data";
 import { Transaction } from "./_components/columns";
 import { CategoryChart } from "./_components/category-chart";
 import { SpendingTrendChart } from "./_components/spending-trend-chart";
 import { IncomeExpensesChart } from "./_components/income-expenses-chart";
+import { Button } from "@/components/ui/button";
+import { Plus } from "lucide-react";
 
 function SelectAccount({
   accounts,
@@ -77,6 +80,8 @@ export default function TransactionsPage() {
   const [selectedTransactions, setSelectedTransactions] = useState<
     Transaction[]
   >([]);
+  const [tableInstance, setTableInstance] =
+    useState<TanStackTable<Transaction> | null>(null);
 
   // Load all transactions
   const allTransactions = useMemo(() => getAllTransactions(), []);
@@ -159,10 +164,10 @@ export default function TransactionsPage() {
                 selectedAccount={selectedAccount}
                 setSelectedAccount={setSelectedAccount}
               />
-              <div className="flex gap-2">
-                <ExportButton transactions={filteredTransactions} />
-                <BulkActions selectedTransactions={selectedTransactions} />
-              </div>
+              <Button variant="default" className="gap-2">
+                <Plus className="h-4 w-4" />
+                Add Transaction
+              </Button>
             </div>
           </div>
 
@@ -180,10 +185,17 @@ export default function TransactionsPage() {
 
           {/* Data Table */}
           <div className="px-4 lg:px-6">
+            {tableInstance && (
+              <TableToolbar
+                table={tableInstance}
+                transactions={filteredTransactions}
+              />
+            )}
             <DataTable
               columns={columns}
               data={filteredTransactions}
               onSelectedRowsChange={setSelectedTransactions}
+              onTableReady={setTableInstance}
             />
           </div>
         </div>
