@@ -10,6 +10,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useState, useMemo } from "react";
+import { type DateRange } from "react-day-picker";
 import { DataTable } from "./_components/data-table";
 import { columns } from "./_components/columns";
 import { SummaryCards } from "./_components/summary-cards";
@@ -19,6 +20,9 @@ import { ExportButton } from "./_components/export-button";
 import { BulkActions } from "./_components/bulk-actions";
 import { getAllTransactions } from "./_components/transaction-data";
 import { Transaction } from "./_components/columns";
+import { CategoryChart } from "./_components/category-chart";
+import { SpendingTrendChart } from "./_components/spending-trend-chart";
+import { IncomeExpensesChart } from "./_components/income-expenses-chart";
 
 function SelectAccount({
   accounts,
@@ -142,6 +146,15 @@ export default function TransactionsPage() {
 
           {/* Summary Cards (KPIs) */}
           <SummaryCards transactions={filteredTransactions} />
+
+          {/* Charts */}
+          <div className="px-4 lg:px-6">
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+              <CategoryChart transactions={filteredTransactions} />
+              <SpendingTrendChart transactions={filteredTransactions} />
+              <IncomeExpensesChart transactions={filteredTransactions} />
+            </div>
+          </div>
 
           {/* Data Table */}
           <div className="px-4 lg:px-6">
