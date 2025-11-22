@@ -124,23 +124,18 @@ export default function TransactionsPage() {
         <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6">
           {/* Filters and Actions */}
           <div className="px-4 lg:px-6">
-            <div className="flex flex-col gap-4 rounded-lg border p-4">
-              <div className="flex flex-col gap-4 lg:flex-row lg:items-end">
-                <div className="flex-1">
-                  <GlobalSearch
-                    value={globalSearch}
-                    onChange={setGlobalSearch}
-                  />
-                </div>
-                <DatePicker />
-                <SelectAccount
-                  accounts={accounts}
-                  setSelectedAccount={setSelectedAccount}
-                />
-                <div className="flex gap-2">
-                  <ExportButton transactions={filteredTransactions} />
-                  <BulkActions selectedTransactions={selectedTransactions} />
-                </div>
+            <div className="flex flex-col gap-4 lg:flex-row lg:items-end">
+              <div className="flex-1">
+                <GlobalSearch value={globalSearch} onChange={setGlobalSearch} />
+              </div>
+              <DatePicker />
+              <SelectAccount
+                accounts={accounts}
+                setSelectedAccount={setSelectedAccount}
+              />
+              <div className="flex gap-2">
+                <ExportButton transactions={filteredTransactions} />
+                <BulkActions selectedTransactions={selectedTransactions} />
               </div>
             </div>
           </div>
@@ -150,13 +145,11 @@ export default function TransactionsPage() {
 
           {/* Data Table */}
           <div className="px-4 lg:px-6">
-            <div className="container mx-auto py-4">
-              <DataTable
-                columns={columns}
-                data={filteredTransactions}
-                onSelectedRowsChange={setSelectedTransactions}
-              />
-            </div>
+            <DataTable
+              columns={columns}
+              data={filteredTransactions}
+              onSelectedRowsChange={setSelectedTransactions}
+            />
           </div>
         </div>
       </div>

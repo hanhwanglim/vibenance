@@ -11,12 +11,18 @@ import {
   SelectContent,
   SelectItem,
 } from "@/components/ui/select";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { Drawer, DrawerTrigger } from "@/components/ui/drawer";
 import { Checkbox } from "@/components/ui/checkbox";
-import { ChevronDown, ChevronUp } from "lucide-react";
+import { ChevronDown, ChevronUp, Filter, X } from "lucide-react";
 import { toast } from "sonner";
 import TransactionDrawer from "./transaction-dialog";
 import { useState } from "react";
+import { cn } from "@/lib/utils";
 
 export type Transaction = {
   id: string;
@@ -42,20 +48,59 @@ function FilterableHeader({
   const [inputValue, setInputValue] = useState(() => {
     return (column.getFilterValue() as string | undefined) ?? "";
   });
+  const [isOpen, setIsOpen] = useState(false);
+  const filterValue = column.getFilterValue() as string | undefined;
+  const isFiltered = !!filterValue;
 
   return (
-    <div className="flex flex-col space-y-2">
+    <div className="flex items-center gap-2">
       <span>{title}</span>
-      <Input
-        placeholder={`Filter ${title}...`}
-        value={inputValue}
-        onChange={(e) => {
-          const value = e.target.value;
-          setInputValue(value);
-          column.setFilterValue(value || undefined);
-        }}
-        className="h-8 w-full"
-      />
+      <Popover open={isOpen} onOpenChange={setIsOpen}>
+        <PopoverTrigger asChild>
+          <Button
+            variant="ghost"
+            size="icon-sm"
+            className={cn(
+              "h-8 w-8",
+              isFiltered && "bg-accent text-accent-foreground",
+            )}
+          >
+            <Filter className="h-4 w-4" />
+            <span className="sr-only">Filter {title}</span>
+          </Button>
+        </PopoverTrigger>
+        <PopoverContent className="w-64" align="start">
+          <div className="flex flex-col space-y-4">
+            <div className="flex items-center justify-between">
+              <Label className="text-sm font-medium">Filter {title}</Label>
+              {isFiltered && (
+                <Button
+                  variant="ghost"
+                  size="icon-sm"
+                  className="h-6 w-6"
+                  onClick={() => {
+                    setInputValue("");
+                    column.setFilterValue(undefined);
+                  }}
+                >
+                  <X className="h-3 w-3" />
+                  <span className="sr-only">Clear filter</span>
+                </Button>
+              )}
+            </div>
+            <Input
+              placeholder={`Filter ${title}...`}
+              value={inputValue}
+              onChange={(e) => {
+                const value = e.target.value;
+                setInputValue(value);
+                column.setFilterValue(value || undefined);
+              }}
+              className="h-8"
+            />
+          </div>
+        </PopoverContent>
+      </Popover>
     </div>
   );
 }
@@ -70,29 +115,72 @@ function SelectableFilterHeader({
   title: string;
   options: { value: string; label: string }[];
 }) {
+  const [isOpen, setIsOpen] = useState(false);
   const filterValue = column.getFilterValue() as string | undefined;
+  const isFiltered = !!filterValue;
+  const selectedLabel = options.find((opt) => opt.value === filterValue)?.label;
 
   return (
-    <div className="flex flex-col space-y-2">
+    <div className="flex items-center gap-2">
       <span>{title}</span>
-      <Select
-        value={filterValue ?? "all"}
-        onValueChange={(value) =>
-          column.setFilterValue(value === "all" ? undefined : value)
-        }
-      >
-        <SelectTrigger className="h-8 w-full">
-          <SelectValue placeholder={`All ${title}`} />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem value="all">All {title}</SelectItem>
-          {options.map((option) => (
-            <SelectItem key={option.value} value={option.value}>
-              {option.label}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
+      <Popover open={isOpen} onOpenChange={setIsOpen}>
+        <PopoverTrigger asChild>
+          <Button
+            variant="ghost"
+            size="icon-sm"
+            className={cn(
+              "h-8 w-8",
+              isFiltered && "bg-accent text-accent-foreground",
+            )}
+          >
+            <Filter className="h-4 w-4" />
+            <span className="sr-only">Filter {title}</span>
+          </Button>
+        </PopoverTrigger>
+        <PopoverContent className="w-64" align="start">
+          <div className="flex flex-col space-y-4">
+            <div className="flex items-center justify-between">
+              <Label className="text-sm font-medium">Filter {title}</Label>
+              {isFiltered && (
+                <Button
+                  variant="ghost"
+                  size="icon-sm"
+                  className="h-6 w-6"
+                  onClick={() => {
+                    column.setFilterValue(undefined);
+                  }}
+                >
+                  <X className="h-3 w-3" />
+                  <span className="sr-only">Clear filter</span>
+                </Button>
+              )}
+            </div>
+            <Select
+              value={filterValue ?? "all"}
+              onValueChange={(value) => {
+                column.setFilterValue(value === "all" ? undefined : value);
+              }}
+            >
+              <SelectTrigger className="h-8 w-full">
+                <SelectValue placeholder={`All ${title}`} />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All {title}</SelectItem>
+                {options.map((option) => (
+                  <SelectItem key={option.value} value={option.value}>
+                    {option.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            {isFiltered && selectedLabel && (
+              <div className="text-xs text-muted-foreground">
+                Selected: {selectedLabel}
+              </div>
+            )}
+          </div>
+        </PopoverContent>
+      </Popover>
     </div>
   );
 }
@@ -131,28 +219,19 @@ export const columns: ColumnDef<Transaction>[] = [
   },
   {
     accessorKey: "account",
-    header: ({ column }) => (
-      <FilterableHeader column={column} title="Account" />
-    ),
+    header: "Account",
     enableHiding: true,
   },
   {
     accessorKey: "timestamp",
-    header: ({ column }) => (
-      <FilterableHeader column={column} title="Timestamp" />
-    ),
+    header: "Timestamp",
   },
   {
     accessorKey: "name",
-    header: ({ column }) => <FilterableHeader column={column} title="Name" />,
+    header: "Name",
     cell: ({ row }) => {
       return <TableCellViewer item={row.original} />;
     },
-  },
-  {
-    accessorKey: "currency",
-    header: "Currency",
-    enableHiding: true,
   },
   {
     accessorKey: "amount",
@@ -173,11 +252,6 @@ export const columns: ColumnDef<Transaction>[] = [
         ]}
       />
     ),
-    enableHiding: true,
-  },
-  {
-    accessorKey: "reference",
-    header: "Reference",
     enableHiding: true,
   },
   {
