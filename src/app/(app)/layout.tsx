@@ -1,4 +1,4 @@
-import { SidebarProvider } from "@/components/ui/sidebar";
+import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import AppSidebar from "./_components/app-sidebar";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
@@ -20,7 +20,9 @@ export default async function Layout({
   return (
     <SidebarProvider>
       <AppSidebar />
-      <main>{children}</main>
+      <SidebarInset>
+        <main>{children}</main>
+      </SidebarInset>
     </SidebarProvider>
   );
 }
