@@ -234,7 +234,10 @@ function TableCellViewer({ item }: { item: Transaction }) {
   return (
     <Drawer direction="right" open={isOpen} onOpenChange={setIsOpen}>
       <DrawerTrigger asChild>
-        <Button variant="link" className="text-foreground w-fit px-0 text-left">
+        <Button
+          variant="link"
+          className="text-foreground w-fit px-0 text-left underline hover:cursor-pointer"
+        >
           {item.name}
         </Button>
       </DrawerTrigger>

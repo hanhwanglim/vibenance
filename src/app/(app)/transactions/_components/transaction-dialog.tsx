@@ -9,10 +9,11 @@ import {
 } from "@/components/ui/drawer";
 import { Transaction } from "./columns";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { PencilIcon, XIcon } from "lucide-react";
-import { FormEvent, useEffect, useRef, useState } from "react";
+import { XIcon } from "lucide-react";
+import { FormEvent, useState } from "react";
 import { formatTime } from "@/lib/formatter";
 import { Input } from "@/components/ui/input";
+import { Separator } from "@/components/ui/separator";
 
 export default function TransactionDrawer({
   item,
@@ -21,45 +22,17 @@ export default function TransactionDrawer({
   item: Transaction;
   isOpen: boolean;
 }) {
-  const [editingState, setEditingState] = useState(false);
   const [tabsValue, setTabsValue] = useState("details");
-  const prevIsOpenRef = useRef(isOpen);
-  useEffect(() => {
-    if (prevIsOpenRef.current && !isOpen) {
-      // Drawer just closed, reset editing state
-      // Use setTimeout to avoid synchronous setState in effect
-      const timeoutId = setTimeout(() => {
-        setEditingState(false);
-      }, 0);
-      return () => clearTimeout(timeoutId);
-    }
-    prevIsOpenRef.current = isOpen;
-  }, [isOpen]);
-
-  const isEditing = isOpen && editingState;
 
   return (
-    <DrawerContent>
-      <Tabs defaultValue={tabsValue} onValueChange={setTabsValue}>
-        <DrawerHeader className="gap-1 relative">
-          <div className="absolute top-4 right-4 flex items-center">
-            {tabsValue === "details" && (
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => setEditingState(true)}
-                disabled={isEditing}
-              >
-                <PencilIcon className="size-4" />
-              </Button>
-            )}
-            <DrawerClose asChild>
-              <Button variant="ghost" size="icon">
-                <XIcon className="size-4" />
-              </Button>
-            </DrawerClose>
-          </div>
-          <TabsList>
+    <DrawerContent className="flex flex-col">
+      <Tabs
+        defaultValue={tabsValue}
+        onValueChange={setTabsValue}
+        className="flex flex-col flex-1 min-h-0"
+      >
+        <DrawerHeader className="gap-3 relative pb-4 shrink-0">
+          <TabsList className="w-full justify-start">
             <TabsTrigger value="details">Details</TabsTrigger>
             <TabsTrigger value="comments">Comments</TabsTrigger>
           </TabsList>
@@ -68,58 +41,70 @@ export default function TransactionDrawer({
             Transaction details for {item.name}
           </DrawerDescription>
         </DrawerHeader>
-        <TabsContent value="details">
-          <div className="grid grid-cols-2 gap-4">
-            <div className="flex flex-col">
-              <span>Account</span>
-              <span>{item.account}</span>
+        <TabsContent value="details" className="px-4 pb-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+            <div className="flex flex-col gap-1.5">
+              <span className="text-sm text-muted-foreground font-medium">
+                Account
+              </span>
+              <span className="text-base font-semibold">{item.account}</span>
             </div>
-            <div>
-              <span>Transaction ID</span>
-              <span>{item.id}</span>
+            <div className="flex flex-col gap-1.5">
+              <span className="text-sm text-muted-foreground font-medium">
+                Transaction ID
+              </span>
+              <span className="text-base font-mono text-sm">{item.id}</span>
             </div>
-            <div>
-              <span>Timestamp</span>
-              <span>{item.timestamp}</span>
+            <div className="flex flex-col gap-1.5">
+              <span className="text-sm text-muted-foreground font-medium">
+                Timestamp
+              </span>
+              <span className="text-base">{item.timestamp}</span>
             </div>
-            <div>
-              <span>Type</span>
-              <span>Direct Debit</span>
+            <div className="flex flex-col gap-1.5">
+              <span className="text-sm text-muted-foreground font-medium">
+                Type
+              </span>
+              <span className="text-base">Direct Debit</span>
             </div>
-            <div>
-              <span>Currency</span>
-              <span>{item.currency}</span>
+            <div className="flex flex-col gap-1.5">
+              <span className="text-sm text-muted-foreground font-medium">
+                Currency
+              </span>
+              <span className="text-base font-semibold">{item.currency}</span>
             </div>
-            <div>
-              <span>Amount</span>
-              <span>{item.amount}</span>
+            <div className="flex flex-col gap-1.5">
+              <span className="text-sm text-muted-foreground font-medium">
+                Amount
+              </span>
+              <span className="text-xl font-bold">{item.amount}</span>
             </div>
-            <div>
-              <span>Reference</span>
-              <span>{item.reference}</span>
+            <div className="flex flex-col gap-1.5 sm:col-span-2">
+              <span className="text-sm text-muted-foreground font-medium">
+                Reference
+              </span>
+              <span className="text-base break-words">{item.reference}</span>
             </div>
-            <div>
-              <span>Notes</span>
-              <span>{item.notes}</span>
+            <div className="flex flex-col gap-1.5 sm:col-span-2">
+              <span className="text-sm text-muted-foreground font-medium">
+                Notes
+              </span>
+              <span className="text-base break-words">{item.notes || "—"}</span>
             </div>
           </div>
         </TabsContent>
-        <TabsContent value="comments">
+        <TabsContent
+          value="comments"
+          className="px-4 pb-4 flex flex-col flex-1 min-h-0"
+        >
           <CommentTab />
         </TabsContent>
       </Tabs>
       {tabsValue === "details" && (
-        <DrawerFooter>
-          {isEditing ? (
-            <Button variant="secondary" onClick={() => setEditingState(false)}>
-              Save changes
-            </Button>
-          ) : (
-            <div>
-              <span className="text-gray-500 text-sm">Last updated:&nbsp;</span>
-              <span className="text-gray-500 text-sm">today</span>
-            </div>
-          )}
+        <DrawerFooter className="pt-4 shrink-0">
+          <div className="text-sm text-muted-foreground">
+            Last updated: <span className="font-medium">today</span>
+          </div>
         </DrawerFooter>
       )}
     </DrawerContent>
@@ -144,26 +129,36 @@ function CommentTab() {
   };
 
   return (
-    <div className="flex  flex-col w-full">
-      <h3>Comments</h3>
-      <div className="flex flex-col justify-between w-full">
-        <div>
-          {comments.map((comment) => {
-            return (
-              <div key={comment.id} className="flex gap-6 items-center">
-                <span className="text-gray-500 text-sm">
-                  {formatTime(comment.createdAt)}
-                </span>
-                <p>{comment.comment}</p>
+    <div className="flex flex-col h-full">
+      <div className="flex-1 overflow-y-auto min-h-0">
+        {comments.length > 0 ? (
+          <div className="flex flex-col">
+            {comments.map((comment, index) => (
+              <div
+                key={comment.id}
+                className={`py-3 ${index < comments.length - 1 ? "border-b" : ""}`}
+              >
+                <div className="flex flex-col gap-1.5">
+                  <span className="text-xs text-muted-foreground font-medium">
+                    {formatTime(comment.createdAt)}
+                  </span>
+                  <p className="text-sm leading-relaxed">{comment.comment}</p>
+                </div>
               </div>
-            );
-          })}
-        </div>
-        <form onSubmit={handleSubmit}>
-          <div className="flex gap-1 items-center">
-            <Input placeholder="Add comment" />
-            <Button type="submit">Add</Button>
+            ))}
           </div>
+        ) : (
+          <div className="text-center py-8 text-sm text-muted-foreground">
+            No comments yet
+          </div>
+        )}
+      </div>
+      <div className="pt-4 border-t mt-4 shrink-0">
+        <form onSubmit={handleSubmit} className="flex gap-2">
+          <Input placeholder="Add a comment..." className="flex-1" />
+          <Button type="submit" size="default">
+            Add
+          </Button>
         </form>
       </div>
     </div>
