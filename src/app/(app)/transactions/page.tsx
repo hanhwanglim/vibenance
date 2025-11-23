@@ -86,25 +86,11 @@ export default function TransactionsPage() {
   const [globalSearch, setGlobalSearch] = useState("");
   const [tableInstance, setTableInstance] =
     useState<TanStackTable<Transaction> | null>(null);
-  const [importedTransactions] = useState<Transaction[]>(() => {
-    if (typeof window !== "undefined") {
-      const stored = localStorage.getItem("imported-transactions");
-      if (stored) {
-        try {
-          return JSON.parse(stored);
-        } catch {
-          return [];
-        }
-      }
-    }
-    return [];
-  });
 
-  // Load all transactions and merge with imported
+  // Load all transactions
   const allTransactions = useMemo(() => {
-    const sample = getAllTransactions();
-    return [...sample, ...importedTransactions];
-  }, [importedTransactions]);
+    return getAllTransactions();
+  }, []);
 
   // Apply filters
   const filteredTransactions = useMemo(() => {

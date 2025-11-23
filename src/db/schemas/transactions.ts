@@ -3,7 +3,6 @@ import {
   text,
   timestamp,
   numeric,
-  foreignKey,
   AnyPgColumn,
 } from "drizzle-orm/pg-core";
 import { user } from "./auth";
@@ -32,3 +31,5 @@ export const transaction = pgTable("transaction", {
     .$onUpdate(() => /* @__PURE__ */ new Date())
     .notNull(),
 });
+
+export type TransactionInsert = typeof transaction.$inferInsert;

@@ -4,35 +4,21 @@ import { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { CSVPreviewTable } from "../_components/csv-preview-table";
-import { parseCSVFile, type ParseResult } from "@/lib/csv-parser";
 import { Upload, Loader2, X, ArrowLeft } from "lucide-react";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { parseFile, ParseResult } from "@/lib/parser";
 
-const accounts = [
-  { id: 1, name: "Monzo" },
-  { id: 2, name: "American Express" },
-  { id: 3, name: "Chase" },
-  { id: 4, name: "Barclays" },
-];
+const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
 
 export default function ImportPage() {
   const router = useRouter();
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [selectedAccount, setSelectedAccount] = useState<string>(
-    accounts[0]?.id.toString() || "",
-  );
   const [parseResult, setParseResult] = useState<ParseResult | null>(null);
   const [isParsing, setIsParsing] = useState(false);
+  const [isImporting, setIsImporting] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleFileSelect = async (
@@ -41,14 +27,7 @@ export default function ImportPage() {
     const file = event.target.files?.[0];
     if (!file) return;
 
-    // Validate file type
-    if (!file.name.endsWith(".csv") && !file.type.includes("csv")) {
-      toast.error("Please select a CSV file");
-      return;
-    }
-
-    // Validate file size (max 10MB)
-    if (file.size > 10 * 1024 * 1024) {
+    if (file.size > MAX_FILE_SIZE) {
       toast.error("File size must be less than 10MB");
       return;
     }
@@ -57,98 +36,57 @@ export default function ImportPage() {
     setIsParsing(true);
 
     try {
-      // Read file content
-      const text = await file.text();
-      const accountName =
-        accounts.find((acc) => acc.id.toString() === selectedAccount)?.name ||
-        "Imported";
-
-      // Parse CSV
-      const result = parseCSVFile(text, accountName);
+      const result = await parseFile(file);
       setParseResult(result);
-
-      if (result.transactions.length === 0) {
-        toast.error("No transactions found in CSV file");
-      } else if (result.validRows === 0) {
-        toast.warning(
-          `Found ${result.totalRows} rows but none are valid. Please check the file format.`,
-        );
-      } else {
-        toast.success(
-          `Parsed ${result.validRows} valid transaction(s) from ${result.totalRows} row(s)`,
-        );
-      }
-    } catch (error) {
-      console.error("Error parsing CSV:", error);
-      toast.error("Failed to parse CSV file. Please check the format.");
-      setParseResult(null);
-    } finally {
       setIsParsing(false);
+    } catch (error) {
+      console.error("Error parsing file:", error);
+      toast.error("Failed to parse file. Please check the format.");
+      setParseResult(null);
     }
   };
 
-  const handleImport = () => {
+  const handleImport = async () => {
     if (!parseResult) return;
 
-    // Filter out transactions with errors
-    const validTransactions = parseResult.transactions
-      .filter((p) => p.errors.length === 0)
-      .map((p) => p.transaction);
+    setIsImporting(true);
 
-    if (validTransactions.length === 0) {
-      toast.error("No valid transactions to import");
-      return;
-    }
-
-    // Update account for all transactions
-    const accountName =
-      accounts.find((acc) => acc.id.toString() === selectedAccount)?.name ||
-      "Imported";
-    const transactionsWithAccount = validTransactions.map((txn) => ({
-      ...txn,
-      account: accountName,
-    }));
-
-    // Get existing imported transactions from localStorage
-    const existing =
-      typeof window !== "undefined"
-        ? (() => {
-            const stored = localStorage.getItem("imported-transactions");
-            if (stored) {
-              try {
-                return JSON.parse(stored);
-              } catch {
-                return [];
-              }
-            }
-            return [];
-          })()
-        : [];
-
-    // Merge and save
-    const updated = [...existing, ...transactionsWithAccount];
-    if (typeof window !== "undefined") {
-      localStorage.setItem("imported-transactions", JSON.stringify(updated));
-    }
-
-    toast.success(`Imported ${transactionsWithAccount.length} transaction(s)`);
-
-    // Redirect back to transactions page
-    router.push("/transactions");
-  };
-
-  const handleAccountChange = (accountId: string) => {
-    setSelectedAccount(accountId);
-    // Re-parse if we have a file and result
-    if (selectedFile && parseResult) {
-      // Re-read and parse with new account
-      selectedFile.text().then((text) => {
-        const accountName =
-          accounts.find((acc) => acc.id.toString() === accountId)?.name ||
-          "Imported";
-        const result = parseCSVFile(text, accountName);
-        setParseResult(result);
+    try {
+      const response = await fetch("/api/transactions/import", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          account: parseResult.format,
+          transactions: parseResult.transactions,
+        }),
       });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "Failed to import transactions");
+      }
+
+      if (data.skipped > 0) {
+        toast.success(
+          `Imported ${data.imported} transaction(s), skipped ${data.skipped} duplicate(s)`,
+        );
+      } else {
+        toast.success(`Imported ${data.imported} transaction(s)`);
+      }
+
+      router.push("/transactions");
+    } catch (error) {
+      console.error("Error importing transactions:", error);
+      toast.error(
+        error instanceof Error
+          ? error.message
+          : "Failed to import transactions. Please try again.",
+      );
+    } finally {
+      setIsImporting(false);
     }
   };
 
@@ -215,77 +153,65 @@ export default function ImportPage() {
               )}
             </div>
 
-            {/* Account Selection */}
-            <div className="flex flex-col gap-2">
-              <Label htmlFor="account">Assign to Account</Label>
-              <Select
-                value={selectedAccount}
-                onValueChange={handleAccountChange}
-                disabled={!selectedFile || isParsing}
+            {/* Loading State */}
+            {isParsing && (
+              <div className="flex items-center justify-center gap-2 py-8">
+                <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+                <span className="text-sm text-muted-foreground">
+                  Parsing CSV file...
+                </span>
+              </div>
+            )}
+
+            {/* Preview */}
+            {parseResult && !isParsing && (
+              <CSVPreviewTable
+                transactions={parseResult.transactions}
+                format={parseResult.format}
+                totalRows={parseResult.count}
+                validRows={parseResult.valid}
+                invalidRows={parseResult.invalid}
+              />
+            )}
+
+            {/* Instructions */}
+            {!selectedFile && !isParsing && (
+              <div className="rounded-lg border border-dashed p-4 text-sm text-muted-foreground">
+                <p className="font-medium mb-2">Supported formats:</p>
+                <ul className="list-disc list-inside space-y-1 ml-2">
+                  <li>Monzo CSV exports</li>
+                  <li>Barclays CSV exports</li>
+                  <li>Chase CSV exports</li>
+                  <li>American Express CSV exports</li>
+                  <li>Generic CSV format (Date, Description, Amount)</li>
+                </ul>
+              </div>
+            )}
+
+            {/* Actions */}
+            <div className="flex items-center justify-end gap-2 border-t pt-4">
+              <Link href="/transactions">
+                <Button variant="outline">Cancel</Button>
+              </Link>
+              <Button
+                onClick={handleImport}
+                disabled={
+                  !parseResult ||
+                  parseResult.valid === 0 ||
+                  isParsing ||
+                  isImporting
+                }
               >
-                <SelectTrigger id="account">
-                  <SelectValue placeholder="Select account" />
-                </SelectTrigger>
-                <SelectContent>
-                  {accounts.map((account) => (
-                    <SelectItem key={account.id} value={account.id.toString()}>
-                      {account.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+                {isImporting ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Importing...
+                  </>
+                ) : (
+                  <>Import Transactions</>
+                )}
+              </Button>
             </div>
-          </div>
-
-          {/* Loading State */}
-          {isParsing && (
-            <div className="flex items-center justify-center gap-2 py-8">
-              <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
-              <span className="text-sm text-muted-foreground">
-                Parsing CSV file...
-              </span>
-            </div>
-          )}
-
-          {/* Preview */}
-          {parseResult && !isParsing && (
-            <CSVPreviewTable
-              transactions={parseResult.transactions}
-              format={parseResult.format}
-              totalRows={parseResult.totalRows}
-              validRows={parseResult.validRows}
-              invalidRows={parseResult.invalidRows}
-            />
-          )}
-
-          {/* Instructions */}
-          {!selectedFile && !isParsing && (
-            <div className="rounded-lg border border-dashed p-4 text-sm text-muted-foreground">
-              <p className="font-medium mb-2">Supported formats:</p>
-              <ul className="list-disc list-inside space-y-1 ml-2">
-                <li>Monzo CSV exports</li>
-                <li>Barclays CSV exports</li>
-                <li>Chase CSV exports</li>
-                <li>American Express CSV exports</li>
-                <li>Generic CSV format (Date, Description, Amount)</li>
-              </ul>
-            </div>
-          )}
-
-          {/* Actions */}
-          <div className="flex items-center justify-end gap-2 border-t pt-4">
-            <Link href="/transactions">
-              <Button variant="outline">Cancel</Button>
-            </Link>
-            <Button
-              onClick={handleImport}
-              disabled={
-                !parseResult || parseResult.validRows === 0 || isParsing
-              }
-            >
-              Import {parseResult?.validRows || 0} Transaction
-              {parseResult?.validRows !== 1 ? "s" : ""}
-            </Button>
           </div>
         </div>
       </div>
