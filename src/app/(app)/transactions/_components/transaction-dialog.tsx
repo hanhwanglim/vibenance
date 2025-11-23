@@ -5,23 +5,14 @@ import {
   DrawerTitle,
   DrawerDescription,
   DrawerFooter,
-  DrawerClose,
 } from "@/components/ui/drawer";
 import { Transaction } from "./columns";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { XIcon } from "lucide-react";
 import { FormEvent, useState } from "react";
 import { formatTime } from "@/lib/formatter";
 import { Input } from "@/components/ui/input";
-import { Separator } from "@/components/ui/separator";
 
-export default function TransactionDrawer({
-  item,
-  isOpen,
-}: {
-  item: Transaction;
-  isOpen: boolean;
-}) {
+export default function TransactionDrawer({ item }: { item: Transaction }) {
   const [tabsValue, setTabsValue] = useState("details");
 
   return (

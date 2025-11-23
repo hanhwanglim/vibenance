@@ -241,7 +241,7 @@ function TableCellViewer({ item }: { item: Transaction }) {
           {item.name}
         </Button>
       </DrawerTrigger>
-      <TransactionDrawer item={item} isOpen={isOpen} />
+      <TransactionDrawer item={item} />
     </Drawer>
   );
 }

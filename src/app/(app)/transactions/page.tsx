@@ -19,7 +19,6 @@ import {
   type DateRange,
 } from "./_components/date-range-picker";
 import { GlobalSearch } from "./_components/global-search";
-import { BulkActions } from "./_components/bulk-actions";
 import { TableToolbar } from "./_components/table-toolbar";
 import { getAllTransactions } from "./_components/transaction-data";
 import { Transaction } from "./_components/columns";
@@ -27,7 +26,14 @@ import { CategoryChart } from "./_components/category-chart";
 import { SpendingTrendChart } from "./_components/spending-trend-chart";
 import { IncomeExpensesChart } from "./_components/income-expenses-chart";
 import { Button } from "@/components/ui/button";
-import { Plus } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Plus, Upload, ChevronDown } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 function SelectAccount({
   accounts,
@@ -66,6 +72,7 @@ const accounts = [
 ];
 
 export default function TransactionsPage() {
+  const router = useRouter();
   const [selectedAccount, setSelectedAccount] = useState<string>("all");
 
   // Initialize date range to "This Month"
@@ -77,14 +84,27 @@ export default function TransactionsPage() {
   });
 
   const [globalSearch, setGlobalSearch] = useState("");
-  const [selectedTransactions, setSelectedTransactions] = useState<
-    Transaction[]
-  >([]);
   const [tableInstance, setTableInstance] =
     useState<TanStackTable<Transaction> | null>(null);
+  const [importedTransactions] = useState<Transaction[]>(() => {
+    if (typeof window !== "undefined") {
+      const stored = localStorage.getItem("imported-transactions");
+      if (stored) {
+        try {
+          return JSON.parse(stored);
+        } catch {
+          return [];
+        }
+      }
+    }
+    return [];
+  });
 
-  // Load all transactions
-  const allTransactions = useMemo(() => getAllTransactions(), []);
+  // Load all transactions and merge with imported
+  const allTransactions = useMemo(() => {
+    const sample = getAllTransactions();
+    return [...sample, ...importedTransactions];
+  }, [importedTransactions]);
 
   // Apply filters
   const filteredTransactions = useMemo(() => {
@@ -164,10 +184,27 @@ export default function TransactionsPage() {
                 selectedAccount={selectedAccount}
                 setSelectedAccount={setSelectedAccount}
               />
-              <Button variant="default" className="gap-2">
-                <Plus className="h-4 w-4" />
-                Add Transaction
-              </Button>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="default" className="gap-2">
+                    <Plus className="h-4 w-4" />
+                    Add Transaction
+                    <ChevronDown className="h-4 w-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem
+                    onClick={() => router.push("/transactions/import")}
+                  >
+                    <Upload className="h-4 w-4" />
+                    Import CSV
+                  </DropdownMenuItem>
+                  <DropdownMenuItem>
+                    <Plus className="h-4 w-4" />
+                    Add Manually
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
           </div>
 
@@ -194,7 +231,6 @@ export default function TransactionsPage() {
             <DataTable
               columns={columns}
               data={filteredTransactions}
-              onSelectedRowsChange={setSelectedTransactions}
               onTableReady={setTableInstance}
             />
           </div>

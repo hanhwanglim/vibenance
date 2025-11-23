@@ -9,7 +9,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Download, Eye, Plus } from "lucide-react";
+import { Download, Eye } from "lucide-react";
 import { Table } from "@tanstack/react-table";
 import { Transaction } from "./columns";
 import { toast } from "sonner";
