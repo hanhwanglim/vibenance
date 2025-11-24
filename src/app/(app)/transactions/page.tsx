@@ -94,7 +94,7 @@ export default function TransactionsPage() {
       `/api/transactions?from=${dateRange.from!.toISOString()}&to=${dateRange.to!.toISOString()}`,
     )
       .then((response) => response.json())
-      .then((data) => setTransactions(data))
+      .then((data) => setTransactions(data.data))
       .catch((error) => console.error("Failed to fetch transactions:", error));
   }, [session?.user?.id, dateRange]);
 
