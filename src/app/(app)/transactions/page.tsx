@@ -9,7 +9,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useState, useMemo } from "react";
+import { useState, useEffect } from "react";
 import type { Table as TanStackTable } from "@tanstack/react-table";
 import { DataTable } from "./_components/data-table";
 import { columns } from "./_components/columns";
@@ -20,7 +20,6 @@ import {
 } from "./_components/date-range-picker";
 import { GlobalSearch } from "./_components/global-search";
 import { TableToolbar } from "./_components/table-toolbar";
-import { getAllTransactions } from "./_components/transaction-data";
 import { Transaction } from "./_components/columns";
 import { CategoryChart } from "./_components/category-chart";
 import { SpendingTrendChart } from "./_components/spending-trend-chart";
@@ -34,6 +33,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Plus, Upload, ChevronDown } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { useSession } from "@/lib/auth-client";
 
 function SelectAccount({
   accounts,
@@ -73,9 +73,8 @@ const accounts = [
 
 export default function TransactionsPage() {
   const router = useRouter();
-  const [selectedAccount, setSelectedAccount] = useState<string>("all");
+  const { data: session } = useSession();
 
-  // Initialize date range to "This Month"
   const [dateRange, setDateRange] = useState<DateRange>(() => {
     const now = new Date();
     const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
@@ -86,73 +85,20 @@ export default function TransactionsPage() {
   const [globalSearch, setGlobalSearch] = useState("");
   const [tableInstance, setTableInstance] =
     useState<TanStackTable<Transaction> | null>(null);
+  const [transactions, setTransactions] = useState<Transaction[]>([]);
 
-  // Load all transactions
-  const allTransactions = useMemo(() => {
-    return getAllTransactions();
-  }, []);
+  useEffect(() => {
+    if (!session?.user?.id) return;
 
-  // Apply filters
-  const filteredTransactions = useMemo(() => {
-    let filtered = [...allTransactions];
+    fetch(
+      `/api/transactions?from=${dateRange.from!.toISOString()}&to=${dateRange.to!.toISOString()}`,
+    )
+      .then((response) => response.json())
+      .then((data) => setTransactions(data))
+      .catch((error) => console.error("Failed to fetch transactions:", error));
+  }, [session?.user?.id, dateRange]);
 
-    // Account filter
-    if (selectedAccount !== "all") {
-      const accountName = accounts.find(
-        (acc) => acc.id.toString() === selectedAccount,
-      )?.name;
-      if (accountName) {
-        filtered = filtered.filter((txn) => txn.account === accountName);
-      }
-    }
-
-    // Date range filter
-    if (dateRange.from || dateRange.to) {
-      filtered = filtered.filter((txn) => {
-        // Parse timestamp and normalize to start of day for comparison
-        const txnDate = new Date(txn.timestamp);
-        const txnDateOnly = new Date(
-          txnDate.getFullYear(),
-          txnDate.getMonth(),
-          txnDate.getDate(),
-        );
-
-        if (dateRange.from) {
-          const fromDateOnly = new Date(
-            dateRange.from.getFullYear(),
-            dateRange.from.getMonth(),
-            dateRange.from.getDate(),
-          );
-          if (txnDateOnly < fromDateOnly) return false;
-        }
-        if (dateRange.to) {
-          const toDateOnly = new Date(
-            dateRange.to.getFullYear(),
-            dateRange.to.getMonth(),
-            dateRange.to.getDate(),
-          );
-          if (txnDateOnly > toDateOnly) return false;
-        }
-        return true;
-      });
-    }
-
-    // Global search filter
-    if (globalSearch) {
-      const searchLower = globalSearch.toLowerCase();
-      filtered = filtered.filter((txn) => {
-        return (
-          txn.name.toLowerCase().includes(searchLower) ||
-          txn.account.toLowerCase().includes(searchLower) ||
-          txn.reference.toLowerCase().includes(searchLower) ||
-          (txn.notes && txn.notes.toLowerCase().includes(searchLower)) ||
-          txn.category.toLowerCase().includes(searchLower)
-        );
-      });
-    }
-
-    return filtered;
-  }, [allTransactions, selectedAccount, dateRange, globalSearch]);
+  console.log(transactions);
 
   return (
     <div className="flex flex-1 flex-col">
@@ -167,8 +113,8 @@ export default function TransactionsPage() {
               <DateRangePicker value={dateRange} onChange={setDateRange} />
               <SelectAccount
                 accounts={accounts}
-                selectedAccount={selectedAccount}
-                setSelectedAccount={setSelectedAccount}
+                selectedAccount="all"
+                setSelectedAccount={() => {}}
               />
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
@@ -195,28 +141,25 @@ export default function TransactionsPage() {
           </div>
 
           {/* Summary Cards (KPIs) */}
-          <SummaryCards transactions={filteredTransactions} />
+          <SummaryCards transactions={[]} />
 
           {/* Charts */}
           <div className="px-4 lg:px-6">
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
-              <CategoryChart transactions={filteredTransactions} />
-              <SpendingTrendChart transactions={filteredTransactions} />
-              <IncomeExpensesChart transactions={filteredTransactions} />
+              <CategoryChart transactions={[]} />
+              <SpendingTrendChart transactions={[]} />
+              <IncomeExpensesChart transactions={[]} />
             </div>
           </div>
 
           {/* Data Table */}
           <div className="px-4 lg:px-6">
             {tableInstance && (
-              <TableToolbar
-                table={tableInstance}
-                transactions={filteredTransactions}
-              />
+              <TableToolbar table={tableInstance} transactions={transactions} />
             )}
             <DataTable
               columns={columns}
-              data={filteredTransactions}
+              data={transactions}
               onTableReady={setTableInstance}
             />
           </div>
