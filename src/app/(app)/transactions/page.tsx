@@ -83,22 +83,6 @@ export default function TransactionsPage() {
   });
 
   const [globalSearch, setGlobalSearch] = useState("");
-  const [tableInstance, setTableInstance] =
-    useState<TanStackTable<Transaction> | null>(null);
-  const [transactions, setTransactions] = useState<Transaction[]>([]);
-
-  useEffect(() => {
-    if (!session?.user?.id) return;
-
-    fetch(
-      `/api/transactions?from=${dateRange.from!.toISOString()}&to=${dateRange.to!.toISOString()}`,
-    )
-      .then((response) => response.json())
-      .then((data) => setTransactions(data.data))
-      .catch((error) => console.error("Failed to fetch transactions:", error));
-  }, [session?.user?.id, dateRange]);
-
-  console.log(transactions);
 
   return (
     <div className="flex flex-1 flex-col">
@@ -154,14 +138,7 @@ export default function TransactionsPage() {
 
           {/* Data Table */}
           <div className="px-4 lg:px-6">
-            {tableInstance && (
-              <TableToolbar table={tableInstance} transactions={transactions} />
-            )}
-            <DataTable
-              columns={columns}
-              data={transactions}
-              onTableReady={setTableInstance}
-            />
+            <DataTable dateRange={dateRange} />
           </div>
         </div>
       </div>

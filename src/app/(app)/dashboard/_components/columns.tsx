@@ -2,6 +2,7 @@
 
 import { ColumnDef } from "@tanstack/react-table";
 import { Badge } from "@/components/ui/badge";
+import { formatCurrency } from "@/lib/formatter";
 
 export type Transaction = {
   id: string;
@@ -59,10 +60,7 @@ export const columns: ColumnDef<Transaction>[] = [
           <span
             className={`font-medium ${isNegative ? "text-destructive" : "text-green-500"}`}
           >
-            {new Intl.NumberFormat("en-US", {
-              style: "currency",
-              currency: row.original.currency,
-            }).format(amount)}
+            {formatCurrency(amount, row.original.currency)}
           </span>
         </div>
       );

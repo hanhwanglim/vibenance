@@ -23,6 +23,7 @@ import { toast } from "sonner";
 import TransactionDrawer from "./transaction-dialog";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
+import { formatCurrency } from "@/lib/formatter";
 
 export type Transaction = {
   id: string;
@@ -150,11 +151,6 @@ export const columns: ColumnDef<Transaction>[] = [
     enableHiding: false,
   },
   {
-    accessorKey: "account",
-    header: "Account",
-    enableHiding: true,
-  },
-  {
     accessorKey: "timestamp",
     header: "Timestamp",
   },
@@ -168,6 +164,24 @@ export const columns: ColumnDef<Transaction>[] = [
   {
     accessorKey: "amount",
     header: "Amount",
+    cell: ({ row }) => {
+      const amount = row.original.amount;
+      const isNegative = amount < 0;
+      return (
+        <div className="text-right">
+          <span
+            className={`${isNegative ? "text-destructive" : "text-green-500"}`}
+          >
+            {formatCurrency(amount, row.original.currency)}
+          </span>
+        </div>
+      );
+    },
+  },
+  {
+    accessorKey: "account",
+    header: "Account",
+    enableHiding: true,
   },
   {
     accessorKey: "category",
