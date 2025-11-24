@@ -30,262 +30,47 @@ import {
   ChevronsRight,
   ChevronsLeft,
 } from "lucide-react";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { columns, Transaction } from "./columns";
+import { useSession } from "@/lib/auth-client";
 
-function getData(pagination: { pageIndex: number; pageSize: number }): {
+type TransactionResponse = {
+  count: number;
   data: Transaction[];
-  rowCount: number;
-} {
-  const data = [
-    {
-      id: "txn-001",
-      account: "Monzo",
-      timestamp: "2025-01-15 14:32:00",
-      name: "Starbucks Coffee",
-      currency: "GBP",
-      amount: -4.5,
-      category: "Food",
-      reference: "TXN-2025-001",
-      notes: "Morning coffee",
-    },
-    {
-      id: "txn-002",
-      account: "Chase",
-      timestamp: "2025-01-14 18:45:00",
-      name: "Amazon Prime",
-      currency: "USD",
-      amount: -12.99,
-      category: "Shopping",
-      reference: "TXN-2025-002",
-      notes: "Monthly subscription",
-    },
-    {
-      id: "txn-003",
-      account: "American Express",
-      timestamp: "2025-01-13 20:15:00",
-      name: "Uber Ride",
-      currency: "USD",
-      amount: -28.5,
-      category: "Travel",
-      reference: "TXN-2025-003",
-      notes: "Airport transfer",
-    },
-    {
-      id: "txn-004",
-      account: "Monzo",
-      timestamp: "2025-01-12 12:00:00",
-      name: "Salary Deposit",
-      currency: "GBP",
-      amount: 3500.0,
-      category: "Other",
-      reference: "SAL-2025-001",
-      notes: "Monthly salary",
-    },
-    {
-      id: "txn-005",
-      account: "Barclays",
-      timestamp: "2025-01-11 09:30:00",
-      name: "Electricity Bill",
-      currency: "GBP",
-      amount: -85.2,
-      category: "Bills",
-      reference: "BILL-2025-001",
-      notes: "January bill",
-    },
-    {
-      id: "txn-006",
-      account: "Chase",
-      timestamp: "2025-01-10 19:22:00",
-      name: "Netflix Subscription",
-      currency: "USD",
-      amount: -15.99,
-      category: "Shopping",
-      reference: "TXN-2025-006",
-      notes: "Monthly plan",
-    },
-    {
-      id: "txn-007",
-      account: "Monzo",
-      timestamp: "2025-01-09 13:45:00",
-      name: "Tesco Supermarket",
-      currency: "GBP",
-      amount: -67.89,
-      category: "Food",
-      reference: "TXN-2025-007",
-      notes: "Weekly groceries",
-    },
-    {
-      id: "txn-008",
-      account: "American Express",
-      timestamp: "2025-01-08 16:10:00",
-      name: "Hotel Booking",
-      currency: "EUR",
-      amount: -245.0,
-      category: "Travel",
-      reference: "TXN-2025-008",
-      notes: "Paris trip",
-    },
-    {
-      id: "txn-009",
-      account: "Chase",
-      timestamp: "2025-01-07 11:20:00",
-      name: "Spotify Premium",
-      currency: "USD",
-      amount: -9.99,
-      category: "Shopping",
-      reference: "TXN-2025-009",
-      notes: "Monthly subscription",
-    },
-    {
-      id: "txn-010",
-      account: "Barclays",
-      timestamp: "2025-01-06 08:15:00",
-      name: "Water Bill",
-      currency: "GBP",
-      amount: -42.5,
-      category: "Bills",
-      reference: "BILL-2025-002",
-      notes: "Quarterly payment",
-    },
-    {
-      id: "txn-011",
-      account: "Monzo",
-      timestamp: "2025-01-05 20:30:00",
-      name: "Restaurant Dinner",
-      currency: "GBP",
-      amount: -89.5,
-      category: "Food",
-      reference: "TXN-2025-011",
-      notes: "Birthday celebration",
-    },
-    {
-      id: "txn-012",
-      account: "Chase",
-      timestamp: "2025-01-04 14:00:00",
-      name: "Flight Ticket",
-      currency: "USD",
-      amount: -450.0,
-      category: "Travel",
-      reference: "TXN-2025-012",
-      notes: "New York trip",
-    },
-    {
-      id: "txn-013",
-      account: "American Express",
-      timestamp: "2025-01-03 10:45:00",
-      name: "Gym Membership",
-      currency: "USD",
-      amount: -49.99,
-      category: "Other",
-      reference: "TXN-2025-013",
-      notes: "Monthly fee",
-    },
-    {
-      id: "txn-014",
-      account: "Monzo",
-      timestamp: "2025-01-02 17:30:00",
-      name: "Coffee Shop",
-      currency: "GBP",
-      amount: -5.75,
-      category: "Food",
-      reference: "TXN-2025-014",
-      notes: "Afternoon break",
-    },
-    {
-      id: "txn-015",
-      account: "Barclays",
-      timestamp: "2025-01-01 09:00:00",
-      name: "Internet Bill",
-      currency: "GBP",
-      amount: -29.99,
-      category: "Bills",
-      reference: "BILL-2025-003",
-      notes: "Monthly broadband",
-    },
-    {
-      id: "txn-016",
-      account: "Chase",
-      timestamp: "2024-12-31 21:00:00",
-      name: "New Year's Eve Dinner",
-      currency: "USD",
-      amount: -125.0,
-      category: "Food",
-      reference: "TXN-2024-999",
-      notes: "Celebration dinner",
-    },
-    {
-      id: "txn-017",
-      account: "Monzo",
-      timestamp: "2024-12-30 15:20:00",
-      name: "Bookstore Purchase",
-      currency: "GBP",
-      amount: -24.99,
-      category: "Shopping",
-      reference: "TXN-2024-998",
-      notes: "Technical books",
-    },
-    {
-      id: "txn-018",
-      account: "American Express",
-      timestamp: "2024-12-29 11:10:00",
-      name: "Train Ticket",
-      currency: "EUR",
-      amount: -78.5,
-      category: "Travel",
-      reference: "TXN-2024-997",
-      notes: "London to Paris",
-    },
-    {
-      id: "txn-019",
-      account: "Chase",
-      timestamp: "2024-12-28 16:45:00",
-      name: "Freelance Payment",
-      currency: "USD",
-      amount: 1200.0,
-      category: "Other",
-      reference: "INV-2024-001",
-      notes: "Web development project",
-    },
-    {
-      id: "txn-020",
-      account: "Barclays",
-      timestamp: "2024-12-27 08:30:00",
-      name: "Gas Bill",
-      currency: "GBP",
-      amount: -95.6,
-      category: "Bills",
-      reference: "BILL-2024-999",
-      notes: "December bill",
-    },
-  ];
-
-  const start = pagination.pageIndex * pagination.pageSize;
-  const end = start + pagination.pageSize;
-
-  return {
-    data: data.slice(start, end),
-    rowCount: data.length,
-  };
-}
+};
 
 export function DataTable() {
+  const { data: session } = useSession();
   const [pagination, setPagination] = useState({
     pageIndex: 0,
     pageSize: 10,
   });
 
-  const { data, rowCount } = useMemo(() => getData(pagination), [pagination]);
+  const [transactions, setTransactions] = useState<TransactionResponse>({
+    count: 0,
+    data: [],
+  });
+
+  useEffect(() => {
+    if (!session?.user?.id) return;
+
+    fetch(
+      `/api/transactions?page=${pagination.pageIndex}&limit=${pagination.pageSize}`,
+    )
+      .then((response) => response.json())
+      .then((data) => setTransactions(data))
+      .catch((error) => console.error("Failed to fetch transactions:", error));
+  }, [session?.user?.id, pagination]);
 
   const table = useReactTable({
-    data,
+    data: transactions.data,
     columns,
     getCoreRowModel: getCoreRowModel(),
 
     manualPagination: true,
     getPaginationRowModel: getPaginationRowModel(),
     onPaginationChange: setPagination,
-    rowCount: rowCount,
+    rowCount: transactions.count,
 
     state: {
       pagination,

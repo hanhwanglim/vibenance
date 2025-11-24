@@ -5,9 +5,8 @@ import { headers } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
 import { BankFormat, MonzoTransaction } from "@/lib/parser";
 import { transaction as transactionTable } from "@/db/schemas/transactions";
-import { and, between, eq } from "drizzle-orm";
+import { and, between, eq, count } from "drizzle-orm";
 import { desc } from "drizzle-orm";
-import { DateRange } from "@/app/(app)/transactions/_components/date-range-picker";
 
 export async function GET(request: NextRequest) {
   const session = await auth.api.getSession({
@@ -21,21 +20,28 @@ export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams;
   const from = searchParams.get("from");
   const to = searchParams.get("to");
+  const page = searchParams.get("page");
+  const limit = searchParams.get("limit");
 
-  const today = new Date();
-  const dateRange: { from: Date; to: Date } = {
-    from: from ? new Date(from) : new Date(today.setDate(today.getDate() - 30)),
-    to: to ? new Date(to) : new Date(today.setDate(today.getDate())),
-  };
+  const whereConditions = [eq(transaction.userId, session.user.id)];
+
+  if (from && to) {
+    whereConditions.push(
+      between(transaction.timestamp, new Date(from), new Date(to)),
+    );
+  }
 
   const transactions = await db.query.transaction.findMany({
-    where: and(
-      eq(transaction.userId, session.user.id),
-      between(transaction.timestamp, dateRange.from, dateRange.to),
-    ),
-    limit: 100,
+    where: and(...whereConditions),
+    limit: limit ? parseInt(limit) : 100,
+    offset: page ? parseInt(page) * (limit ? parseInt(limit) : 100) : 0,
     orderBy: [desc(transaction.timestamp), desc(transaction.createdAt)],
   });
 
-  return NextResponse.json(transactions);
+  const rowCount = await db
+    .select({ count: count() })
+    .from(transaction)
+    .where(and(...whereConditions));
+
+  return NextResponse.json({ count: rowCount[0].count, data: transactions });
 }
