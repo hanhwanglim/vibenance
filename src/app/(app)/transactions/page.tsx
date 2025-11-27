@@ -32,7 +32,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Plus, Upload, ChevronDown } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useSession } from "@/lib/auth-client";
 
 function SelectAccount({
@@ -71,18 +71,110 @@ const accounts = [
   { id: 4, name: "Barclays" },
 ];
 
+function getDefaultDateRange(): DateRange {
+  const now = new Date();
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+  return { from: startOfMonth, to: today };
+}
+
+function validateDateParam(value: string | null): Date | null {
+  if (!value) return null;
+
+  try {
+    const date = new Date(value);
+    // Check if date is valid (not NaN)
+    if (isNaN(date.getTime())) {
+      return null;
+    }
+    return date;
+  } catch {
+    return null;
+  }
+}
+
+function validateDateRange(from: Date | null, to: Date | null): DateRange {
+  // If both are invalid, return defaults
+  if (!from || !to) {
+    return getDefaultDateRange();
+  }
+
+  // If to is before from, swap them
+  if (to < from) {
+    return { from: to, to: from };
+  }
+
+  return { from, to };
+}
+
 export default function TransactionsPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { data: session } = useSession();
 
+  // Initialize dateRange from URL parameters or use defaults
   const [dateRange, setDateRange] = useState<DateRange>(() => {
-    const now = new Date();
-    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-    const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
-    return { from: startOfMonth, to: today };
+    const fromParam = searchParams.get("from");
+    const toParam = searchParams.get("to");
+
+    const from = validateDateParam(fromParam);
+    const to = validateDateParam(toParam);
+
+    // If both params are present and valid, use them
+    if (from && to) {
+      return validateDateRange(from, to);
+    }
+
+    // Otherwise use defaults
+    return getDefaultDateRange();
   });
 
   const [globalSearch, setGlobalSearch] = useState("");
+
+  // Sync state with URL parameters when they change externally (e.g., browser back/forward)
+  useEffect(() => {
+    const fromParam = searchParams.get("from");
+    const toParam = searchParams.get("to");
+
+    const from = validateDateParam(fromParam);
+    const to = validateDateParam(toParam);
+
+    // Only update if URL params are different from current state
+    const urlFrom = from?.toISOString();
+    const urlTo = to?.toISOString();
+    const currentFrom = dateRange.from?.toISOString();
+    const currentTo = dateRange.to?.toISOString();
+
+    if (urlFrom !== currentFrom || urlTo !== currentTo) {
+      if (from && to) {
+        const validated = validateDateRange(from, to);
+        setDateRange(validated);
+      } else if (!fromParam && !toParam) {
+        // If both params are missing, use defaults
+        setDateRange(getDefaultDateRange());
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams]);
+
+  // Update URL when dateRange changes (but not from URL sync)
+  useEffect(() => {
+    if (!dateRange.from || !dateRange.to) return;
+
+    const params = new URLSearchParams(searchParams.toString());
+    const currentFrom = params.get("from");
+    const currentTo = params.get("to");
+    const newFrom = dateRange.from.toISOString();
+    const newTo = dateRange.to.toISOString();
+
+    // Only update URL if it's different from current URL params
+    if (currentFrom !== newFrom || currentTo !== newTo) {
+      params.set("from", newFrom);
+      params.set("to", newTo);
+      router.replace(`?${params.toString()}`, { scroll: false });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [dateRange.from, dateRange.to, router]);
 
   return (
     <div className="flex flex-1 flex-col">
