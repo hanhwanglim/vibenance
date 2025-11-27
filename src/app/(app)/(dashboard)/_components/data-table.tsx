@@ -30,7 +30,7 @@ import {
   ChevronsRight,
   ChevronsLeft,
 } from "lucide-react";
-import { useState, useMemo, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { columns, Transaction } from "./columns";
 import { useSession } from "@/lib/auth-client";
 

@@ -4,7 +4,6 @@ import {
   timestamp,
   numeric,
   AnyPgColumn,
-  unique,
 } from "drizzle-orm/pg-core";
 import { user } from "./auth";
 

@@ -10,17 +10,13 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useState, useEffect } from "react";
-import type { Table as TanStackTable } from "@tanstack/react-table";
 import { DataTable } from "./_components/data-table";
-import { columns } from "./_components/columns";
 import { SummaryCards } from "./_components/summary-cards";
 import {
   DateRangePicker,
   type DateRange,
 } from "./_components/date-range-picker";
 import { GlobalSearch } from "./_components/global-search";
-import { TableToolbar } from "./_components/table-toolbar";
-import { Transaction } from "./_components/columns";
 import { CategoryChart } from "./_components/category-chart";
 import { SpendingTrendChart } from "./_components/spending-trend-chart";
 import { IncomeExpensesChart } from "./_components/income-expenses-chart";
@@ -33,7 +29,6 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Plus, Upload, ChevronDown } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useSession } from "@/lib/auth-client";
 
 function SelectAccount({
   accounts,
@@ -110,7 +105,6 @@ function validateDateRange(from: Date | null, to: Date | null): DateRange {
 export default function TransactionsPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { data: session } = useSession();
 
   // Initialize dateRange from URL parameters or use defaults
   const [dateRange, setDateRange] = useState<DateRange>(() => {

@@ -1,12 +1,9 @@
 import { auth } from "@/lib/auth";
 import { db } from "@/db";
-import { transaction, TransactionInsert } from "@/db/schemas/transactions";
+import { transaction } from "@/db/schemas/transactions";
 import { headers } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
-import { BankFormat, MonzoTransaction } from "@/lib/parser";
-import { transaction as transactionTable } from "@/db/schemas/transactions";
-import { and, between, eq, count } from "drizzle-orm";
-import { desc } from "drizzle-orm";
+import { and, between, eq, count, desc } from "drizzle-orm";
 
 export async function GET(request: NextRequest) {
   const session = await auth.api.getSession({
