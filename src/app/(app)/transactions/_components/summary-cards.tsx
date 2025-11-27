@@ -3,7 +3,7 @@
 import {
   SectionCards,
   StatCardData,
-} from "@/app/(app)/dashboard/_components/section-cards";
+} from "@/app/(app)/(dashboard)/_components/section-cards";
 import { Transaction } from "./columns";
 
 type SummaryCardsProps = {
