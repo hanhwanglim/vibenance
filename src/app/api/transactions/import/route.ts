@@ -80,6 +80,82 @@ async function handleMonzo(
   return { imported, skipped };
 }
 
+async function handleAmex(
+  userId: string,
+  transactions: MonzoTransaction[],
+): Promise<{ imported: number; skipped: number }> {
+  let imported = 0;
+  let skipped = 0;
+
+  await db.transaction(async (tx) => {
+    const transactionsToInsert: TransactionInsert[] = [];
+
+    for (const transaction of transactions) {
+      if (transaction.errors) {
+        skipped++;
+        continue;
+      }
+
+      const [day, month, year] = transaction.date.split("/");
+      const timestamp = new Date(`${year}-${month}-${day}`);
+
+      const txn: TransactionInsert = {
+        id: crypto.randomUUID(),
+        userId: userId,
+        transactionHash: transaction.transactionId,
+        account: "Amex",
+        timestamp: timestamp,
+        name: transaction.name,
+        currency: transaction.currency,
+        amount: transaction.amount.startsWith("-")
+          ? transaction.amount.substring(1)
+          : `-${transaction.amount}`,
+        category: transaction.category,
+        notes: transaction.notes,
+      };
+
+      transactionsToInsert.push(txn);
+
+      if (transactionsToInsert.length >= 1000) {
+        const count = (
+          await tx
+            .insert(transactionTable)
+            .values(transactionsToInsert)
+            .onConflictDoUpdate({
+              target: transactionTable.transactionHash,
+              set: {
+                category: transactionTable.category,
+                notes: transactionTable.notes,
+              },
+            })
+        ).rowCount;
+        transactionsToInsert.length = 0;
+        imported += count ?? 0;
+        skipped += transactionsToInsert.length - (count ?? 0);
+      }
+    }
+
+    if (transactionsToInsert.length > 0) {
+      const count = (
+        await tx
+          .insert(transactionTable)
+          .values(transactionsToInsert)
+          .onConflictDoUpdate({
+            target: transactionTable.transactionHash,
+            set: {
+              category: transactionTable.category,
+              notes: transactionTable.notes,
+            },
+          })
+      ).rowCount;
+      imported += count ?? 0;
+      skipped += transactionsToInsert.length - (count ?? 0);
+    }
+  });
+
+  return { imported, skipped };
+}
+
 export async function POST(request: Request) {
   const session = await auth.api.getSession({
     headers: await headers(),
@@ -104,6 +180,9 @@ export async function POST(request: Request) {
         session.user.id,
         transactions,
       ));
+      break;
+    case BankFormat.AMEX:
+      ({ imported, skipped } = await handleAmex(session.user.id, transactions));
       break;
     default:
       return NextResponse.json(
