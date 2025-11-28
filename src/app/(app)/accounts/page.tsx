@@ -7,6 +7,9 @@ import { useSession } from "@/lib/auth-client";
 import { SummaryCards, AccountWithStats } from "./_components/summary-cards";
 import { AccountCards } from "./_components/account-cards";
 import { AccountDialog } from "./_components/account-dialog";
+import { BalanceByTypeChart } from "./_components/balance-by-type-chart";
+import { BalanceOverTimeChart } from "./_components/balance-over-time-chart";
+import { BalanceDistributionChart } from "./_components/balance-distribution-chart";
 import { Dialog } from "@/components/ui/dialog";
 import { Skeleton } from "@/components/ui/skeleton";
 
@@ -32,6 +35,10 @@ export default function AccountsPage() {
         type AccountResponse = {
           id: string;
           name: string;
+          type: AccountWithStats["type"];
+          accountNumber: string | null;
+          bankName: string | null;
+          color: string | null;
           createdAt: string;
           updatedAt: string;
           transactionCount: number;
@@ -120,7 +127,8 @@ export default function AccountsPage() {
 
           {/* Summary Cards */}
           {loading ? (
-            <div className="grid grid-cols-1 gap-4 px-4 lg:px-6 @xl/main:grid-cols-2 @5xl/main:grid-cols-3">
+            <div className="grid grid-cols-1 gap-4 px-4 lg:px-6 @xl/main:grid-cols-2 @5xl/main:grid-cols-4">
+              <Skeleton className="h-32" />
               <Skeleton className="h-32" />
               <Skeleton className="h-32" />
               <Skeleton className="h-32" />
@@ -128,6 +136,15 @@ export default function AccountsPage() {
           ) : (
             <SummaryCards accounts={accounts} />
           )}
+
+          {/* Charts */}
+          <div className="px-4 lg:px-6">
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+              <BalanceByTypeChart />
+              <BalanceOverTimeChart />
+              <BalanceDistributionChart />
+            </div>
+          </div>
 
           {/* Account Cards */}
           {loading ? (
