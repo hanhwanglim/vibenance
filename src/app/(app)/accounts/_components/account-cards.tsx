@@ -25,6 +25,16 @@ const ACCOUNT_TYPE_LABELS: Record<AccountWithStats["type"], string> = {
   other: "Other",
 };
 
+const ACCOUNT_TYPE_ORDER: AccountWithStats["type"][] = [
+  "savings",
+  "checking",
+  "current",
+  "credit_card",
+  "investment",
+  "loan",
+  "other",
+];
+
 const COLOR_CLASSES: Record<string, string> = {
   blue: "border-l-blue-500",
   green: "border-l-green-500",
@@ -76,6 +86,23 @@ export function AccountCards({
     }
   };
 
+  // Group accounts by type
+  const groupedAccounts = accounts.reduce(
+    (acc, account) => {
+      if (!acc[account.type]) {
+        acc[account.type] = [];
+      }
+      acc[account.type].push(account);
+      return acc;
+    },
+    {} as Record<AccountWithStats["type"], AccountWithStats[]>,
+  );
+
+  // Get ordered types that have accounts
+  const orderedTypes = ACCOUNT_TYPE_ORDER.filter(
+    (type) => groupedAccounts[type] && groupedAccounts[type].length > 0,
+  );
+
   if (accounts.length === 0) {
     return (
       <div className="px-4 lg:px-6">
@@ -92,98 +119,96 @@ export function AccountCards({
     );
   }
 
-  return (
-    <>
-      <div className="px-4 lg:px-6">
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
-          {accounts.map((account) => (
-            <Card
-              key={account.id}
-              className={cn(
-                "flex flex-col",
-                account.color && COLOR_CLASSES[account.color]
-                  ? `${COLOR_CLASSES[account.color]} border-l-4`
-                  : "",
-              )}
+  const renderAccountCard = (account: AccountWithStats) => (
+    <Card
+      key={account.id}
+      className={cn(
+        "flex flex-col",
+        account.color && COLOR_CLASSES[account.color]
+          ? `${COLOR_CLASSES[account.color]} border-l-4`
+          : "",
+      )}
+    >
+      <CardHeader>
+        <div className="flex items-start justify-between">
+          <div className="flex-1">
+            <div className="flex items-center gap-2 mb-1">
+              <CardTitle className="text-lg">{account.name}</CardTitle>
+              <Badge variant="outline" className="text-xs">
+                {ACCOUNT_TYPE_LABELS[account.type]}
+              </Badge>
+            </div>
+            {account.bankName && (
+              <CardDescription className="text-xs">
+                {account.bankName}
+              </CardDescription>
+            )}
+            {account.accountNumber && (
+              <CardDescription className="text-xs text-muted-foreground">
+                Account: {account.accountNumber}
+              </CardDescription>
+            )}
+            {!account.bankName && !account.accountNumber && (
+              <CardDescription className="mt-1 text-xs">
+                Created {new Date(account.createdAt).toLocaleDateString()}
+              </CardDescription>
+            )}
+          </div>
+          <div className="flex gap-1">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8"
+              onClick={() => onEdit(account)}
             >
-              <CardHeader>
-                <div className="flex items-start justify-between">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-1">
-                      <CardTitle className="text-lg">{account.name}</CardTitle>
-                      <Badge variant="outline" className="text-xs">
-                        {ACCOUNT_TYPE_LABELS[account.type]}
-                      </Badge>
-                    </div>
-                    {account.bankName && (
-                      <CardDescription className="text-xs">
-                        {account.bankName}
-                      </CardDescription>
-                    )}
-                    {account.accountNumber && (
-                      <CardDescription className="text-xs text-muted-foreground">
-                        Account: {account.accountNumber}
-                      </CardDescription>
-                    )}
-                    {!account.bankName && !account.accountNumber && (
-                      <CardDescription className="mt-1 text-xs">
-                        Created{" "}
-                        {new Date(account.createdAt).toLocaleDateString()}
-                      </CardDescription>
-                    )}
-                  </div>
-                  <div className="flex gap-1">
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-8 w-8"
-                      onClick={() => onEdit(account)}
-                    >
-                      <Pencil className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-8 w-8 text-destructive hover:text-destructive"
-                      onClick={() => handleDelete(account)}
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </div>
-              </CardHeader>
-              <CardFooter className="flex flex-col items-start gap-2 mt-auto pt-0">
-                <div className="flex items-center gap-2 w-full">
-                  <span className="text-sm text-muted-foreground">
-                    Balance:
-                  </span>
-                  <span className="text-lg font-semibold">
-                    {formatCurrency(account.totalBalance, "USD")}
-                  </span>
-                </div>
-                <div className="flex items-center gap-2 w-full">
-                  <span className="text-sm text-muted-foreground">
-                    Transactions:
-                  </span>
-                  <Badge variant="secondary">{account.transactionCount}</Badge>
-                </div>
-                {account.lastTransactionDate && (
-                  <div className="flex items-center gap-2 w-full">
-                    <span className="text-sm text-muted-foreground">
-                      Last transaction:
-                    </span>
-                    <span className="text-sm">
-                      {new Date(
-                        account.lastTransactionDate,
-                      ).toLocaleDateString()}
-                    </span>
-                  </div>
-                )}
-              </CardFooter>
-            </Card>
-          ))}
+              <Pencil className="h-4 w-4" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8 text-destructive hover:text-destructive"
+              onClick={() => handleDelete(account)}
+            >
+              <Trash2 className="h-4 w-4" />
+            </Button>
+          </div>
         </div>
-      </div>
-    </>
+      </CardHeader>
+      <CardFooter className="flex flex-col items-start gap-2 mt-auto pt-0">
+        <div className="flex items-center gap-2 w-full">
+          <span className="text-sm text-muted-foreground">Balance:</span>
+          <span className="text-lg font-semibold">
+            {formatCurrency(account.totalBalance, "USD")}
+          </span>
+        </div>
+        <div className="flex items-center gap-2 w-full">
+          <span className="text-sm text-muted-foreground">Transactions:</span>
+          <Badge variant="secondary">{account.transactionCount}</Badge>
+        </div>
+        {account.lastTransactionDate && (
+          <div className="flex items-center gap-2 w-full">
+            <span className="text-sm text-muted-foreground">
+              Last transaction:
+            </span>
+            <span className="text-sm">
+              {new Date(account.lastTransactionDate).toLocaleDateString()}
+            </span>
+          </div>
+        )}
+      </CardFooter>
+    </Card>
+  );
+
+  return (
+    <div className="px-4 lg:px-6 space-y-8">
+      {orderedTypes.map((type) => (
+        <div key={type} className="space-y-4">
+          <h2 className="text-xl font-semibold">{ACCOUNT_TYPE_LABELS[type]}</h2>
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+            {groupedAccounts[type].map(renderAccountCard)}
+          </div>
+        </div>
+      ))}
+    </div>
   );
 }
