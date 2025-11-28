@@ -4,12 +4,27 @@ import {
   timestamp,
   numeric,
   AnyPgColumn,
+  pgEnum,
 } from "drizzle-orm/pg-core";
 import { user } from "./auth";
+
+export const accountTypeEnum = pgEnum("account_type", [
+  "savings",
+  "current",
+  "checking",
+  "credit_card",
+  "investment",
+  "loan",
+  "other",
+]);
 
 export const bankAccount = pgTable("bank_account", {
   id: text("id").primaryKey(),
   name: text("name").notNull().unique(),
+  type: accountTypeEnum("type").notNull().default("other"),
+  accountNumber: text("account_number"),
+  bankName: text("bank_name"),
+  color: text("color"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at")
     .defaultNow()

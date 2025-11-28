@@ -8,7 +8,7 @@ import { eq, sql } from "drizzle-orm";
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } },
+  { params }: { params: Promise<{ id: string }> },
 ) {
   const session = await auth.api.getSession({
     headers: await headers(),
@@ -19,9 +19,9 @@ export async function PUT(
   }
 
   try {
-    const accountId = params.id;
+    const { id: accountId } = await params;
     const body = await request.json();
-    const { name } = body;
+    const { name, type, accountNumber, bankName, color } = body;
 
     if (!name || typeof name !== "string" || name.trim().length === 0) {
       return NextResponse.json(
@@ -31,6 +31,42 @@ export async function PUT(
     }
 
     const trimmedName = name.trim();
+
+    // Validate account type
+    const validTypes = [
+      "savings",
+      "current",
+      "checking",
+      "credit_card",
+      "investment",
+      "loan",
+      "other",
+    ];
+    const accountType = type || "other";
+    if (!validTypes.includes(accountType)) {
+      return NextResponse.json(
+        { error: "Invalid account type" },
+        { status: 400 },
+      );
+    }
+
+    // Validate color if provided
+    const validColors = [
+      "blue",
+      "green",
+      "red",
+      "orange",
+      "purple",
+      "pink",
+      "teal",
+      "gray",
+    ];
+    if (color && !validColors.includes(color)) {
+      return NextResponse.json(
+        { error: "Invalid color. Must be one of: " + validColors.join(", ") },
+        { status: 400 },
+      );
+    }
 
     // Check if account exists
     const existingAccount = await db.query.bankAccount.findFirst({
@@ -56,7 +92,19 @@ export async function PUT(
     // Update the account
     const [updatedAccount] = await db
       .update(bankAccount)
-      .set({ name: trimmedName })
+      .set({
+        name: trimmedName,
+        type: accountType,
+        accountNumber:
+          accountNumber && typeof accountNumber === "string"
+            ? accountNumber.trim() || null
+            : null,
+        bankName:
+          bankName && typeof bankName === "string"
+            ? bankName.trim() || null
+            : null,
+        color: color || null,
+      })
       .where(eq(bankAccount.id, accountId))
       .returning();
 
@@ -88,7 +136,7 @@ export async function PUT(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } },
+  { params }: { params: Promise<{ id: string }> },
 ) {
   const session = await auth.api.getSession({
     headers: await headers(),
@@ -99,7 +147,7 @@ export async function DELETE(
   }
 
   try {
-    const accountId = params.id;
+    const { id: accountId } = await params;
 
     // Check if account exists
     const existingAccount = await db.query.bankAccount.findFirst({

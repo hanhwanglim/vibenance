@@ -13,6 +13,28 @@ import { formatCurrency } from "@/lib/formatter";
 import { Pencil, Trash2, Wallet } from "lucide-react";
 import { AccountWithStats } from "./summary-cards";
 import { toast } from "sonner";
+import { cn } from "@/lib/utils";
+
+const ACCOUNT_TYPE_LABELS: Record<AccountWithStats["type"], string> = {
+  savings: "Savings",
+  current: "Current",
+  checking: "Checking",
+  credit_card: "Credit Card",
+  investment: "Investment",
+  loan: "Loan",
+  other: "Other",
+};
+
+const COLOR_CLASSES: Record<string, string> = {
+  blue: "border-l-blue-500",
+  green: "border-l-green-500",
+  red: "border-l-red-500",
+  orange: "border-l-orange-500",
+  purple: "border-l-purple-500",
+  pink: "border-l-pink-500",
+  teal: "border-l-teal-500",
+  gray: "border-l-gray-500",
+};
 
 type AccountCardsProps = {
   accounts: AccountWithStats[];
@@ -75,14 +97,40 @@ export function AccountCards({
       <div className="px-4 lg:px-6">
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
           {accounts.map((account) => (
-            <Card key={account.id} className="flex flex-col">
+            <Card
+              key={account.id}
+              className={cn(
+                "flex flex-col",
+                account.color && COLOR_CLASSES[account.color]
+                  ? `${COLOR_CLASSES[account.color]} border-l-4`
+                  : "",
+              )}
+            >
               <CardHeader>
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
-                    <CardTitle className="text-lg">{account.name}</CardTitle>
-                    <CardDescription className="mt-1">
-                      Created {new Date(account.createdAt).toLocaleDateString()}
-                    </CardDescription>
+                    <div className="flex items-center gap-2 mb-1">
+                      <CardTitle className="text-lg">{account.name}</CardTitle>
+                      <Badge variant="outline" className="text-xs">
+                        {ACCOUNT_TYPE_LABELS[account.type]}
+                      </Badge>
+                    </div>
+                    {account.bankName && (
+                      <CardDescription className="text-xs">
+                        {account.bankName}
+                      </CardDescription>
+                    )}
+                    {account.accountNumber && (
+                      <CardDescription className="text-xs text-muted-foreground">
+                        Account: {account.accountNumber}
+                      </CardDescription>
+                    )}
+                    {!account.bankName && !account.accountNumber && (
+                      <CardDescription className="mt-1 text-xs">
+                        Created{" "}
+                        {new Date(account.createdAt).toLocaleDateString()}
+                      </CardDescription>
+                    )}
                   </div>
                   <div className="flex gap-1">
                     <Button

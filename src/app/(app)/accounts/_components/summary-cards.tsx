@@ -8,6 +8,17 @@ import {
 export type AccountWithStats = {
   id: string;
   name: string;
+  type:
+    | "savings"
+    | "current"
+    | "checking"
+    | "credit_card"
+    | "investment"
+    | "loan"
+    | "other";
+  accountNumber: string | null;
+  bankName: string | null;
+  color: string | null;
   createdAt: Date;
   updatedAt: Date;
   transactionCount: number;
