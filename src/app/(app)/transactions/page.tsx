@@ -29,6 +29,8 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Plus, Upload, ChevronDown } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { useSession } from "@/lib/auth-client";
+import { Transaction } from "./_components/columns";
 
 function SelectAccount({
   accounts,
@@ -124,6 +126,8 @@ export default function TransactionsPage() {
   });
 
   const [globalSearch, setGlobalSearch] = useState("");
+  const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const { data: session } = useSession();
 
   // Sync state with URL parameters when they change externally (e.g., browser back/forward)
   useEffect(() => {
@@ -170,6 +174,18 @@ export default function TransactionsPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dateRange.from, dateRange.to, router]);
 
+  // Fetch transactions from API
+  useEffect(() => {
+    if (!session?.user?.id || !dateRange.from || !dateRange.to) return;
+
+    fetch(
+      `/api/transactions?from=${dateRange.from.toISOString()}&to=${dateRange.to.toISOString()}`,
+    )
+      .then((response) => response.json())
+      .then((data) => setTransactions(data.data))
+      .catch((error) => console.error("Failed to fetch transactions:", error));
+  }, [session?.user?.id, dateRange]);
+
   return (
     <div className="flex flex-1 flex-col">
       <div className="@container/main flex flex-1 flex-col gap-2">
@@ -211,14 +227,14 @@ export default function TransactionsPage() {
           </div>
 
           {/* Summary Cards (KPIs) */}
-          <SummaryCards transactions={[]} />
+          <SummaryCards transactions={transactions} />
 
           {/* Charts */}
           <div className="px-4 lg:px-6">
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
-              <CategoryChart transactions={[]} />
-              <SpendingTrendChart transactions={[]} />
-              <IncomeExpensesChart transactions={[]} />
+              <CategoryChart transactions={transactions} />
+              <SpendingTrendChart transactions={transactions} />
+              <IncomeExpensesChart transactions={transactions} />
             </div>
           </div>
 
