@@ -1,9 +1,9 @@
 import { auth } from "@/lib/auth";
 import { db } from "@/db";
-import { transaction } from "@/db/schemas/transactions";
+import { transaction, bankAccount, category } from "@/db/schemas/transactions";
 import { headers } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
-import { and, between, eq, count, desc } from "drizzle-orm";
+import { and, between, eq, count, desc, inArray } from "drizzle-orm";
 
 export async function GET(request: NextRequest) {
   const session = await auth.api.getSession({
@@ -40,5 +40,46 @@ export async function GET(request: NextRequest) {
     .from(transaction)
     .where(and(...whereConditions));
 
-  return NextResponse.json({ count: rowCount[0].count, data: transactions });
+  // Fetch all unique account and category IDs
+  const accountIds = [...new Set(transactions.map((t) => t.accountId))];
+  const categoryIds = [...new Set(transactions.map((t) => t.categoryId))];
+
+  // Fetch accounts and categories
+  const accounts =
+    accountIds.length > 0
+      ? await db
+          .select()
+          .from(bankAccount)
+          .where(inArray(bankAccount.id, accountIds))
+      : [];
+
+  const categories =
+    categoryIds.length > 0
+      ? await db
+          .select()
+          .from(category)
+          .where(inArray(category.id, categoryIds))
+      : [];
+
+  // Create lookup maps
+  const accountMap = new Map(accounts.map((a) => [a.id, a.name]));
+  const categoryMap = new Map(categories.map((c) => [c.id, c.name]));
+
+  // Transform transactions to include denormalized account and category fields
+  const transformedTransactions = transactions.map((t) => ({
+    id: t.id,
+    account: accountMap.get(t.accountId) || "",
+    timestamp: t.timestamp.toISOString(),
+    name: t.name,
+    currency: t.currency,
+    amount: parseFloat(t.amount),
+    category: categoryMap.get(t.categoryId) || "",
+    reference: t.reference || "",
+    notes: t.notes || "",
+  }));
+
+  return NextResponse.json({
+    count: rowCount[0].count,
+    data: transformedTransactions,
+  });
 }
