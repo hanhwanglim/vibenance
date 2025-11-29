@@ -4,10 +4,57 @@ import { TransactionInsert } from "@/db/schemas/transactions";
 import { headers } from "next/headers";
 import { NextResponse } from "next/server";
 import { BankFormat, MonzoTransaction } from "@/lib/parser";
-import { transaction as transactionTable } from "@/db/schemas/transactions";
+import {
+  transaction as transactionTable,
+  category as categoryTable,
+  bankAccount,
+} from "@/db/schemas/transactions";
+import { eq, sql } from "drizzle-orm";
+
+/**
+ * Resolves a category name to a categoryId.
+ * If the category doesn't exist, creates it.
+ * Falls back to "Other" category if name is empty.
+ */
+async function resolveCategoryId(
+  categoryName: string | undefined,
+): Promise<string> {
+  const name = categoryName?.trim() || "Other";
+
+  // Try to find existing category (case-insensitive)
+  const existingCategories = await db
+    .select()
+    .from(categoryTable)
+    .where(sql`LOWER(${categoryTable.name}) = LOWER(${name})`)
+    .limit(1);
+
+  if (existingCategories.length > 0) {
+    return existingCategories[0].id;
+  }
+
+  // Create new category if it doesn't exist
+  const newCategoryId = crypto.randomUUID();
+  await db
+    .insert(categoryTable)
+    .values({
+      id: newCategoryId,
+      name: name,
+    })
+    .onConflictDoNothing();
+
+  // If insert was skipped due to conflict, fetch the existing one
+  const categories = await db
+    .select()
+    .from(categoryTable)
+    .where(sql`LOWER(${categoryTable.name}) = LOWER(${name})`)
+    .limit(1);
+
+  return categories[0]?.id || newCategoryId;
+}
 
 async function handleMonzo(
   userId: string,
+  accountId: string,
   transactions: MonzoTransaction[],
 ): Promise<{ imported: number; skipped: number }> {
   let imported = 0;
@@ -25,16 +72,19 @@ async function handleMonzo(
       const [day, month, year] = transaction.date.split("/");
       const timestamp = new Date(`${year}-${month}-${day}T${transaction.time}`);
 
+      // Resolve category name to categoryId
+      const categoryId = await resolveCategoryId(transaction.category);
+
       const txn: TransactionInsert = {
         id: crypto.randomUUID(),
         userId: userId,
         transactionHash: transaction.transactionId,
-        account: "Monzo",
+        accountId: accountId,
         timestamp: timestamp,
         name: transaction.name,
         currency: transaction.currency,
         amount: transaction.amount,
-        category: transaction.category,
+        categoryId: categoryId,
         notes: transaction.notes,
       };
 
@@ -48,7 +98,7 @@ async function handleMonzo(
             .onConflictDoUpdate({
               target: transactionTable.transactionHash,
               set: {
-                category: transactionTable.category,
+                categoryId: transactionTable.categoryId,
                 notes: transactionTable.notes,
               },
             })
@@ -67,7 +117,7 @@ async function handleMonzo(
           .onConflictDoUpdate({
             target: transactionTable.transactionHash,
             set: {
-              category: transactionTable.category,
+              categoryId: transactionTable.categoryId,
               notes: transactionTable.notes,
             },
           })
@@ -82,6 +132,7 @@ async function handleMonzo(
 
 async function handleAmex(
   userId: string,
+  accountId: string,
   transactions: MonzoTransaction[],
 ): Promise<{ imported: number; skipped: number }> {
   let imported = 0;
@@ -99,18 +150,21 @@ async function handleAmex(
       const [day, month, year] = transaction.date.split("/");
       const timestamp = new Date(`${year}-${month}-${day}`);
 
+      // Resolve category name to categoryId
+      const categoryId = await resolveCategoryId(transaction.category);
+
       const txn: TransactionInsert = {
         id: crypto.randomUUID(),
         userId: userId,
         transactionHash: transaction.transactionId,
-        account: "Amex",
+        accountId: accountId,
         timestamp: timestamp,
         name: transaction.name,
         currency: transaction.currency,
         amount: transaction.amount.startsWith("-")
           ? transaction.amount.substring(1)
           : `-${transaction.amount}`,
-        category: transaction.category,
+        categoryId: categoryId,
         notes: transaction.notes,
       };
 
@@ -124,7 +178,7 @@ async function handleAmex(
             .onConflictDoUpdate({
               target: transactionTable.transactionHash,
               set: {
-                category: transactionTable.category,
+                categoryId: transactionTable.categoryId,
                 notes: transactionTable.notes,
               },
             })
@@ -143,7 +197,7 @@ async function handleAmex(
           .onConflictDoUpdate({
             target: transactionTable.transactionHash,
             set: {
-              category: transactionTable.category,
+              categoryId: transactionTable.categoryId,
               notes: transactionTable.notes,
             },
           })
@@ -168,25 +222,54 @@ export async function POST(request: Request) {
   const body = await request.json();
 
   const {
-    account,
+    accountId,
+    format,
     transactions,
-  }: { account: BankFormat; transactions: MonzoTransaction[] } = body;
+  }: {
+    accountId: string;
+    format: BankFormat;
+    transactions: MonzoTransaction[];
+  } = body;
+
+  // Validate accountId
+  if (!accountId || typeof accountId !== "string") {
+    return NextResponse.json(
+      { error: "Account ID is required" },
+      { status: 400 },
+    );
+  }
+
+  // Verify account exists (accounts are not user-specific in the current schema,
+  // but we validate it exists)
+  const account = await db.query.bankAccount.findFirst({
+    where: eq(bankAccount.id, accountId),
+  });
+
+  if (!account) {
+    return NextResponse.json({ error: "Account not found" }, { status: 404 });
+  }
+
   let imported = 0;
   let skipped = 0;
 
-  switch (account) {
+  switch (format) {
     case BankFormat.MONZO:
       ({ imported, skipped } = await handleMonzo(
         session.user.id,
+        accountId,
         transactions,
       ));
       break;
     case BankFormat.AMEX:
-      ({ imported, skipped } = await handleAmex(session.user.id, transactions));
+      ({ imported, skipped } = await handleAmex(
+        session.user.id,
+        accountId,
+        transactions,
+      ));
       break;
     default:
       return NextResponse.json(
-        { error: "Unsupported account type" },
+        { error: "Unsupported bank format" },
         { status: 400 },
       );
   }

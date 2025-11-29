@@ -151,7 +151,7 @@ function parseAmex(data: Papa.ParseResult<AmexTransactionRow>): ParseResult {
 
   data.data.forEach((row, index: number) => {
     const transaction: MonzoTransaction = {
-      transactionId: row["Reference"].substring(1), // Amex prefixes with "'"
+      transactionId: row["Reference"].replaceAll("'", ""), // Amex wraps with "'"
       date: row["Date"],
       time: "",
       type: Number(row["Amount"]) < 0 ? "Credit" : "Debit",

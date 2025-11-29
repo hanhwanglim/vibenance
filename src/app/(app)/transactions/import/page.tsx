@@ -1,9 +1,18 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectLabel,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { CSVPreviewTable } from "../_components/csv-preview-table";
 import { Upload, Loader2, X, ArrowLeft } from "lucide-react";
 import { toast } from "sonner";
@@ -13,13 +22,49 @@ import { parseFile, ParseResult } from "@/lib/parser";
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
 
+type Account = {
+  id: string;
+  name: string;
+};
+
 export default function ImportPage() {
   const router = useRouter();
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [parseResult, setParseResult] = useState<ParseResult | null>(null);
   const [isParsing, setIsParsing] = useState(false);
   const [isImporting, setIsImporting] = useState(false);
+  const [accounts, setAccounts] = useState<Account[]>([]);
+  const [selectedAccountId, setSelectedAccountId] = useState<string>("");
+  const [isLoadingAccounts, setIsLoadingAccounts] = useState(true);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    const fetchAccounts = async () => {
+      try {
+        setIsLoadingAccounts(true);
+        const response = await fetch("/api/accounts");
+        const data = await response.json();
+
+        if (response.ok) {
+          const accountsList = (data.data as Account[]).map((account) => ({
+            id: account.id,
+            name: account.name,
+          }));
+          setAccounts(accountsList);
+        } else {
+          console.error("Failed to fetch accounts:", data.error);
+          toast.error("Failed to load accounts");
+        }
+      } catch (error) {
+        console.error("Error fetching accounts:", error);
+        toast.error("Failed to load accounts");
+      } finally {
+        setIsLoadingAccounts(false);
+      }
+    };
+
+    fetchAccounts();
+  }, []);
 
   const handleFileSelect = async (
     event: React.ChangeEvent<HTMLInputElement>,
@@ -47,7 +92,7 @@ export default function ImportPage() {
   };
 
   const handleImport = async () => {
-    if (!parseResult) return;
+    if (!parseResult || !selectedAccountId) return;
 
     setIsImporting(true);
 
@@ -58,7 +103,8 @@ export default function ImportPage() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          account: parseResult.format,
+          accountId: selectedAccountId,
+          format: parseResult.format,
           transactions: parseResult.transactions,
         }),
       });
@@ -153,6 +199,32 @@ export default function ImportPage() {
               )}
             </div>
 
+            {/* Account Selection */}
+            {parseResult && !isParsing && (
+              <div className="flex flex-col gap-2">
+                <Label htmlFor="account-select">Select Account</Label>
+                <Select
+                  value={selectedAccountId}
+                  onValueChange={setSelectedAccountId}
+                  disabled={isLoadingAccounts}
+                >
+                  <SelectTrigger id="account-select" className="w-full">
+                    <SelectValue placeholder="Choose an account..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectGroup>
+                      <SelectLabel>Accounts</SelectLabel>
+                      {accounts.map((account) => (
+                        <SelectItem key={account.id} value={account.id}>
+                          {account.name}
+                        </SelectItem>
+                      ))}
+                    </SelectGroup>
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
+
             {/* Loading State */}
             {isParsing && (
               <div className="flex items-center justify-center gap-2 py-8">
@@ -198,6 +270,7 @@ export default function ImportPage() {
                 disabled={
                   !parseResult ||
                   parseResult.valid === 0 ||
+                  !selectedAccountId ||
                   isParsing ||
                   isImporting
                 }
