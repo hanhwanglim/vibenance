@@ -51,7 +51,13 @@ interface AmexTransactionRow {
 
 export async function parseFile(file: File): Promise<ParseResult> {
   const text = await file.text();
+  return parseText(text);
+}
 
+/**
+ * Parse transaction data from a text string (for Node.js environments)
+ */
+export async function parseText(text: string): Promise<ParseResult> {
   let data: Papa.ParseResult<MonzoTransactionRow | AmexTransactionRow>;
   data = Papa.parse(text, { header: true, skipEmptyLines: true });
   if (!isHeader(data.meta.fields || [])) {
