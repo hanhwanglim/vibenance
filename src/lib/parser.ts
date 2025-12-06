@@ -1,4 +1,6 @@
 import Papa from "papaparse";
+import { extractTextFromPDF } from "./pdf-extractor";
+import { parsePDFText } from "./pdf-parser";
 
 export enum BankFormat {
   MONZO = "monzo",
@@ -52,6 +54,14 @@ interface AmexTransactionRow {
 export async function parseFile(file: File): Promise<ParseResult> {
   const text = await file.text();
   return parseText(text);
+}
+
+/**
+ * Parse transaction data from a PDF buffer
+ */
+export async function parsePDF(buffer: Buffer): Promise<ParseResult> {
+  const text = await extractTextFromPDF(buffer);
+  return parsePDFText(text);
 }
 
 /**
