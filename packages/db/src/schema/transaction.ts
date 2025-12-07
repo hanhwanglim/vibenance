@@ -1,10 +1,12 @@
+import { relations } from "drizzle-orm";
 import {
+	integer,
 	numeric,
 	pgEnum,
 	pgTable,
+	serial,
 	text,
 	timestamp,
-	uuid,
 } from "drizzle-orm/pg-core";
 
 export const accountTypeEnum = pgEnum("account_type", [
@@ -18,7 +20,7 @@ export const accountTypeEnum = pgEnum("account_type", [
 ]);
 
 export const bankAccount = pgTable("bank_account", {
-	id: uuid("id").defaultRandom().primaryKey(),
+	id: serial("id").primaryKey(),
 	name: text("name").notNull().unique(),
 	type: accountTypeEnum("type").notNull().default("other"),
 	accountNumber: text("account_number"),
@@ -32,7 +34,7 @@ export const bankAccount = pgTable("bank_account", {
 });
 
 export const category = pgTable("category", {
-	id: uuid("id").defaultRandom().primaryKey(),
+	id: serial("id").primaryKey(),
 	name: text("name").notNull().unique(),
 	createdAt: timestamp("created_at").defaultNow().notNull(),
 	updatedAt: timestamp("updated_at")
@@ -42,16 +44,16 @@ export const category = pgTable("category", {
 });
 
 export const transaction = pgTable("transaction", {
-	id: uuid("id").defaultRandom().primaryKey(),
+	id: serial("id").primaryKey(),
 	transactionHash: text("transaction_hash").notNull().unique(),
 	timestamp: timestamp("timestamp").notNull(),
-	accountId: text("account_id")
+	accountId: integer("account_id")
 		.notNull()
 		.references(() => bankAccount.id),
 	name: text("name").notNull(),
 	currency: text("currency").notNull(),
 	amount: numeric("amount", { precision: 50, scale: 18 }).notNull(),
-	categoryId: text("category_id")
+	categoryId: integer("category_id")
 		.notNull()
 		.references(() => category.id),
 	reference: text("reference"),
@@ -62,3 +64,14 @@ export const transaction = pgTable("transaction", {
 		.$onUpdate(() => /* @__PURE__ */ new Date())
 		.notNull(),
 });
+
+export const transactionRelations = relations(transaction, ({ one }) => ({
+	account: one(bankAccount, {
+		fields: [transaction.accountId],
+		references: [bankAccount.id],
+	}),
+	category: one(category, {
+		fields: [transaction.categoryId],
+		references: [category.id],
+	}),
+}));

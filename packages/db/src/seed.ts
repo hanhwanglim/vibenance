@@ -1,5 +1,4 @@
 import "dotenv/config";
-import { randomUUID } from "node:crypto";
 import { db } from "./index";
 import { category } from "./schema/transaction";
 
@@ -24,7 +23,6 @@ async function seed() {
 		const categoriesToInsert: CategoryInsert[] = [];
 		for (const categoryName of defaultCategories) {
 			const category: CategoryInsert = {
-				id: randomUUID(),
 				name: categoryName,
 			};
 			categoriesToInsert.push(category);

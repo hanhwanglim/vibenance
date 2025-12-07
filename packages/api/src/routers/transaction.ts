@@ -4,7 +4,7 @@ import { eq } from "drizzle-orm";
 import z from "zod";
 import { publicProcedure } from "../index";
 
-export const transactionRouter: Record<string, unknown> = {
+export const transactionRouter = {
 	getAll: publicProcedure
 		.input(
 			z.object({
@@ -13,15 +13,18 @@ export const transactionRouter: Record<string, unknown> = {
 			}),
 		)
 		.handler(async ({ input }) => {
-			return await db
-				.select()
-				.from(transaction)
-				.limit(input.pageSize)
-				.offset(input.page);
+			return await db.query.transaction.findMany({
+				with: {
+					account: true,
+					category: true,
+				},
+				limit: input.pageSize,
+				offset: input.page,
+			});
 		}),
 
 	updateCategory: publicProcedure
-		.input(z.object({ id: z.uuid(), categoryId: z.uuid() }))
+		.input(z.object({ id: z.number(), categoryId: z.number() }))
 		.handler(async ({ input }) => {
 			return await db
 				.update(transaction)
