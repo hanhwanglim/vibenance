@@ -32,9 +32,10 @@
 		"typescript": "^5"
 	},
 	"dependencies": {
+		"@faker-js/faker": "^10.1.0",
+		"dotenv": "catalog:",
 		"drizzle-orm": "catalog:",
 		"pg": "^8.14.1",
-		"dotenv": "catalog:",
 		"zod": "^4.1.11"
 	}
 }
