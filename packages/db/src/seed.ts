@@ -1,8 +1,6 @@
 import "dotenv/config";
 import { faker } from "@faker-js/faker";
-import { seed } from "drizzle-seed";
 import { db } from "./index";
-import { account, todo } from "./schema";
 import { bankAccount, category, transaction } from "./schema/transaction";
 import { sample } from "./utils";
 

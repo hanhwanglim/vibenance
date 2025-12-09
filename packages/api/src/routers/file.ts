@@ -4,6 +4,7 @@ import { db } from "@vibenance/db";
 import { file } from "@vibenance/db/schema/file";
 import z from "zod";
 import { publicProcedure } from "../index";
+import { parseFile } from "../services/parse";
 
 export const fileRouter = {
 	upload: publicProcedure.input(z.file()).handler(async ({ input }) => {
@@ -11,14 +12,27 @@ export const fileRouter = {
 			"/tmp",
 			`${crypto.randomUUID()}${path.extname(input.name)}`,
 		);
-		Bun.write(uploadDir, Buffer.from(await input.arrayBuffer()));
+		const arrayBuffer = await input.arrayBuffer();
+
+		const hasher = new Bun.CryptoHasher("md5");
+		hasher.update(arrayBuffer);
+
+		Bun.write(uploadDir, Buffer.from(arrayBuffer));
 
 		return await db.insert(file).values({
 			fileName: input.name,
 			filePath: uploadDir,
-			fileHash: "",
+			fileHash: hasher.digest("hex"),
 			fileSize: input.size,
 			source: "upload",
 		});
+	}),
+
+	preview: publicProcedure.input(z.number()).handler(async ({ input }) => {
+		const file = await db.query.file.findFirst({
+			where: (file, { eq }) => eq(file.id, input),
+		});
+
+		return await parseFile(Bun.file(file?.filePath) as File);
 	}),
 };
