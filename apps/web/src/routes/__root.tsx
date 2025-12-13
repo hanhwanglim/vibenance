@@ -10,11 +10,11 @@ import {
 import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
 import type { AppRouterClient } from "@vibenance/api/routers/index";
 import { useState } from "react";
-import Header from "@/components/header";
 import { ThemeProvider } from "@/components/theme-provider";
 import { Toaster } from "@/components/ui/sonner";
 import { link, type orpc } from "@/utils/orpc";
 import "../index.css";
+import Layout from "@/layouts/layout";
 
 export interface RouterAppContext {
 	orpc: typeof orpc;
@@ -56,8 +56,9 @@ function RootComponent() {
 				storageKey="vite-ui-theme"
 			>
 				<div className="grid h-svh grid-rows-[auto_1fr]">
-					<Header />
-					<Outlet />
+					<Layout>
+						<Outlet />
+					</Layout>
 				</div>
 				<Toaster richColors />
 			</ThemeProvider>
