@@ -3,7 +3,7 @@ import {
 	type TransactionInsert,
 	transaction,
 } from "@vibenance/db/schema/transaction";
-import { eq, sql } from "drizzle-orm";
+import { count, desc, eq, sql } from "drizzle-orm";
 import z from "zod";
 import { publicProcedure } from "../index";
 
@@ -16,14 +16,23 @@ export const transactionRouter = {
 			}),
 		)
 		.handler(async ({ input }) => {
-			return await db.query.transaction.findMany({
+			const numTransactions = await db
+				.select({ count: count() })
+				.from(transaction);
+			const transactions = await db.query.transaction.findMany({
+				orderBy: [desc(transaction.timestamp), desc(transaction.createdAt)],
 				with: {
 					account: true,
 					category: true,
 				},
 				limit: input.pageSize,
-				offset: input.page,
+				offset: input.page * input.pageSize,
 			});
+
+			return {
+				count: numTransactions[0]?.count || 0,
+				data: transactions,
+			};
 		}),
 
 	create: publicProcedure

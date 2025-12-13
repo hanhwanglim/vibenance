@@ -8,7 +8,7 @@ import {
 import { authClient } from "@/lib/auth-client";
 import { TransactionTable } from "@/modules/transactions/components/transaction-table";
 
-export const Route = createFileRoute("/transactions")({
+export const Route = createFileRoute("/transactions/")({
 	component: RouteComponent,
 	beforeLoad: async () => {
 		const session = await authClient.getSession();

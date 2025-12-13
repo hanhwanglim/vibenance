@@ -1,90 +1,19 @@
 import { useQuery } from "@tanstack/react-query";
 import {
 	type ColumnDef,
-	flexRender,
 	getCoreRowModel,
 	useReactTable,
 } from "@tanstack/react-table";
-import type { transaction } from "@vibenance/db/schema/transaction";
-import {
-	Table,
-	TableBody,
-	TableCell,
-	TableHead,
-	TableHeader,
-	TableRow,
-} from "@/components/ui/table";
+import type { TransactionSelect } from "@vibenance/db/schema/transaction";
+import { useState } from "react";
+import { DataTable, DataTablePagination } from "@/components/ui/data-table";
 import { orpc } from "@/utils/orpc";
 
-interface DataTableProps<TData, TValue> {
-	columns: ColumnDef<TData, TValue>[];
-	data: TData[];
-}
-
-export function DataTable<TData, TValue>({
-	columns,
-	data,
-}: DataTableProps<TData, TValue>) {
-	const table = useReactTable({
-		data,
-		columns,
-		getCoreRowModel: getCoreRowModel(),
-	});
-
-	return (
-		<div className="overflow-hidden rounded-md border">
-			<Table>
-				<TableHeader>
-					{table.getHeaderGroups().map((headerGroup) => (
-						<TableRow key={headerGroup.id}>
-							{headerGroup.headers.map((header) => {
-								return (
-									<TableHead key={header.id}>
-										{header.isPlaceholder
-											? null
-											: flexRender(
-													header.column.columnDef.header,
-													header.getContext(),
-												)}
-									</TableHead>
-								);
-							})}
-						</TableRow>
-					))}
-				</TableHeader>
-				<TableBody>
-					{table.getRowModel().rows?.length ? (
-						table.getRowModel().rows.map((row) => (
-							<TableRow
-								key={row.id}
-								data-state={row.getIsSelected() && "selected"}
-							>
-								{row.getVisibleCells().map((cell) => (
-									<TableCell key={cell.id}>
-										{flexRender(cell.column.columnDef.cell, cell.getContext())}
-									</TableCell>
-								))}
-							</TableRow>
-						))
-					) : (
-						<TableRow>
-							<TableCell colSpan={columns.length} className="h-24 text-center">
-								No results.
-							</TableCell>
-						</TableRow>
-					)}
-				</TableBody>
-			</Table>
-		</div>
-	);
-}
-
-type Transaction = typeof transaction.$inferSelect;
-
-const columns: ColumnDef<Transaction>[] = [
+const columns: ColumnDef<TransactionSelect>[] = [
 	{
 		accessorKey: "timestamp",
 		header: "Time",
+		cell: ({ row }) => row.original.timestamp.toLocaleString(),
 	},
 	{
 		accessorKey: "name",
@@ -101,9 +30,7 @@ const columns: ColumnDef<Transaction>[] = [
 	{
 		accessorKey: "categoryId",
 		header: "Category",
-		accessorFn: (row) => {
-			return row.category.name;
-		},
+		accessorFn: (row) => row.category.name,
 	},
 	{
 		accessorKey: "accountId",
@@ -117,13 +44,30 @@ const columns: ColumnDef<Transaction>[] = [
 ];
 
 export function TransactionTable() {
+	const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: 10 });
+
 	const transactions = useQuery(
-		orpc.transaction.getAll.queryOptions({ input: {} }),
+		orpc.transaction.getAll.queryOptions({
+			input: { page: pagination.pageIndex, pageSize: pagination.pageSize },
+		}),
 	);
 
+	const table = useReactTable({
+		data: transactions.data?.data || [],
+		columns,
+		getCoreRowModel: getCoreRowModel(),
+		manualPagination: true,
+		onPaginationChange: setPagination,
+		rowCount: transactions.data?.count || 0,
+		state: {
+			pagination,
+		},
+	});
+
 	return (
-		<div>
-			<DataTable columns={columns} data={transactions.data || []} />
+		<div className="flex flex-col gap-2 px-4">
+			<DataTable table={table} />
+			<DataTablePagination table={table} />
 		</div>
 	);
 }

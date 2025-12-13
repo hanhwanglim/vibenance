@@ -9,18 +9,13 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as TransactionsRouteImport } from './routes/transactions'
 import { Route as TodosRouteImport } from './routes/todos'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as TransactionsIndexRouteImport } from './routes/transactions/index'
 import { Route as TransactionsUploadRouteImport } from './routes/transactions/upload'
 
-const TransactionsRoute = TransactionsRouteImport.update({
-  id: '/transactions',
-  path: '/transactions',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const TodosRoute = TodosRouteImport.update({
   id: '/todos',
   path: '/todos',
@@ -41,10 +36,15 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const TransactionsIndexRoute = TransactionsIndexRouteImport.update({
+  id: '/transactions/',
+  path: '/transactions/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const TransactionsUploadRoute = TransactionsUploadRouteImport.update({
-  id: '/upload',
-  path: '/upload',
-  getParentRoute: () => TransactionsRoute,
+  id: '/transactions/upload',
+  path: '/transactions/upload',
+  getParentRoute: () => rootRouteImport,
 } as any)
 
 export interface FileRoutesByFullPath {
@@ -52,16 +52,16 @@ export interface FileRoutesByFullPath {
   '/dashboard': typeof DashboardRoute
   '/login': typeof LoginRoute
   '/todos': typeof TodosRoute
-  '/transactions': typeof TransactionsRouteWithChildren
   '/transactions/upload': typeof TransactionsUploadRoute
+  '/transactions': typeof TransactionsIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/dashboard': typeof DashboardRoute
   '/login': typeof LoginRoute
   '/todos': typeof TodosRoute
-  '/transactions': typeof TransactionsRouteWithChildren
   '/transactions/upload': typeof TransactionsUploadRoute
+  '/transactions': typeof TransactionsIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -69,8 +69,8 @@ export interface FileRoutesById {
   '/dashboard': typeof DashboardRoute
   '/login': typeof LoginRoute
   '/todos': typeof TodosRoute
-  '/transactions': typeof TransactionsRouteWithChildren
   '/transactions/upload': typeof TransactionsUploadRoute
+  '/transactions/': typeof TransactionsIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -79,24 +79,24 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/login'
     | '/todos'
-    | '/transactions'
     | '/transactions/upload'
+    | '/transactions'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/dashboard'
     | '/login'
     | '/todos'
-    | '/transactions'
     | '/transactions/upload'
+    | '/transactions'
   id:
     | '__root__'
     | '/'
     | '/dashboard'
     | '/login'
     | '/todos'
-    | '/transactions'
     | '/transactions/upload'
+    | '/transactions/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -104,18 +104,12 @@ export interface RootRouteChildren {
   DashboardRoute: typeof DashboardRoute
   LoginRoute: typeof LoginRoute
   TodosRoute: typeof TodosRoute
-  TransactionsRoute: typeof TransactionsRouteWithChildren
+  TransactionsUploadRoute: typeof TransactionsUploadRoute
+  TransactionsIndexRoute: typeof TransactionsIndexRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/transactions': {
-      id: '/transactions'
-      path: '/transactions'
-      fullPath: '/transactions'
-      preLoaderRoute: typeof TransactionsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/todos': {
       id: '/todos'
       path: '/todos'
@@ -144,34 +138,30 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/transactions/': {
+      id: '/transactions/'
+      path: '/transactions'
+      fullPath: '/transactions'
+      preLoaderRoute: typeof TransactionsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/transactions/upload': {
       id: '/transactions/upload'
-      path: '/upload'
+      path: '/transactions/upload'
       fullPath: '/transactions/upload'
       preLoaderRoute: typeof TransactionsUploadRouteImport
-      parentRoute: typeof TransactionsRoute
+      parentRoute: typeof rootRouteImport
     }
   }
 }
-
-interface TransactionsRouteChildren {
-  TransactionsUploadRoute: typeof TransactionsUploadRoute
-}
-
-const TransactionsRouteChildren: TransactionsRouteChildren = {
-  TransactionsUploadRoute: TransactionsUploadRoute,
-}
-
-const TransactionsRouteWithChildren = TransactionsRoute._addFileChildren(
-  TransactionsRouteChildren,
-)
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   DashboardRoute: DashboardRoute,
   LoginRoute: LoginRoute,
   TodosRoute: TodosRoute,
-  TransactionsRoute: TransactionsRouteWithChildren,
+  TransactionsUploadRoute: TransactionsUploadRoute,
+  TransactionsIndexRoute: TransactionsIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

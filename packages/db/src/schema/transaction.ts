@@ -77,3 +77,4 @@ export const transactionRelations = relations(transaction, ({ one }) => ({
 }));
 
 export type TransactionInsert = typeof transaction.$inferInsert;
+export type TransactionSelect = typeof transaction.$inferSelect;
