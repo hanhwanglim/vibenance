@@ -75,3 +75,5 @@ export const transactionRelations = relations(transaction, ({ one }) => ({
 		references: [category.id],
 	}),
 }));
+
+export type TransactionInsert = typeof transaction.$inferInsert;

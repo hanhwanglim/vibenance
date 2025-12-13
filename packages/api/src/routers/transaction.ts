@@ -1,6 +1,9 @@
 import { db } from "@vibenance/db";
-import { transaction } from "@vibenance/db/schema/transaction";
-import { eq } from "drizzle-orm";
+import {
+	type TransactionInsert,
+	transaction,
+} from "@vibenance/db/schema/transaction";
+import { eq, sql } from "drizzle-orm";
 import z from "zod";
 import { publicProcedure } from "../index";
 
@@ -21,6 +24,33 @@ export const transactionRouter = {
 				limit: input.pageSize,
 				offset: input.page,
 			});
+		}),
+
+	create: publicProcedure
+		.input(
+			z.array(
+				z.object({
+					transactionHash: z.string(),
+					timestamp: z.date(),
+					accountId: z.number(),
+					name: z.string(),
+					currency: z.string(),
+					amount: z.string(),
+					categoryId: z.number(),
+					reference: z.string(),
+				}),
+			),
+		)
+		.handler(async ({ input }) => {
+			return await db
+				.insert(transaction)
+				.values(input as TransactionInsert[])
+				.onConflictDoUpdate({
+					target: transaction.transactionHash,
+					set: {
+						categoryId: sql.raw(`excluded.${transaction.categoryId.name}`),
+					},
+				});
 		}),
 
 	updateCategory: publicProcedure
