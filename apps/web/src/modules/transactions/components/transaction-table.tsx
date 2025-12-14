@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
+import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import {
 	type ColumnDef,
 	getCoreRowModel,
@@ -49,6 +49,7 @@ export function TransactionTable() {
 	const transactions = useQuery(
 		orpc.transaction.getAll.queryOptions({
 			input: { page: pagination.pageIndex, pageSize: pagination.pageSize },
+			placeholderData: keepPreviousData,
 		}),
 	);
 
