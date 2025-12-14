@@ -1,5 +1,6 @@
 import type { RouterClient } from "@orpc/server";
 import { protectedProcedure, publicProcedure } from "../index";
+import { bankAccountRouter } from "./bank-account";
 import { fileRouter } from "./file";
 import { todoRouter } from "./todo";
 import { transactionRouter } from "./transaction";
@@ -16,6 +17,7 @@ export const appRouter = {
 	}),
 	todo: todoRouter,
 	transaction: transactionRouter,
+	bankAccount: bankAccountRouter,
 	file: fileRouter,
 };
 export type AppRouter = typeof appRouter;

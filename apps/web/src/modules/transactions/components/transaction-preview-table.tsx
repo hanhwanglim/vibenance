@@ -1,14 +1,11 @@
-import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import {
 	type ColumnDef,
 	getCoreRowModel,
+	getPaginationRowModel,
 	useReactTable,
 } from "@tanstack/react-table";
 import type { TransactionSelect } from "@vibenance/db/schema/transaction";
-import { useState } from "react";
 import { DataTable, DataTablePagination } from "@/components/ui/data-table";
-import { formatCurrency } from "@/utils/formatting";
-import { orpc } from "@/utils/orpc";
 
 const columns: ColumnDef<TransactionSelect>[] = [
 	{
@@ -27,17 +24,11 @@ const columns: ColumnDef<TransactionSelect>[] = [
 	{
 		accessorKey: "amount",
 		header: "Amount",
-		cell: ({ row }) => formatCurrency(Number(row.original.amount)),
 	},
 	{
-		accessorKey: "categoryId",
+		accessorKey: "category",
 		header: "Category",
 		accessorFn: (row) => row.category?.name || null,
-	},
-	{
-		accessorKey: "accountId",
-		header: "Account",
-		accessorFn: (row) => row.account.name,
 	},
 	{
 		accessorKey: "reference",
@@ -45,26 +36,12 @@ const columns: ColumnDef<TransactionSelect>[] = [
 	},
 ];
 
-export function TransactionTable() {
-	const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: 10 });
-
-	const transactions = useQuery(
-		orpc.transaction.getAll.queryOptions({
-			input: { page: pagination.pageIndex, pageSize: pagination.pageSize },
-			placeholderData: keepPreviousData,
-		}),
-	);
-
+export function TransactionPreviewTable({ fileId, data }: { fileId: number }) {
 	const table = useReactTable({
-		data: transactions.data?.data || [],
+		data: data,
 		columns,
 		getCoreRowModel: getCoreRowModel(),
-		manualPagination: true,
-		onPaginationChange: setPagination,
-		rowCount: transactions.data?.count || 0,
-		state: {
-			pagination,
-		},
+		getPaginationRowModel: getPaginationRowModel(),
 	});
 
 	return (

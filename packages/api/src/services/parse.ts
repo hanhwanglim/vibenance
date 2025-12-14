@@ -128,16 +128,13 @@ async function parseMonzo(
 		errorRows.add(error.row as number);
 	});
 
-	const account = await db.query.bankAccount.findFirst({
-		where: (account, { eq }) => eq(account.bankName, "Monzo"),
-	});
-	const category = await db.query.category.findFirst({
-		where: (category, { eq }) => eq(category.name, "other"),
-	});
+	const categories = await db.query.category.findMany();
+	const categoryMap = new Map(categories.map((cat) => [cat.name, cat]));
 
 	data.data.forEach((row) => {
 		const [day, month, year] = row.Date.split("/").map(Number);
 		const [hours, mins, secs] = row.Time.split(":").map(Number);
+		const category = categoryMap.get(row.Category);
 
 		const transaction: Transaction = {
 			transactionHash: row["Transaction ID"],
@@ -149,11 +146,11 @@ async function parseMonzo(
 				mins,
 				secs,
 			),
-			accountId: account.id,
 			name: row.Name,
 			currency: row.Currency,
 			amount: row.Amount,
 			categoryId: category?.id,
+			category: category,
 			reference: row["Notes and #tags"],
 		};
 
@@ -178,27 +175,25 @@ async function parseAmex(
 		errorRows.add(error.row as number);
 	});
 
-	const account = await db.query.bankAccount.findFirst({
-		where: (account, { eq }) => eq(account.bankName, "Monzo"),
-	});
-	const category = await db.query.category.findFirst({
-		where: (category, { eq }) => eq(category.name, "other"),
-	});
+	const categories = await db.query.category.findMany();
+	const categoryMap = new Map(categories.map((cat) => [cat.name, cat]));
 
 	data.data.forEach((row) => {
 		const [day, month, year] = row.Date.split("/").map(Number);
+		const category = categoryMap.get(row.Category);
 
 		const transaction: Transaction = {
 			transactionHash: row.Reference.replaceAll("'", ""), // Amex wraps with "'"
 			timestamp: new Date(year as number, (month as number) - 1, day),
-			accountId: account?.id,
 			name: row["Appears On Your Statement As"],
 			currency: "GBP",
 			amount: row.Amount,
-			categoryId: category?.id,
+			categoryId: category.id,
+			category: category,
 		};
 
 		result.transactions.push(transaction);
 	});
+
 	return result;
 }

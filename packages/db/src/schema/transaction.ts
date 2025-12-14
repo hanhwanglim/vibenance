@@ -53,9 +53,7 @@ export const transaction = pgTable("transaction", {
 	name: text("name").notNull(),
 	currency: text("currency").notNull(),
 	amount: numeric("amount", { precision: 50, scale: 18 }).notNull(),
-	categoryId: integer("category_id")
-		.notNull()
-		.references(() => category.id),
+	categoryId: integer("category_id").references(() => category.id),
 	reference: text("reference"),
 
 	createdAt: timestamp("created_at").defaultNow().notNull(),

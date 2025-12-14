@@ -1,11 +1,11 @@
 import {
 	createFileRoute,
-	Link,
 	Outlet,
 	redirect,
 	useLocation,
 } from "@tanstack/react-router";
 import { authClient } from "@/lib/auth-client";
+import { ImportDialog } from "@/modules/transactions/components/import-dialog";
 import { TransactionTable } from "@/modules/transactions/components/transaction-table";
 
 export const Route = createFileRoute("/transactions/")({
@@ -31,7 +31,7 @@ function RouteComponent() {
 
 	return (
 		<div>
-			<Link to="/transactions/upload">Upload</Link>
+			<ImportDialog />
 			<TransactionTable />
 		</div>
 	);

@@ -37,23 +37,32 @@ export const transactionRouter = {
 
 	create: publicProcedure
 		.input(
-			z.array(
-				z.object({
-					transactionHash: z.string(),
-					timestamp: z.date(),
-					accountId: z.number(),
-					name: z.string(),
-					currency: z.string(),
-					amount: z.string(),
-					categoryId: z.number(),
-					reference: z.string(),
-				}),
-			),
+			z.object({
+				transactions: z.array(
+					z.object({
+						transactionHash: z.string(),
+						timestamp: z.date(),
+						name: z.string(),
+						currency: z.string(),
+						amount: z.string(),
+						categoryId: z.number().optional(),
+						reference: z.string().optional(),
+					}),
+				),
+				accountId: z.number(),
+			}),
 		)
 		.handler(async ({ input }) => {
+			const transactions = input.transactions.map((tx) => {
+				return {
+					...tx,
+					accountId: input.accountId,
+				};
+			});
+
 			return await db
 				.insert(transaction)
-				.values(input as TransactionInsert[])
+				.values(transactions as TransactionInsert[])
 				.onConflictDoUpdate({
 					target: transaction.transactionHash,
 					set: {

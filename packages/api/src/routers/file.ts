@@ -19,12 +19,23 @@ export const fileRouter = {
 
 		Bun.write(uploadDir, Buffer.from(arrayBuffer));
 
-		return await db.insert(file).values({
-			fileName: input.name,
-			filePath: uploadDir,
-			fileHash: hasher.digest("hex"),
-			fileSize: input.size,
-			source: "upload",
+		const [uploadedFile] = await db
+			.insert(file)
+			.values({
+				fileName: input.name,
+				filePath: uploadDir,
+				fileHash: hasher.digest("hex"),
+				fileSize: input.size,
+				source: "upload",
+			})
+			.returning();
+
+		return uploadedFile;
+	}),
+
+	get: publicProcedure.input(z.number()).handler(async ({ input }) => {
+		return await db.query.file.findFirst({
+			where: (file, { eq }) => eq(file.id, input),
 		});
 	}),
 

@@ -9,15 +9,22 @@ type BankAccountInsert = typeof bankAccount.$inferInsert;
 type TransactionInsert = typeof transaction.$inferInsert;
 
 const defaultCategories = [
-	"Transport",
-	"Eating Out",
-	"Groceries",
 	"Bills",
-	"Entertainment",
-	"Other",
+	"Charity",
+	"Eating Out",
+	"Expenses",
+	"Family",
+	"Finances",
+	"General",
+	"Gifts",
+	"Groceries",
+	"Holidays",
 	"Income",
-	"Investments",
+	"Personal care",
+	"Savings",
 	"Shopping",
+	"Transfers",
+	"Transport",
 ] as const;
 
 const defaultAccounts = [
