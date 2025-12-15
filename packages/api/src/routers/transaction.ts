@@ -4,7 +4,7 @@ import {
 	type TransactionInsert,
 	transaction,
 } from "@vibenance/db/schema/transaction";
-import { asc, count, desc, eq, gt, lt, sql, sum } from "drizzle-orm";
+import { asc, count, desc, eq, gt, lt, max, min, sql, sum } from "drizzle-orm";
 import z from "zod";
 import { publicProcedure } from "../index";
 
@@ -156,6 +156,36 @@ export const transactionRouter = {
 		return {
 			categories: formattedCategories,
 			sum: totalExpenses[0]?.sum,
+		};
+	}),
+
+	spendingTrend: publicProcedure.handler(async () => {
+		const data = await db
+			.select({
+				bin: sql<string>`date_trunc('month', ${transaction.timestamp})`,
+				sum: sum(transaction.amount),
+			})
+			.from(transaction)
+			.where(lt(transaction.amount, 0))
+			.groupBy(({ bin }) => bin);
+
+		const minPeriod = await db
+			.select({
+				min: min(transaction.timestamp),
+			})
+			.from(transaction)
+			.where(lt(transaction.amount, 0));
+
+		const maxPeriod = await db
+			.select({
+				max: max(transaction.timestamp),
+			})
+			.from(transaction)
+			.where(lt(transaction.amount, 0));
+
+		return {
+			period: { min: minPeriod[0].min, max: maxPeriod[0].max },
+			data: data,
 		};
 	}),
 
