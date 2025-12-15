@@ -3,7 +3,7 @@ import {
 	type TransactionInsert,
 	transaction,
 } from "@vibenance/db/schema/transaction";
-import { count, desc, eq, sql } from "drizzle-orm";
+import { count, desc, eq, gt, lt, sql, sum } from "drizzle-orm";
 import z from "zod";
 import { publicProcedure } from "../index";
 
@@ -70,6 +70,37 @@ export const transactionRouter = {
 					},
 				});
 		}),
+
+	summary: publicProcedure.handler(async () => {
+		const totalIncomePromise = db
+			.select({ income: sum(transaction.amount) })
+			.from(transaction)
+			.where(gt(transaction.amount, "0"));
+		const totalExpensesPromise = db
+			.select({ expenses: sum(transaction.amount) })
+			.from(transaction)
+			.where(lt(transaction.amount, "0"));
+		const netAmountPromise = db
+			.select({ asdf: sum(transaction.amount) })
+			.from(transaction);
+		const numTransactionsPromise = db
+			.select({ count: count() })
+			.from(transaction);
+
+		const result = await Promise.all([
+			totalIncomePromise,
+			totalExpensesPromise,
+			netAmountPromise,
+			numTransactionsPromise,
+		]);
+
+		return {
+			totalIncome: result[0][0]?.income,
+			totalExpenses: result[1][0]?.expenses,
+			netAmount: result[2][0]?.asdf,
+			count: result[3][0]?.count,
+		};
+	}),
 
 	updateCategory: publicProcedure
 		.input(z.object({ id: z.number(), categoryId: z.number() }))

@@ -36,7 +36,7 @@ const columns: ColumnDef<TransactionSelect>[] = [
 	},
 ];
 
-export function TransactionPreviewTable({ fileId, data }: { fileId: number }) {
+export function TransactionPreviewTable({ data }) {
 	const table = useReactTable({
 		data: data,
 		columns,

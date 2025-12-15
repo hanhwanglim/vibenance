@@ -68,7 +68,7 @@ export function TransactionTable() {
 	});
 
 	return (
-		<div className="flex flex-col gap-2 px-4">
+		<div className="flex flex-col gap-2 px-4 lg:px-6">
 			<DataTable table={table} />
 			<DataTablePagination table={table} />
 		</div>

@@ -6,6 +6,7 @@ import {
 } from "@tanstack/react-router";
 import { authClient } from "@/lib/auth-client";
 import { ImportDialog } from "@/modules/transactions/components/import-dialog";
+import { SummaryCards } from "@/modules/transactions/components/summary-cards";
 import { TransactionTable } from "@/modules/transactions/components/transaction-table";
 
 export const Route = createFileRoute("/transactions/")({
@@ -30,8 +31,9 @@ function RouteComponent() {
 	}
 
 	return (
-		<div>
+		<div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6">
 			<ImportDialog />
+			<SummaryCards />
 			<TransactionTable />
 		</div>
 	);
