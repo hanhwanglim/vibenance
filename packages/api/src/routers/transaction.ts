@@ -1,9 +1,10 @@
 import { db } from "@vibenance/db";
 import {
+	category,
 	type TransactionInsert,
 	transaction,
 } from "@vibenance/db/schema/transaction";
-import { count, desc, eq, gt, lt, sql, sum } from "drizzle-orm";
+import { asc, count, desc, eq, gt, lt, sql, sum } from "drizzle-orm";
 import z from "zod";
 import { publicProcedure } from "../index";
 
@@ -99,6 +100,62 @@ export const transactionRouter = {
 			totalExpenses: result[1][0]?.expenses,
 			netAmount: result[2][0]?.asdf,
 			count: result[3][0]?.count,
+		};
+	}),
+
+	categoryBreakdown: publicProcedure.handler(async () => {
+		const categoriesPromise = db
+			.select({
+				name: category.name,
+				sum: sum(transaction.amount),
+			})
+			.from(transaction)
+			.leftJoin(category, eq(transaction.categoryId, category.id))
+			.where(lt(transaction.amount, 0))
+			.groupBy(category.name)
+			.orderBy(({ sum }) => asc(sum)); // expenses are negative
+
+		const totalExpensesPromise = db
+			.select({ sum: sum(transaction.amount) })
+			.from(transaction)
+			.where(lt(transaction.amount, "0"));
+
+		const [categories, totalExpenses] = await Promise.all([
+			categoriesPromise,
+			totalExpensesPromise,
+		]);
+
+		// Keep top 6 categories, group the rest into "Others"
+		const maxCategories = 6;
+		const topCategories = categories.slice(0, maxCategories);
+		const otherCategories = categories.slice(maxCategories);
+
+		console.log(categories);
+
+		const formattedCategories = topCategories.map((category, index) => {
+			return {
+				category: category.name || "Uncategorized",
+				sum: -Number(category.sum),
+				fill: `var(--chart-${(index % 6) + 1})`,
+			};
+		});
+
+		// Add "Others" category if there are remaining categories
+		if (otherCategories.length > 0) {
+			const othersSum = otherCategories.reduce(
+				(acc, cat) => acc + Number(cat.sum || 0),
+				0,
+			);
+			formattedCategories.push({
+				category: "Others",
+				sum: -othersSum,
+				fill: "var(--chart-7)",
+			});
+		}
+
+		return {
+			categories: formattedCategories,
+			sum: totalExpenses[0]?.sum,
 		};
 	}),
 
