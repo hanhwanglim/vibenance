@@ -6,6 +6,7 @@ import {
 } from "@tanstack/react-router";
 import { authClient } from "@/lib/auth-client";
 import { CategoryChart } from "@/modules/transactions/components/category-chart";
+import { CategoryTrendChart } from "@/modules/transactions/components/category-trend-chart";
 import { ImportDialog } from "@/modules/transactions/components/import-dialog";
 import { SpendingTrendChart } from "@/modules/transactions/components/spending-trend-chart";
 import { SummaryCards } from "@/modules/transactions/components/summary-cards";
@@ -41,7 +42,7 @@ function RouteComponent() {
 					<CategoryChart />
 				</div>
 				<div className="flex-1">
-					<CategoryChart />
+					<CategoryTrendChart />
 				</div>
 				<div className="flex-1">
 					<SpendingTrendChart />

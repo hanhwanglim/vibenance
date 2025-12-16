@@ -4,7 +4,20 @@ import {
 	type TransactionInsert,
 	transaction,
 } from "@vibenance/db/schema/transaction";
-import { asc, count, desc, eq, gt, lt, max, min, sql, sum } from "drizzle-orm";
+import {
+	and,
+	asc,
+	count,
+	desc,
+	eq,
+	gt,
+	gte,
+	lt,
+	max,
+	min,
+	sql,
+	sum,
+} from "drizzle-orm";
 import z from "zod";
 import { publicProcedure } from "../index";
 
@@ -76,13 +89,13 @@ export const transactionRouter = {
 		const totalIncomePromise = db
 			.select({ income: sum(transaction.amount) })
 			.from(transaction)
-			.where(gt(transaction.amount, "0"));
+			.where(gt(transaction.amount, 0));
 		const totalExpensesPromise = db
 			.select({ expenses: sum(transaction.amount) })
 			.from(transaction)
-			.where(lt(transaction.amount, "0"));
+			.where(lt(transaction.amount, 0));
 		const netAmountPromise = db
-			.select({ asdf: sum(transaction.amount) })
+			.select({ net: sum(transaction.amount) })
 			.from(transaction);
 		const numTransactionsPromise = db
 			.select({ count: count() })
@@ -98,7 +111,7 @@ export const transactionRouter = {
 		return {
 			totalIncome: result[0][0]?.income,
 			totalExpenses: result[1][0]?.expenses,
-			netAmount: result[2][0]?.asdf,
+			netAmount: result[2][0]?.net,
 			count: result[3][0]?.count,
 		};
 	}),
@@ -129,8 +142,6 @@ export const transactionRouter = {
 		const maxCategories = 6;
 		const topCategories = categories.slice(0, maxCategories);
 		const otherCategories = categories.slice(maxCategories);
-
-		console.log(categories);
 
 		const formattedCategories = topCategories.map((category, index) => {
 			return {
@@ -189,9 +200,147 @@ export const transactionRouter = {
 		};
 	}),
 
+	categoryTrend: publicProcedure
+		.input(
+			z
+				.object({
+					startDate: z.date().optional(),
+					endDate: z.date().optional(),
+				})
+				.optional(),
+		)
+		.handler(async ({ input }) => {
+			if (!input?.startDate || !input?.endDate) {
+				return {
+					categories: [],
+					data: [],
+				};
+			}
+			const previous = new Date(
+				input.startDate.getTime() -
+					(input.endDate.getTime() - input.startDate.getTime()),
+			);
+
+			const currentData = await db
+				.select({
+					bin: sql<string>`date_trunc('month', ${transaction.timestamp})`,
+					category: category.name,
+					sum: sum(transaction.amount),
+				})
+				.from(transaction)
+				.leftJoin(category, eq(transaction.categoryId, category.id))
+				.where(
+					and(
+						lt(transaction.amount, 0),
+						gte(transaction.timestamp, input?.startDate),
+						lt(transaction.timestamp, input?.endDate),
+					),
+				)
+				.groupBy(({ bin, category }) => [bin, category])
+				.orderBy(({ bin }) => asc(bin));
+
+			const previousData = await db
+				.select({
+					bin: sql<string>`date_trunc('month', ${transaction.timestamp})`,
+					category: category.name,
+					sum: sum(transaction.amount),
+				})
+				.from(transaction)
+				.leftJoin(category, eq(transaction.categoryId, category.id))
+				.where(
+					and(
+						lt(transaction.amount, 0),
+						gte(transaction.timestamp, previous),
+						lt(transaction.timestamp, input?.startDate),
+					),
+				)
+				.groupBy(({ bin, category }) => [bin, category])
+				.orderBy(({ bin }) => asc(bin));
+
+			// Helper function to calculate period number from a date relative to a start date
+			const getPeriodNumber = (dateStr: string, startDate: Date): number => {
+				const binDate = new Date(dateStr);
+				const startMonth = startDate.getMonth();
+				const startYear = startDate.getFullYear();
+				const binMonth = binDate.getMonth();
+				const binYear = binDate.getFullYear();
+
+				// Calculate the difference in months
+				const monthDiff = (binYear - startYear) * 12 + (binMonth - startMonth);
+				return monthDiff + 1; // +1 to make it 1-indexed (Month 1, Month 2, etc.)
+			};
+
+			const dataMap = new Map<number, Record<string, unknown>>();
+
+			// Process previous data - calculate period number relative to previous period start
+			for (const transactionBin of previousData) {
+				const periodNumber = getPeriodNumber(
+					String(transactionBin.bin),
+					previous,
+				);
+				if (!dataMap.has(periodNumber)) {
+					dataMap.set(periodNumber, {
+						bin: periodNumber,
+					});
+				}
+
+				const point = dataMap.get(periodNumber);
+				if (!point) {
+					continue;
+				}
+				const categoryName = String(transactionBin.category || "Others");
+				point[`prev_${categoryName}`] = -Number(transactionBin.sum);
+			}
+
+			// Process current data - calculate period number relative to current period start
+			for (const transactionBin of currentData) {
+				const periodNumber = getPeriodNumber(
+					String(transactionBin.bin),
+					input.startDate,
+				);
+				if (!dataMap.has(periodNumber)) {
+					dataMap.set(periodNumber, {
+						bin: periodNumber,
+					});
+				}
+				const point = dataMap.get(periodNumber);
+				if (!point) {
+					continue;
+				}
+				const categoryName = String(transactionBin.category || "Others");
+				point[`curr_${categoryName}`] = -Number(transactionBin.sum);
+			}
+
+			const data = Array.from(dataMap.values()).sort((a, b) => {
+				// Sort by period number extracted from "Month X"
+				const aNum = Number.parseInt(String(a.bin).replace("Month ", ""), 10);
+				const bNum = Number.parseInt(String(b.bin).replace("Month ", ""), 10);
+				return aNum - bNum;
+			});
+
+			const categories = await db
+				.select({ category: category.name, count: count() })
+				.from(category)
+				.rightJoin(transaction, eq(category.id, transaction.categoryId))
+				.groupBy(({ category }) => category)
+				.where(
+					and(
+						lt(transaction.amount, 0),
+						gte(transaction.timestamp, previous),
+						lt(transaction.timestamp, input?.endDate),
+					),
+				)
+				.having(({ count }) => gt(count, 0));
+
+			return {
+				categories: categories,
+				data: data,
+			};
+		}),
+
 	updateCategory: publicProcedure
 		.input(z.object({ id: z.number(), categoryId: z.number() }))
-		.handler(async ({ input }) => {
+		.handler(async (input) => {
 			return await db
 				.update(transaction)
 				.set({ categoryId: input.categoryId })

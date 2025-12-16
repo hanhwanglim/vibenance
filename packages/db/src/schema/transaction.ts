@@ -74,5 +74,9 @@ export const transactionRelations = relations(transaction, ({ one }) => ({
 	}),
 }));
 
+export const categoryRelations = relations(category, ({ many }) => ({
+	transactions: many(transaction),
+}));
+
 export type TransactionInsert = typeof transaction.$inferInsert;
 export type TransactionSelect = typeof transaction.$inferSelect;
