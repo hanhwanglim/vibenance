@@ -54,12 +54,12 @@ export function SpendingTrendChart() {
 	});
 
 	return (
-		<Card>
+		<Card className="h-full">
 			<CardHeader>
 				<CardTitle>Spending Trend</CardTitle>
 				<CardDescription>Daily expense trends over time</CardDescription>
 			</CardHeader>
-			<CardContent>
+			<CardContent className="flex-1">
 				<ChartContainer config={chartConfig}>
 					<LineChart
 						accessibilityLayer

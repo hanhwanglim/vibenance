@@ -38,13 +38,13 @@ function RouteComponent() {
 			<ImportDialog />
 			<SummaryCards />
 			<div className="flex w-full gap-3 px-4 lg:px-6">
-				<div className="flex-1">
+				<div className="flex flex-1 flex-col">
 					<CategoryChart />
 				</div>
-				<div className="flex-1">
+				<div className="flex flex-1 flex-col">
 					<CategoryTrendChart />
 				</div>
-				<div className="flex-1">
+				<div className="flex flex-1 flex-col">
 					<SpendingTrendChart />
 				</div>
 			</div>

@@ -75,14 +75,14 @@ export function CategoryTrendChart() {
 	}
 
 	return (
-		<Card>
+		<Card className="h-full">
 			<CardHeader>
 				<CardTitle>Category Spending Trends</CardTitle>
 				<CardDescription>
 					Comparing current and previous period spending by category
 				</CardDescription>
 			</CardHeader>
-			<CardContent>
+			<CardContent className="flex-1">
 				<ChartContainer config={chartConfig}>
 					<BarChart accessibilityLayer data={data?.data}>
 						<CartesianGrid vertical={false} />
