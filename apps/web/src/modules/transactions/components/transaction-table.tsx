@@ -45,12 +45,12 @@ const columns: ColumnDef<TransactionSelect>[] = [
 	},
 ];
 
-export function TransactionTable() {
+export function TransactionTable({ type, dateRange }) {
 	const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: 10 });
 
 	const transactions = useQuery(
 		orpc.transaction.getAll.queryOptions({
-			input: { page: pagination.pageIndex, pageSize: pagination.pageSize },
+			input: { pagination: pagination, type: type, dateRange: dateRange },
 			placeholderData: keepPreviousData,
 		}),
 	);

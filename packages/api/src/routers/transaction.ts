@@ -25,26 +25,49 @@ export const transactionRouter = {
 	getAll: publicProcedure
 		.input(
 			z.object({
-				page: z.number().default(0),
-				pageSize: z.number().default(25),
+				pagination: z.object({
+					pageIndex: z.number().default(0),
+					pageSize: z.number().default(20),
+				}),
+				type: z.enum(["all", "income", "expenses"]),
+				dateRange: z.object({ from: z.date(), to: z.date() }),
 			}),
 		)
 		.handler(async ({ input }) => {
-			const numTransactions = await db
-				.select({ count: count() })
-				.from(transaction);
+			const typeFilter =
+				input.type === "all"
+					? []
+					: input.type === "income"
+						? [gt(transaction.amount, 0)]
+						: [lt(transaction.amount, 0)];
+
+			const numTransactions = await db.$count(
+				transaction,
+				and(
+					gte(transaction.timestamp, input.dateRange.from),
+					lt(transaction.timestamp, input.dateRange.to),
+					...typeFilter,
+				),
+			);
+
 			const transactions = await db.query.transaction.findMany({
 				orderBy: [desc(transaction.timestamp), desc(transaction.createdAt)],
+				where: (transaction, { lt, gte, and }) =>
+					and(
+						gte(transaction.timestamp, input.dateRange.from),
+						lt(transaction.timestamp, input.dateRange.to),
+						...typeFilter,
+					),
 				with: {
 					account: true,
 					category: true,
 				},
-				limit: input.pageSize,
-				offset: input.page * input.pageSize,
+				limit: input.pagination.pageSize,
+				offset: input.pagination.pageIndex * input.pagination.pageSize,
 			});
 
 			return {
-				count: numTransactions[0]?.count || 0,
+				count: numTransactions,
 				data: transactions,
 			};
 		}),

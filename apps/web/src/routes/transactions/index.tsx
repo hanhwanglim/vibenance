@@ -51,10 +51,12 @@ export const Route = createFileRoute("/transactions/")({
 function RouteComponent() {
 	const location = useLocation();
 
+	const now = new Date();
+
 	const [open, setOpen] = useState(false);
 	const [dateRange, setDateRange] = useState<DateRange | undefined>({
-		from: new Date(2025, 5, 12),
-		to: new Date(2025, 5, 26),
+		from: new Date(now.getFullYear(), now.getMonth() - 3, now.getDay()),
+		to: now,
 	});
 
 	if (location.pathname !== "/transactions") {
@@ -159,19 +161,19 @@ function RouteComponent() {
 					value="all"
 					className="relative flex flex-col gap-4 overflow-auto px-4 lg:px-6"
 				>
-					<TransactionTable />
+					<TransactionTable type="all" dateRange={dateRange} />
 				</TabsContent>
 				<TabsContent
 					value="income"
 					className="relative flex flex-col gap-4 overflow-auto px-4 lg:px-6"
 				>
-					<TransactionTable />
+					<TransactionTable type="income" dateRange={dateRange} />
 				</TabsContent>
 				<TabsContent
 					value="expenses"
 					className="relative flex flex-col gap-4 overflow-auto px-4 lg:px-6"
 				>
-					<TransactionTable />
+					<TransactionTable type="expenses" dateRange={dateRange} />
 				</TabsContent>
 			</Tabs>
 		</div>
