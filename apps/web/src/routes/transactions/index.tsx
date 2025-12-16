@@ -137,21 +137,17 @@ function RouteComponent() {
 							</DropdownMenuTrigger>
 							<DropdownMenuContent align="end" className="w-56">
 								<DropdownMenuCheckboxItem className="capitalize" checked={true}>
-									{" "}
-									Date{" "}
+									Date
 								</DropdownMenuCheckboxItem>
 								<DropdownMenuCheckboxItem className="capitalize" checked={true}>
-									{" "}
-									Amount{" "}
+									Amount
 								</DropdownMenuCheckboxItem>
 								<DropdownMenuCheckboxItem className="capitalize" checked={true}>
-									{" "}
-									Reference{" "}
+									Reference
 								</DropdownMenuCheckboxItem>
 								<DropdownMenuCheckboxItem className="capitalize" checked={true}>
-									{" "}
-									Account{" "}
-								</DropdownMenuCheckboxItem>{" "}
+									Account
+								</DropdownMenuCheckboxItem>
 							</DropdownMenuContent>
 						</DropdownMenu>
 						<ImportDialog />

@@ -97,7 +97,7 @@ export function DataTablePagination<TData>({
 	return (
 		<div className="flex items-center justify-between px-4">
 			<div className="hidden flex-1 text-muted-foreground text-sm lg:flex">
-				{table.getFilteredSelectedRowModel().rows.length} of{" "}
+				{table.getFilteredSelectedRowModel().rows.length} of&nbsp;
 				{table.getFilteredRowModel().rows.length} row(s) selected.
 			</div>
 			<div className="flex w-full items-center gap-8 lg:w-fit">
@@ -144,7 +144,7 @@ export function DataTablePagination<TData>({
 						<ChevronLeft />
 					</Button>
 					<div className="flex w-fit items-center justify-center font-medium text-sm">
-						Page {table.getState().pagination.pageIndex + 1} of{" "}
+						Page {table.getState().pagination.pageIndex + 1} of&nbsp;
 						{table.getPageCount()}
 					</div>
 					<Button
