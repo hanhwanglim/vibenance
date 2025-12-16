@@ -108,36 +108,63 @@ export const transactionRouter = {
 				});
 		}),
 
-	summary: publicProcedure.handler(async () => {
-		const totalIncomePromise = db
-			.select({ income: sum(transaction.amount) })
-			.from(transaction)
-			.where(gt(transaction.amount, 0));
-		const totalExpensesPromise = db
-			.select({ expenses: sum(transaction.amount) })
-			.from(transaction)
-			.where(lt(transaction.amount, 0));
-		const netAmountPromise = db
-			.select({ net: sum(transaction.amount) })
-			.from(transaction);
-		const numTransactionsPromise = db
-			.select({ count: count() })
-			.from(transaction);
+	summary: publicProcedure
+		.input(z.object({ dateRange: z.object({ from: z.date(), to: z.date() }) }))
+		.handler(async ({ input }) => {
+			const totalIncomePromise = db
+				.select({ income: sum(transaction.amount) })
+				.from(transaction)
+				.where(
+					and(
+						gt(transaction.amount, 0),
+						gte(transaction.timestamp, input.dateRange.from),
+						lt(transaction.timestamp, input.dateRange.to),
+					),
+				);
+			const totalExpensesPromise = db
+				.select({ expenses: sum(transaction.amount) })
+				.from(transaction)
+				.where(
+					and(
+						lt(transaction.amount, 0),
+						gte(transaction.timestamp, input.dateRange.from),
+						lt(transaction.timestamp, input.dateRange.to),
+					),
+				);
+			const netAmountPromise = db
+				.select({ net: sum(transaction.amount) })
+				.from(transaction)
+				.where(
+					and(
+						gte(transaction.timestamp, input.dateRange.from),
+						lt(transaction.timestamp, input.dateRange.to),
+					),
+				);
+			const numTransactionsPromise = db
+				.select({ count: count() })
+				.from(transaction)
+				.where(
+					and(
+						gte(transaction.timestamp, input.dateRange.from),
+						lt(transaction.timestamp, input.dateRange.to),
+					),
+				);
 
-		const result = await Promise.all([
-			totalIncomePromise,
-			totalExpensesPromise,
-			netAmountPromise,
-			numTransactionsPromise,
-		]);
+			const [totalIncome, totalExpenses, netAmount, numTransactions] =
+				await Promise.all([
+					totalIncomePromise,
+					totalExpensesPromise,
+					netAmountPromise,
+					numTransactionsPromise,
+				]);
 
-		return {
-			totalIncome: result[0][0]?.income,
-			totalExpenses: result[1][0]?.expenses,
-			netAmount: result[2][0]?.net,
-			count: result[3][0]?.count,
-		};
-	}),
+			return {
+				totalIncome: totalIncome[0]?.income,
+				totalExpenses: totalExpenses[0]?.expenses,
+				netAmount: netAmount[0]?.net,
+				count: numTransactions[0]?.count,
+			};
+		}),
 
 	categoryBreakdown: publicProcedure.handler(async () => {
 		const categoriesPromise = db

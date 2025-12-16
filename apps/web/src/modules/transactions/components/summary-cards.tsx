@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { TrendingDown, TrendingUp } from "lucide-react";
+import type { DateRange } from "react-day-picker";
 import { Badge } from "@/components/ui/badge";
 import {
 	Card,
@@ -14,9 +15,9 @@ import { cn } from "@/lib/utils";
 import { formatCurrency } from "@/utils/formatting";
 import { orpc } from "@/utils/orpc";
 
-export function SummaryCards() {
+export function SummaryCards({ dateRange }: { dateRange: DateRange }) {
 	const { data: summary, isLoading } = useQuery(
-		orpc.transaction.summary.queryOptions({}),
+		orpc.transaction.summary.queryOptions({ input: { dateRange: dateRange } }),
 	);
 
 	const cardsData: StatCardData[] = [
