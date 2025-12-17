@@ -1,0 +1,33 @@
+{
+	"name": "@vibenance/api",
+	"exports": {
+		".": {
+			"default": "./src/index.ts"
+		},
+		"./*": {
+			"default": "./src/*.ts"
+		}
+	},
+	"type": "module",
+	"scripts": {},
+	"devDependencies": {
+		"@types/papaparse": "^5.5.1",
+		"@vibenance/config": "workspace:*"
+	},
+	"peerDependencies": {
+		"typescript": "^5"
+	},
+	"dependencies": {
+		"@orpc/client": "catalog:",
+		"@orpc/openapi": "catalog:",
+		"@orpc/server": "catalog:",
+		"@orpc/zod": "catalog:",
+		"@vibenance/auth": "workspace:*",
+		"@vibenance/db": "workspace:*",
+		"dotenv": "catalog:",
+		"drizzle-orm": "catalog:",
+		"hono": "catalog:",
+		"papaparse": "^5.5.3",
+		"zod": "^4.1.11"
+	}
+}

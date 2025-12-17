@@ -1,83 +1,58 @@
 {
-  "name": "vibenance",
-  "version": "0.1.0",
-  "private": true,
-  "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start",
-    "lint": "eslint",
-    "format": "prettier --write .",
-    "db:push": "drizzle-kit push",
-    "db:studio": "drizzle-kit studio",
-    "db:seed": "tsx src/db/seed.ts",
-    "db:reset": "tsx src/db/reset.ts",
-    "prepare": "husky"
-  },
-  "dependencies": {
-    "@radix-ui/react-avatar": "^1.1.11",
-    "@radix-ui/react-checkbox": "^1.3.3",
-    "@radix-ui/react-dialog": "^1.1.15",
-    "@radix-ui/react-dropdown-menu": "^2.1.16",
-    "@radix-ui/react-label": "^2.1.8",
-    "@radix-ui/react-popover": "^1.1.15",
-    "@radix-ui/react-select": "^2.2.6",
-    "@radix-ui/react-separator": "^1.1.8",
-    "@radix-ui/react-slot": "^1.2.4",
-    "@radix-ui/react-tabs": "^1.1.13",
-    "@radix-ui/react-toggle": "^1.1.10",
-    "@radix-ui/react-toggle-group": "^1.1.11",
-    "@radix-ui/react-tooltip": "^1.2.8",
-    "@tanstack/react-table": "^8.21.3",
-    "better-auth": "^1.4.6",
-    "class-variance-authority": "^0.7.1",
-    "clsx": "^2.1.1",
-    "date-fns": "^4.1.0",
-    "dotenv": "^17.2.3",
-    "drizzle-orm": "^0.44.7",
-    "drizzle-seed": "^0.3.1",
-    "grammy": "^1.38.4",
-    "lucide-react": "^0.553.0",
-    "next": "16.0.3",
-    "next-themes": "^0.4.6",
-    "papaparse": "^5.5.3",
-    "pdf-parse": "^1.1.4",
-    "pg": "^8.16.3",
-    "react": "19.2.0",
-    "react-day-picker": "^9.12.0",
-    "react-dom": "19.2.0",
-    "recharts": "2.15.4",
-    "sonner": "^2.0.7",
-    "tailwind-merge": "^3.4.0",
-    "vaul": "^1.1.2"
-  },
-  "devDependencies": {
-    "@commitlint/cli": "^20.2.0",
-    "@commitlint/config-conventional": "^20.2.0",
-    "@tailwindcss/postcss": "^4.1.18",
-    "@types/node": "^20.19.26",
-    "@types/papaparse": "^5.5.2",
-    "@types/pdf-parse": "^1.1.5",
-    "@types/pg": "^8.16.0",
-    "@types/react": "^19.2.7",
-    "@types/react-dom": "^19.2.3",
-    "babel-plugin-react-compiler": "1.0.0",
-    "drizzle-kit": "^0.31.8",
-    "eslint": "^9.39.2",
-    "eslint-config-next": "16.0.3",
-    "husky": "^9.1.7",
-    "lint-staged": "^16.2.7",
-    "prettier": "3.6.2",
-    "tailwindcss": "^4.1.18",
-    "ts-node": "^10.9.2",
-    "tsx": "^4.21.0",
-    "tw-animate-css": "^1.4.0",
-    "typescript": "^5.9.3"
-  },
-  "lint-staged": {
-    "*.{js,jsx,ts,tsx}": [
-      "eslint --fix",
-      "prettier --write"
-    ]
-  }
+	"name": "vibenance",
+	"private": true,
+	"type": "module",
+	"workspaces": {
+		"packages": [
+			"apps/*",
+			"packages/*"
+		],
+		"catalog": {
+			"hono": "^4.8.2",
+			"@orpc/server": "^1.10.0",
+			"@orpc/openapi": "^1.10.0",
+			"@orpc/zod": "^1.10.0",
+			"better-auth": "^1.4.5",
+			"dotenv": "^17.2.2",
+			"@orpc/client": "^1.10.0",
+			"drizzle-orm": "^0.44.2"
+		}
+	},
+	"scripts": {
+		"check": "biome check --write .",
+		"prepare": "husky",
+		"dev": "turbo dev",
+		"build": "turbo build",
+		"check-types": "turbo check-types",
+		"dev:native": "turbo -F native dev",
+		"dev:web": "turbo -F web dev",
+		"dev:server": "turbo -F server dev",
+		"db:push": "turbo -F @vibenance/db db:push",
+		"db:seed": "turbo -F @vibenance/db db:seed",
+		"db:reset": "turbo -F @vibenance/db db:reset",
+		"db:studio": "turbo -F @vibenance/db db:studio",
+		"db:generate": "turbo -F @vibenance/db db:generate",
+		"db:migrate": "turbo -F @vibenance/db db:migrate",
+		"db:start": "turbo -F @vibenance/db db:start",
+		"db:watch": "turbo -F @vibenance/db db:watch",
+		"db:stop": "turbo -F @vibenance/db db:stop",
+		"db:down": "turbo -F @vibenance/db db:down"
+	},
+	"dependencies": {
+		"dotenv": "^17.2.3",
+		"zod": "^4.1.13"
+	},
+	"devDependencies": {
+		"turbo": "^2.6.3",
+		"@biomejs/biome": "^2.3.8",
+		"husky": "^9.1.7",
+		"lint-staged": "^16.2.7",
+		"@types/bun": "^1.3.4"
+	},
+	"lint-staged": {
+		"*.{js,ts,cjs,mjs,d.cts,d.mts,jsx,tsx,json,jsonc}": [
+			"biome check --write ."
+		]
+	},
+	"packageManager": "bun@1.2.20"
 }
