@@ -15,8 +15,8 @@ import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as AccountsRouteImport } from './routes/accounts'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as TransactionsIndexRouteImport } from './routes/transactions/index'
-import { Route as TransactionsImportRouteImport } from './routes/transactions/import'
-import { Route as TransactionsImportIdRouteImport } from './routes/transactions/import.$id'
+import { Route as TransactionsImportsRouteImport } from './routes/transactions/imports'
+import { Route as TransactionsImportsIdRouteImport } from './routes/transactions/imports.$id'
 
 const TodosRoute = TodosRouteImport.update({
   id: '/todos',
@@ -48,15 +48,15 @@ const TransactionsIndexRoute = TransactionsIndexRouteImport.update({
   path: '/transactions/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const TransactionsImportRoute = TransactionsImportRouteImport.update({
-  id: '/transactions/import',
-  path: '/transactions/import',
+const TransactionsImportsRoute = TransactionsImportsRouteImport.update({
+  id: '/transactions/imports',
+  path: '/transactions/imports',
   getParentRoute: () => rootRouteImport,
 } as any)
-const TransactionsImportIdRoute = TransactionsImportIdRouteImport.update({
+const TransactionsImportsIdRoute = TransactionsImportsIdRouteImport.update({
   id: '/$id',
   path: '/$id',
-  getParentRoute: () => TransactionsImportRoute,
+  getParentRoute: () => TransactionsImportsRoute,
 } as any)
 
 export interface FileRoutesByFullPath {
@@ -65,9 +65,9 @@ export interface FileRoutesByFullPath {
   '/dashboard': typeof DashboardRoute
   '/login': typeof LoginRoute
   '/todos': typeof TodosRoute
-  '/transactions/import': typeof TransactionsImportRouteWithChildren
+  '/transactions/imports': typeof TransactionsImportsRouteWithChildren
   '/transactions': typeof TransactionsIndexRoute
-  '/transactions/import/$id': typeof TransactionsImportIdRoute
+  '/transactions/imports/$id': typeof TransactionsImportsIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -75,9 +75,9 @@ export interface FileRoutesByTo {
   '/dashboard': typeof DashboardRoute
   '/login': typeof LoginRoute
   '/todos': typeof TodosRoute
-  '/transactions/import': typeof TransactionsImportRouteWithChildren
+  '/transactions/imports': typeof TransactionsImportsRouteWithChildren
   '/transactions': typeof TransactionsIndexRoute
-  '/transactions/import/$id': typeof TransactionsImportIdRoute
+  '/transactions/imports/$id': typeof TransactionsImportsIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -86,9 +86,9 @@ export interface FileRoutesById {
   '/dashboard': typeof DashboardRoute
   '/login': typeof LoginRoute
   '/todos': typeof TodosRoute
-  '/transactions/import': typeof TransactionsImportRouteWithChildren
+  '/transactions/imports': typeof TransactionsImportsRouteWithChildren
   '/transactions/': typeof TransactionsIndexRoute
-  '/transactions/import/$id': typeof TransactionsImportIdRoute
+  '/transactions/imports/$id': typeof TransactionsImportsIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -98,9 +98,9 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/login'
     | '/todos'
-    | '/transactions/import'
+    | '/transactions/imports'
     | '/transactions'
-    | '/transactions/import/$id'
+    | '/transactions/imports/$id'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -108,9 +108,9 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/login'
     | '/todos'
-    | '/transactions/import'
+    | '/transactions/imports'
     | '/transactions'
-    | '/transactions/import/$id'
+    | '/transactions/imports/$id'
   id:
     | '__root__'
     | '/'
@@ -118,9 +118,9 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/login'
     | '/todos'
-    | '/transactions/import'
+    | '/transactions/imports'
     | '/transactions/'
-    | '/transactions/import/$id'
+    | '/transactions/imports/$id'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -129,7 +129,7 @@ export interface RootRouteChildren {
   DashboardRoute: typeof DashboardRoute
   LoginRoute: typeof LoginRoute
   TodosRoute: typeof TodosRoute
-  TransactionsImportRoute: typeof TransactionsImportRouteWithChildren
+  TransactionsImportsRoute: typeof TransactionsImportsRouteWithChildren
   TransactionsIndexRoute: typeof TransactionsIndexRoute
 }
 
@@ -177,33 +177,33 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TransactionsIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/transactions/import': {
-      id: '/transactions/import'
-      path: '/transactions/import'
-      fullPath: '/transactions/import'
-      preLoaderRoute: typeof TransactionsImportRouteImport
+    '/transactions/imports': {
+      id: '/transactions/imports'
+      path: '/transactions/imports'
+      fullPath: '/transactions/imports'
+      preLoaderRoute: typeof TransactionsImportsRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/transactions/import/$id': {
-      id: '/transactions/import/$id'
+    '/transactions/imports/$id': {
+      id: '/transactions/imports/$id'
       path: '/$id'
-      fullPath: '/transactions/import/$id'
-      preLoaderRoute: typeof TransactionsImportIdRouteImport
-      parentRoute: typeof TransactionsImportRoute
+      fullPath: '/transactions/imports/$id'
+      preLoaderRoute: typeof TransactionsImportsIdRouteImport
+      parentRoute: typeof TransactionsImportsRoute
     }
   }
 }
 
-interface TransactionsImportRouteChildren {
-  TransactionsImportIdRoute: typeof TransactionsImportIdRoute
+interface TransactionsImportsRouteChildren {
+  TransactionsImportsIdRoute: typeof TransactionsImportsIdRoute
 }
 
-const TransactionsImportRouteChildren: TransactionsImportRouteChildren = {
-  TransactionsImportIdRoute: TransactionsImportIdRoute,
+const TransactionsImportsRouteChildren: TransactionsImportsRouteChildren = {
+  TransactionsImportsIdRoute: TransactionsImportsIdRoute,
 }
 
-const TransactionsImportRouteWithChildren =
-  TransactionsImportRoute._addFileChildren(TransactionsImportRouteChildren)
+const TransactionsImportsRouteWithChildren =
+  TransactionsImportsRoute._addFileChildren(TransactionsImportsRouteChildren)
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
@@ -211,7 +211,7 @@ const rootRouteChildren: RootRouteChildren = {
   DashboardRoute: DashboardRoute,
   LoginRoute: LoginRoute,
   TodosRoute: TodosRoute,
-  TransactionsImportRoute: TransactionsImportRouteWithChildren,
+  TransactionsImportsRoute: TransactionsImportsRouteWithChildren,
   TransactionsIndexRoute: TransactionsIndexRoute,
 }
 export const routeTree = rootRouteImport

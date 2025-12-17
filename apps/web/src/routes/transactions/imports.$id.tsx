@@ -14,7 +14,7 @@ import { authClient } from "@/lib/auth-client";
 import { TransactionPreviewTable } from "@/modules/transactions/components/transaction-preview-table";
 import { orpc } from "@/utils/orpc";
 
-export const Route = createFileRoute("/transactions/import/$id")({
+export const Route = createFileRoute("/transactions/imports/$id")({
 	component: RouteComponent,
 	beforeLoad: async ({ params }) => {
 		const session = await authClient.getSession();

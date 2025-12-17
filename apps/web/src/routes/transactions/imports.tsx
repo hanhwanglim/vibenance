@@ -2,7 +2,7 @@ import { createFileRoute, Outlet, redirect } from "@tanstack/react-router";
 import { authClient } from "@/lib/auth-client";
 import { ImportHistoryTable } from "@/modules/transactions/components/import-history-table";
 
-export const Route = createFileRoute("/transactions/import")({
+export const Route = createFileRoute("/transactions/imports")({
 	component: RouteComponent,
 	beforeLoad: async () => {
 		const session = await authClient.getSession();
