@@ -20,15 +20,25 @@ export function ImportDialog() {
 	const navigate = useNavigate();
 
 	const uploadMutation = useMutation(orpc.file.upload.mutationOptions({}));
+	const importMutation = useMutation(
+		orpc.transaction.createImport.mutationOptions({}),
+	);
+
 	const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
 		e.preventDefault();
+
 		const formData = new FormData(e.target as HTMLFormElement);
 		const file = formData.get("file") as File;
+
 		uploadMutation.mutate(file, {
 			onSuccess: (data) => {
-				navigate({
-					to: "/transactions/import/$id",
-					params: { id: String(data.id) },
+				importMutation.mutate(data.id, {
+					onSuccess: (data) => {
+						navigate({
+							to: "/transactions/import/$id",
+							params: { id: String(data.id) },
+						});
+					},
 				});
 			},
 			onError: (error) => {

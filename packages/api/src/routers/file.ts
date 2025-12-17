@@ -40,9 +40,13 @@ export const fileRouter = {
 	}),
 
 	preview: publicProcedure.input(z.number()).handler(async ({ input }) => {
-		const file = await db.query.file.findFirst({
-			where: (file, { eq }) => eq(file.id, input),
+		const fileImport = await db.query.fileImport.findFirst({
+			where: (fileImport, { eq }) => eq(fileImport.id, input),
+			with: {
+				files: true,
+			},
 		});
+		const file = fileImport?.files[0];
 
 		return await parseFile(Bun.file(file?.filePath) as File);
 	}),

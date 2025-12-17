@@ -51,6 +51,7 @@ function RouteComponent() {
 	const handleImport = () => {
 		const payload = {
 			accountId: Number(selectedAccountId),
+			fileImportId: Number(id),
 			transactions: previewData?.transactions,
 		};
 

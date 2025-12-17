@@ -1,3 +1,4 @@
+import { relations } from "drizzle-orm";
 import {
 	integer,
 	pgEnum,
@@ -6,6 +7,7 @@ import {
 	text,
 	timestamp,
 } from "drizzle-orm/pg-core";
+import { fileImport } from "./transaction";
 
 export const fileSourceEnum = pgEnum("file_source", [
 	"upload",
@@ -20,9 +22,18 @@ export const file = pgTable("file", {
 	fileHash: text("file_hash").notNull(),
 	fileSize: integer("file_size").notNull(),
 	source: fileSourceEnum("source").notNull().default("other"),
+	fileImportId: integer("file_import_id").references(() => fileImport.id),
+
 	createdAt: timestamp("created_at").defaultNow().notNull(),
 	updatedAt: timestamp("updated_at")
 		.defaultNow()
 		.$onUpdate(() => /* @__PURE__ */ new Date())
 		.notNull(),
 });
+
+export const fileRelations = relations(file, ({ one }) => ({
+	fileImport: one(fileImport, {
+		fields: [file.fileImportId],
+		references: [fileImport.id],
+	}),
+}));

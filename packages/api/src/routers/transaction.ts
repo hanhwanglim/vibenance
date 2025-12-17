@@ -1,6 +1,8 @@
 import { db } from "@vibenance/db";
+import { file } from "@vibenance/db/schema/file";
 import {
 	category,
+	fileImport,
 	type TransactionInsert,
 	transaction,
 } from "@vibenance/db/schema/transaction";
@@ -87,6 +89,7 @@ export const transactionRouter = {
 					}),
 				),
 				accountId: z.number(),
+				fileImportId: z.number(),
 			}),
 		)
 		.handler(async ({ input }) => {
@@ -94,18 +97,21 @@ export const transactionRouter = {
 				return {
 					...tx,
 					accountId: input.accountId,
+					fileImportId: input.fileImportId,
 				};
 			});
 
-			return await db
+			const objs = await db
 				.insert(transaction)
 				.values(transactions as TransactionInsert[])
-				.onConflictDoUpdate({
-					target: transaction.transactionHash,
-					set: {
-						categoryId: sql.raw(`excluded.${transaction.categoryId.name}`),
-					},
-				});
+				.onConflictDoNothing();
+
+			await db
+				.update(fileImport)
+				.set({ status: "success" })
+				.where(eq(fileImport.id, input.fileImportId));
+
+			return objs;
 		}),
 
 	summary: publicProcedure
@@ -395,5 +401,40 @@ export const transactionRouter = {
 				.update(transaction)
 				.set({ categoryId: input.categoryId })
 				.where(eq(transaction.id, input.id));
+		}),
+
+	createImport: publicProcedure.input(z.number()).handler(async ({ input }) => {
+		const [obj] = await db.insert(fileImport).values({}).returning();
+		await db
+			.update(file)
+			.set({ fileImportId: obj?.id })
+			.where(eq(file.id, input));
+		return obj;
+	}),
+
+	importList: publicProcedure
+		.input(
+			z.object({
+				pagination: z.object({
+					pageIndex: z.number().default(0),
+					pageSize: z.number().default(20),
+				}),
+			}),
+		)
+		.handler(async ({ input }) => {
+			const count = await db.$count(fileImport);
+			const fileImports = await db.query.fileImport.findMany({
+				with: {
+					files: true,
+				},
+				limit: input.pagination.pageSize,
+				offset: input.pagination.pageIndex * input.pagination.pageSize,
+				orderBy: [desc(fileImport.createdAt), desc(fileImport.id)],
+			});
+
+			return {
+				count: count,
+				data: fileImports,
+			};
 		}),
 };
