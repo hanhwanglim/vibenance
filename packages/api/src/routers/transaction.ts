@@ -82,7 +82,7 @@ export const transactionRouter = {
 						name: z.string(),
 						currency: z.string(),
 						amount: z.string(),
-						categoryId: z.number().optional(),
+						categoryId: z.number().nullable().optional(),
 						reference: z.string().optional(),
 					}),
 				),

@@ -178,18 +178,33 @@ async function parseAmex(
 	const categories = await db.query.category.findMany();
 	const categoryMap = new Map(categories.map((cat) => [cat.name, cat]));
 
+	const remapCategory = (category: string) => {
+		console.log(category);
+		switch (category) {
+			case "General Purchases-Groceries":
+				return categoryMap.get("Groceries");
+			case "Entertainment-Bars & Cafés":
+				return categoryMap.get("Eating Out");
+			case "Entertainment-Restaurants":
+				return categoryMap.get("Eating Out");
+			default:
+				return null;
+		}
+	};
+
 	data.data.forEach((row) => {
 		const [day, month, year] = row.Date.split("/").map(Number);
-		const category = categoryMap.get(row.Category);
+		const category = remapCategory(row.Category);
+		const isCredit = Number(row.Amount) > 0;
 
 		const transaction: Transaction = {
 			transactionHash: row.Reference.replaceAll("'", ""), // Amex wraps with "'"
 			timestamp: new Date(year as number, (month as number) - 1, day),
 			name: row["Appears On Your Statement As"],
 			currency: "GBP",
-			amount: row.Amount,
-			categoryId: category.id,
-			category: category,
+			amount: isCredit ? `-${row.Amount}` : row.Amount,
+			categoryId: category?.id || null,
+			category: category || "",
 		};
 
 		result.transactions.push(transaction);
