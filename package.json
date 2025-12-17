@@ -28,6 +28,7 @@
 		"dev:web": "turbo -F web dev",
 		"dev:server": "turbo -F server dev",
 		"db:push": "turbo -F @vibenance/db db:push",
+		"db:init": "turbo -F @vibenance/db db:init",
 		"db:seed": "turbo -F @vibenance/db db:seed",
 		"db:reset": "turbo -F @vibenance/db db:reset",
 		"db:studio": "turbo -F @vibenance/db db:studio",

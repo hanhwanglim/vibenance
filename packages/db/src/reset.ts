@@ -1,3 +1,4 @@
+import "dotenv/config";
 import readline from "node:readline";
 import { reset } from "drizzle-seed";
 import { db } from "./index";
