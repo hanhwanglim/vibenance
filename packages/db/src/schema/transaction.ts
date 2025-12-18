@@ -8,7 +8,7 @@ import {
 	text,
 	timestamp,
 } from "drizzle-orm/pg-core";
-import { file } from "./file";
+import { fileImport } from "./file";
 
 export const accountTypeEnum = pgEnum("account_type", [
 	"savings",
@@ -18,12 +18,6 @@ export const accountTypeEnum = pgEnum("account_type", [
 	"investment",
 	"loan",
 	"other",
-]);
-
-export const importStatusEnum = pgEnum("import_status", [
-	"success",
-	"pending",
-	"failed",
 ]);
 
 export const bankAccount = pgTable("bank_account", {
@@ -71,17 +65,6 @@ export const transaction = pgTable("transaction", {
 		.notNull(),
 });
 
-export const fileImport = pgTable("file_import", {
-	id: serial("id").primaryKey(),
-	status: importStatusEnum("status").notNull().default("pending"),
-
-	createdAt: timestamp("created_at").defaultNow().notNull(),
-	updatedAt: timestamp("updated_at")
-		.defaultNow()
-		.$onUpdate(() => /* @__PURE__ */ new Date())
-		.notNull(),
-});
-
 export const transactionRelations = relations(transaction, ({ one }) => ({
 	account: one(bankAccount, {
 		fields: [transaction.accountId],
@@ -95,11 +78,6 @@ export const transactionRelations = relations(transaction, ({ one }) => ({
 
 export const categoryRelations = relations(category, ({ many }) => ({
 	transactions: many(transaction),
-}));
-
-export const fileImportRelations = relations(fileImport, ({ many }) => ({
-	transactions: many(transaction),
-	files: many(file),
 }));
 
 export type TransactionInsert = typeof transaction.$inferInsert;

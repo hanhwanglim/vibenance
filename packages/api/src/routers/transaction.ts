@@ -1,8 +1,7 @@
 import { db } from "@vibenance/db";
-import { file } from "@vibenance/db/schema/file";
+import { file, fileImport } from "@vibenance/db/schema/file";
 import {
 	category,
-	fileImport,
 	type TransactionInsert,
 	transaction,
 } from "@vibenance/db/schema/transaction";

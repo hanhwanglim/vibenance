@@ -7,12 +7,19 @@ import {
 	text,
 	timestamp,
 } from "drizzle-orm/pg-core";
-import { fileImport } from "./transaction";
+import { investmentTransaction } from "./asset";
+import { transaction } from "./transaction";
 
 export const fileSourceEnum = pgEnum("file_source", [
 	"upload",
 	"telegram",
 	"other",
+]);
+
+export const importStatusEnum = pgEnum("import_status", [
+	"success",
+	"pending",
+	"failed",
 ]);
 
 export const file = pgTable("file", {
@@ -31,9 +38,26 @@ export const file = pgTable("file", {
 		.notNull(),
 });
 
+export const fileImport = pgTable("file_import", {
+	id: serial("id").primaryKey(),
+	status: importStatusEnum("status").notNull().default("pending"),
+
+	createdAt: timestamp("created_at").defaultNow().notNull(),
+	updatedAt: timestamp("updated_at")
+		.defaultNow()
+		.$onUpdate(() => /* @__PURE__ */ new Date())
+		.notNull(),
+});
+
 export const fileRelations = relations(file, ({ one }) => ({
 	fileImport: one(fileImport, {
 		fields: [file.fileImportId],
 		references: [fileImport.id],
 	}),
+}));
+
+export const fileImportRelations = relations(fileImport, ({ many }) => ({
+	transactions: many(transaction),
+	investmentTransactions: many(investmentTransaction),
+	files: many(file),
 }));
