@@ -71,8 +71,11 @@ const columns: ColumnDef<TransactionSelect>[] = [
 	{
 		accessorKey: "category",
 		header: "Category",
-		accessorFn: (row) => row.category?.name || null,
 		cell: ({ row, table }) => {
+			const pageIndex = table.getState().pagination.pageIndex;
+			const defaultValue = row.original.categoryId?.toString() || "null";
+			const selectKey = `select-${row.original.id}-${pageIndex}`;
+
 			const handleChange = (value: string) => {
 				const mutation = table.options.meta.updateCategoryMutation;
 				const payload = { id: row.original.id, categoryId: null };
@@ -92,8 +95,9 @@ const columns: ColumnDef<TransactionSelect>[] = [
 						Category
 					</Label>
 					<Select
+						key={selectKey}
 						onValueChange={handleChange}
-						defaultValue={row.original.categoryId?.toString() || "null"}
+						defaultValue={defaultValue}
 					>
 						<SelectTrigger className="w-[180px]">
 							<SelectValue />
@@ -104,7 +108,7 @@ const columns: ColumnDef<TransactionSelect>[] = [
 								{table.options.meta.categories.map((category) => {
 									return (
 										<SelectItem
-											key={`table-category-${category.id}`}
+											key={`table-category-${row.original.id}-${category.id}`}
 											value={category.id.toString()}
 										>
 											{category.name}
