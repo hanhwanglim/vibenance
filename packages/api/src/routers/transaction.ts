@@ -393,9 +393,13 @@ export const transactionRouter = {
 			};
 		}),
 
+	listCategories: publicProcedure.handler(async () => {
+		return await db.query.category.findMany();
+	}),
+
 	updateCategory: publicProcedure
-		.input(z.object({ id: z.number(), categoryId: z.number() }))
-		.handler(async (input) => {
+		.input(z.object({ id: z.number(), categoryId: z.number().nullable() }))
+		.handler(async ({ input }) => {
 			return await db
 				.update(transaction)
 				.set({ categoryId: input.categoryId })
