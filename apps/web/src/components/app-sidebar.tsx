@@ -1,4 +1,5 @@
 import {
+	ChartNoAxesCombined,
 	LayoutDashboard,
 	PiggyBank,
 	Receipt,
@@ -36,6 +37,11 @@ const data = {
 			title: "Transactions",
 			url: "/transactions",
 			icon: Receipt,
+		},
+		{
+			title: "Assets",
+			url: "/assets",
+			icon: ChartNoAxesCombined,
 		},
 		{
 			title: "Accounts",

@@ -15,8 +15,11 @@ import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as AccountsRouteImport } from './routes/accounts'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as TransactionsIndexRouteImport } from './routes/transactions/index'
+import { Route as AssetsIndexRouteImport } from './routes/assets/index'
 import { Route as TransactionsImportsRouteImport } from './routes/transactions/imports'
+import { Route as AssetsImportsRouteImport } from './routes/assets/imports'
 import { Route as TransactionsImportsIdRouteImport } from './routes/transactions/imports.$id'
+import { Route as AssetsImportsIdRouteImport } from './routes/assets/imports.$id'
 
 const TodosRoute = TodosRouteImport.update({
   id: '/todos',
@@ -48,15 +51,30 @@ const TransactionsIndexRoute = TransactionsIndexRouteImport.update({
   path: '/transactions/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AssetsIndexRoute = AssetsIndexRouteImport.update({
+  id: '/assets/',
+  path: '/assets/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const TransactionsImportsRoute = TransactionsImportsRouteImport.update({
   id: '/transactions/imports',
   path: '/transactions/imports',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AssetsImportsRoute = AssetsImportsRouteImport.update({
+  id: '/assets/imports',
+  path: '/assets/imports',
   getParentRoute: () => rootRouteImport,
 } as any)
 const TransactionsImportsIdRoute = TransactionsImportsIdRouteImport.update({
   id: '/$id',
   path: '/$id',
   getParentRoute: () => TransactionsImportsRoute,
+} as any)
+const AssetsImportsIdRoute = AssetsImportsIdRouteImport.update({
+  id: '/$id',
+  path: '/$id',
+  getParentRoute: () => AssetsImportsRoute,
 } as any)
 
 export interface FileRoutesByFullPath {
@@ -65,8 +83,11 @@ export interface FileRoutesByFullPath {
   '/dashboard': typeof DashboardRoute
   '/login': typeof LoginRoute
   '/todos': typeof TodosRoute
+  '/assets/imports': typeof AssetsImportsRouteWithChildren
   '/transactions/imports': typeof TransactionsImportsRouteWithChildren
+  '/assets': typeof AssetsIndexRoute
   '/transactions': typeof TransactionsIndexRoute
+  '/assets/imports/$id': typeof AssetsImportsIdRoute
   '/transactions/imports/$id': typeof TransactionsImportsIdRoute
 }
 export interface FileRoutesByTo {
@@ -75,8 +96,11 @@ export interface FileRoutesByTo {
   '/dashboard': typeof DashboardRoute
   '/login': typeof LoginRoute
   '/todos': typeof TodosRoute
+  '/assets/imports': typeof AssetsImportsRouteWithChildren
   '/transactions/imports': typeof TransactionsImportsRouteWithChildren
+  '/assets': typeof AssetsIndexRoute
   '/transactions': typeof TransactionsIndexRoute
+  '/assets/imports/$id': typeof AssetsImportsIdRoute
   '/transactions/imports/$id': typeof TransactionsImportsIdRoute
 }
 export interface FileRoutesById {
@@ -86,8 +110,11 @@ export interface FileRoutesById {
   '/dashboard': typeof DashboardRoute
   '/login': typeof LoginRoute
   '/todos': typeof TodosRoute
+  '/assets/imports': typeof AssetsImportsRouteWithChildren
   '/transactions/imports': typeof TransactionsImportsRouteWithChildren
+  '/assets/': typeof AssetsIndexRoute
   '/transactions/': typeof TransactionsIndexRoute
+  '/assets/imports/$id': typeof AssetsImportsIdRoute
   '/transactions/imports/$id': typeof TransactionsImportsIdRoute
 }
 export interface FileRouteTypes {
@@ -98,8 +125,11 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/login'
     | '/todos'
+    | '/assets/imports'
     | '/transactions/imports'
+    | '/assets'
     | '/transactions'
+    | '/assets/imports/$id'
     | '/transactions/imports/$id'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -108,8 +138,11 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/login'
     | '/todos'
+    | '/assets/imports'
     | '/transactions/imports'
+    | '/assets'
     | '/transactions'
+    | '/assets/imports/$id'
     | '/transactions/imports/$id'
   id:
     | '__root__'
@@ -118,8 +151,11 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/login'
     | '/todos'
+    | '/assets/imports'
     | '/transactions/imports'
+    | '/assets/'
     | '/transactions/'
+    | '/assets/imports/$id'
     | '/transactions/imports/$id'
   fileRoutesById: FileRoutesById
 }
@@ -129,7 +165,9 @@ export interface RootRouteChildren {
   DashboardRoute: typeof DashboardRoute
   LoginRoute: typeof LoginRoute
   TodosRoute: typeof TodosRoute
+  AssetsImportsRoute: typeof AssetsImportsRouteWithChildren
   TransactionsImportsRoute: typeof TransactionsImportsRouteWithChildren
+  AssetsIndexRoute: typeof AssetsIndexRoute
   TransactionsIndexRoute: typeof TransactionsIndexRoute
 }
 
@@ -177,11 +215,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TransactionsIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/assets/': {
+      id: '/assets/'
+      path: '/assets'
+      fullPath: '/assets'
+      preLoaderRoute: typeof AssetsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/transactions/imports': {
       id: '/transactions/imports'
       path: '/transactions/imports'
       fullPath: '/transactions/imports'
       preLoaderRoute: typeof TransactionsImportsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/assets/imports': {
+      id: '/assets/imports'
+      path: '/assets/imports'
+      fullPath: '/assets/imports'
+      preLoaderRoute: typeof AssetsImportsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/transactions/imports/$id': {
@@ -191,8 +243,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TransactionsImportsIdRouteImport
       parentRoute: typeof TransactionsImportsRoute
     }
+    '/assets/imports/$id': {
+      id: '/assets/imports/$id'
+      path: '/$id'
+      fullPath: '/assets/imports/$id'
+      preLoaderRoute: typeof AssetsImportsIdRouteImport
+      parentRoute: typeof AssetsImportsRoute
+    }
   }
 }
+
+interface AssetsImportsRouteChildren {
+  AssetsImportsIdRoute: typeof AssetsImportsIdRoute
+}
+
+const AssetsImportsRouteChildren: AssetsImportsRouteChildren = {
+  AssetsImportsIdRoute: AssetsImportsIdRoute,
+}
+
+const AssetsImportsRouteWithChildren = AssetsImportsRoute._addFileChildren(
+  AssetsImportsRouteChildren,
+)
 
 interface TransactionsImportsRouteChildren {
   TransactionsImportsIdRoute: typeof TransactionsImportsIdRoute
@@ -211,7 +282,9 @@ const rootRouteChildren: RootRouteChildren = {
   DashboardRoute: DashboardRoute,
   LoginRoute: LoginRoute,
   TodosRoute: TodosRoute,
+  AssetsImportsRoute: AssetsImportsRouteWithChildren,
   TransactionsImportsRoute: TransactionsImportsRouteWithChildren,
+  AssetsIndexRoute: AssetsIndexRoute,
   TransactionsIndexRoute: TransactionsIndexRoute,
 }
 export const routeTree = rootRouteImport
