@@ -54,10 +54,7 @@ function RouteComponent() {
 	const now = new Date();
 
 	const [open, setOpen] = useState(false);
-	const [dateRange, setDateRange] = useState<DateRange | undefined>({
-		from: new Date(now.getFullYear(), now.getMonth() - 3, now.getDay()),
-		to: now,
-	});
+	const [dateRange, setDateRange] = useState<DateRange | undefined>(undefined);
 
 	if (location.pathname !== "/transactions") {
 		return <Outlet />;
@@ -103,8 +100,9 @@ function RouteComponent() {
 										id="date"
 										className="w-52 justify-between font-normal"
 									>
-										{`${dateRange?.from.toLocaleDateString()} - ${dateRange?.to.toLocaleDateString()}` ||
-											"Select Date"}
+										{dateRange?.from && dateRange?.to
+											? `${dateRange.from.toLocaleDateString()} - ${dateRange.to.toLocaleDateString()}`
+											: "Select Date"}
 										<ChevronDownIcon />
 									</Button>
 								</PopoverTrigger>
@@ -114,7 +112,7 @@ function RouteComponent() {
 								>
 									<Calendar
 										mode="range"
-										defaultMonth={dateRange?.from}
+										defaultMonth={dateRange?.from ?? now}
 										selected={dateRange}
 										onSelect={setDateRange}
 										numberOfMonths={2}

@@ -15,7 +15,11 @@ import { cn } from "@/lib/utils";
 import { formatCurrency } from "@/utils/formatting";
 import { orpc } from "@/utils/orpc";
 
-export function SummaryCards({ dateRange }: { dateRange: DateRange }) {
+export function SummaryCards({
+	dateRange,
+}: {
+	dateRange: DateRange | undefined;
+}) {
 	const { data: summary, isLoading } = useQuery(
 		orpc.transaction.summary.queryOptions({ input: { dateRange: dateRange } }),
 	);

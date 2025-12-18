@@ -31,7 +31,7 @@ export const transactionRouter = {
 					pageSize: z.number().default(20),
 				}),
 				type: z.enum(["all", "income", "expenses"]),
-				dateRange: z.object({ from: z.date(), to: z.date() }),
+				dateRange: z.object({ from: z.date(), to: z.date() }).optional(),
 			}),
 		)
 		.handler(async ({ input }) => {
@@ -42,23 +42,22 @@ export const transactionRouter = {
 						? [gt(transaction.amount, 0)]
 						: [lt(transaction.amount, 0)];
 
+			const dateRangeFilter = !input.dateRange
+				? []
+				: [
+						gte(transaction.timestamp, input.dateRange.from),
+						lt(transaction.timestamp, input.dateRange.to),
+					];
+
 			const numTransactions = await db.$count(
 				transaction,
-				and(
-					gte(transaction.timestamp, input.dateRange.from),
-					lt(transaction.timestamp, input.dateRange.to),
-					...typeFilter,
-				),
+				and(...dateRangeFilter, ...typeFilter),
 			);
 
 			const transactions = await db.query.transaction.findMany({
 				orderBy: [desc(transaction.timestamp), desc(transaction.createdAt)],
-				where: (transaction, { lt, gte, and }) =>
-					and(
-						gte(transaction.timestamp, input.dateRange.from),
-						lt(transaction.timestamp, input.dateRange.to),
-						...typeFilter,
-					),
+				where: (_transaction, { and }) =>
+					and(...dateRangeFilter, ...typeFilter),
 				with: {
 					account: true,
 					category: true,
@@ -114,47 +113,35 @@ export const transactionRouter = {
 		}),
 
 	summary: publicProcedure
-		.input(z.object({ dateRange: z.object({ from: z.date(), to: z.date() }) }))
+		.input(
+			z.object({
+				dateRange: z.object({ from: z.date(), to: z.date() }).optional(),
+			}),
+		)
 		.handler(async ({ input }) => {
+			const dateRangeFilter = !input.dateRange
+				? []
+				: [
+						gte(transaction.timestamp, input.dateRange.from),
+						lt(transaction.timestamp, input.dateRange.to),
+					];
+
 			const totalIncomePromise = db
 				.select({ income: sum(transaction.amount) })
 				.from(transaction)
-				.where(
-					and(
-						gt(transaction.amount, 0),
-						gte(transaction.timestamp, input.dateRange.from),
-						lt(transaction.timestamp, input.dateRange.to),
-					),
-				);
+				.where(and(gt(transaction.amount, 0), ...dateRangeFilter));
 			const totalExpensesPromise = db
 				.select({ expenses: sum(transaction.amount) })
 				.from(transaction)
-				.where(
-					and(
-						lt(transaction.amount, 0),
-						gte(transaction.timestamp, input.dateRange.from),
-						lt(transaction.timestamp, input.dateRange.to),
-					),
-				);
+				.where(and(lt(transaction.amount, 0), ...dateRangeFilter));
 			const netAmountPromise = db
 				.select({ net: sum(transaction.amount) })
 				.from(transaction)
-				.where(
-					and(
-						gte(transaction.timestamp, input.dateRange.from),
-						lt(transaction.timestamp, input.dateRange.to),
-					),
-				);
+				.where(and(...dateRangeFilter));
 			const numTransactionsPromise = db
 				.select({ count: count() })
 				.from(transaction)
-				.where(
-					and(
-						gte(transaction.timestamp, input.dateRange.from),
-						lt(transaction.timestamp, input.dateRange.to),
-					),
-				);
-
+				.where(and(...dateRangeFilter));
 			const [totalIncome, totalExpenses, netAmount, numTransactions] =
 				await Promise.all([
 					totalIncomePromise,
