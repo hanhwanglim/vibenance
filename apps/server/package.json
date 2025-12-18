@@ -10,16 +10,17 @@
 		"start": "bun run dist/index.js"
 	},
 	"dependencies": {
-		"hono": "catalog:",
-		"@orpc/server": "catalog:",
 		"@orpc/openapi": "catalog:",
+		"@orpc/server": "catalog:",
 		"@orpc/zod": "catalog:",
-		"better-auth": "catalog:",
-		"dotenv": "catalog:",
-		"zod": "^4.1.11",
 		"@vibenance/api": "workspace:*",
 		"@vibenance/auth": "workspace:*",
-		"@vibenance/db": "workspace:*"
+		"@vibenance/db": "workspace:*",
+		"better-auth": "catalog:",
+		"dotenv": "catalog:",
+		"grammy": "^1.38.4",
+		"hono": "catalog:",
+		"zod": "^4.1.11"
 	},
 	"devDependencies": {
 		"typescript": "^5.8.2",

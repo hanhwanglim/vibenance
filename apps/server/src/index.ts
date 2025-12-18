@@ -10,6 +10,7 @@ import { auth } from "@vibenance/auth";
 import { Hono } from "hono";
 import { cors } from "hono/cors";
 import { logger } from "hono/logger";
+import { bot } from "./bot";
 
 const app = new Hono();
 
@@ -74,5 +75,7 @@ app.use("/*", async (c, next) => {
 app.get("/", (c) => {
 	return c.text("OK");
 });
+
+bot.start();
 
 export default app;
