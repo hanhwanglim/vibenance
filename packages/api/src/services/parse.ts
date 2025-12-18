@@ -7,6 +7,7 @@ type Transaction = typeof transaction.$inferInsert;
 export enum BankFormat {
 	MONZO = "monzo",
 	AMEX = "amex",
+	GENERIC = "generic",
 	UNKNOWN = "unknown",
 }
 
@@ -53,6 +54,13 @@ interface AmexTransactionRow {
 	Category: string;
 }
 
+interface GenericTransactionRow {
+	Date: string;
+	Name: string;
+	Currency: string;
+	Amount: string;
+}
+
 export async function parseFile(file: File) {
 	try {
 		const text = await file.text();
@@ -78,6 +86,10 @@ export async function parseText(text: string): Promise<ParseResult> {
 			);
 		case BankFormat.AMEX:
 			return parseAmex(data as unknown as Papa.ParseResult<AmexTransactionRow>);
+		case BankFormat.GENERIC:
+			return parseGeneric(
+				data as unknown as Papa.ParseResult<GenericTransactionRow>,
+			);
 		default:
 			throw new Error("Unknown bank format");
 	}
@@ -108,6 +120,14 @@ function detectBankFormat(headers: string[]): BankFormat {
 		headers.includes("Category")
 	) {
 		return BankFormat.AMEX;
+	}
+	if (
+		headers.includes("Date") &&
+		headers.includes("Name") &&
+		headers.includes("Currency") &&
+		headers.includes("Amount")
+	) {
+		return BankFormat.GENERIC;
 	}
 	return BankFormat.UNKNOWN;
 }
@@ -179,7 +199,6 @@ async function parseAmex(
 	const categoryMap = new Map(categories.map((cat) => [cat.name, cat]));
 
 	const remapCategory = (category: string) => {
-		console.log(category);
 		switch (category) {
 			case "General Purchases-Groceries":
 				return categoryMap.get("Groceries");
@@ -211,4 +230,43 @@ async function parseAmex(
 	});
 
 	return result;
+}
+
+async function parseGeneric(
+	data: Papa.ParseResult<GenericTransactionRow>,
+): Promise<ParseResult> {
+	const result: ParseResult = {
+		count: data.data.length,
+		valid: data.data.length - data.errors.length,
+		invalid: data.errors.length,
+		format: BankFormat.AMEX,
+		transactions: [],
+	};
+
+	const errorRows = new Set<number>();
+	data.errors.forEach((error) => {
+		errorRows.add(error.row as number);
+	});
+
+	data.data.forEach((row) => {
+		const [day, month, year] = row.Date.split("/").map(Number);
+
+		const transaction: Transaction = {
+			transactionHash: generateHash(JSON.stringify(row)),
+			timestamp: new Date(year as number, (month as number) - 1, day),
+			name: row.Name,
+			currency: row.Currency,
+			amount: row.Amount,
+		};
+
+		result.transactions.push(transaction);
+	});
+
+	return result;
+}
+
+function generateHash(content: string): string {
+	const hasher = new Bun.CryptoHasher("md5");
+	hasher.update(content);
+	return hasher.digest("hex");
 }
