@@ -1,5 +1,5 @@
+import { useNavigate } from "@tanstack/react-router";
 import { Bell, CreditCard, LogOut, MoreVertical, User } from "lucide-react";
-
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
 	DropdownMenu,
@@ -27,6 +27,7 @@ export function NavUser({
 	};
 }) {
 	const { isMobile } = useSidebar();
+	const navigate = useNavigate();
 
 	return (
 		<SidebarMenu>
@@ -72,7 +73,9 @@ export function NavUser({
 						</DropdownMenuLabel>
 						<DropdownMenuSeparator />
 						<DropdownMenuGroup>
-							<DropdownMenuItem>
+							<DropdownMenuItem
+								onClick={() => navigate({ to: "/settings/account" })}
+							>
 								<User />
 								Account
 							</DropdownMenuItem>

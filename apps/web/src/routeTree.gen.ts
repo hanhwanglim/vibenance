@@ -17,6 +17,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as TransactionsIndexRouteImport } from './routes/transactions/index'
 import { Route as AssetsIndexRouteImport } from './routes/assets/index'
 import { Route as TransactionsImportsRouteImport } from './routes/transactions/imports'
+import { Route as SettingsAccountRouteImport } from './routes/settings/account'
 import { Route as AssetsImportsRouteImport } from './routes/assets/imports'
 import { Route as TransactionsImportsIdRouteImport } from './routes/transactions/imports.$id'
 import { Route as AssetsImportsIdRouteImport } from './routes/assets/imports.$id'
@@ -61,6 +62,11 @@ const TransactionsImportsRoute = TransactionsImportsRouteImport.update({
   path: '/transactions/imports',
   getParentRoute: () => rootRouteImport,
 } as any)
+const SettingsAccountRoute = SettingsAccountRouteImport.update({
+  id: '/settings/account',
+  path: '/settings/account',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AssetsImportsRoute = AssetsImportsRouteImport.update({
   id: '/assets/imports',
   path: '/assets/imports',
@@ -84,6 +90,7 @@ export interface FileRoutesByFullPath {
   '/login': typeof LoginRoute
   '/todos': typeof TodosRoute
   '/assets/imports': typeof AssetsImportsRouteWithChildren
+  '/settings/account': typeof SettingsAccountRoute
   '/transactions/imports': typeof TransactionsImportsRouteWithChildren
   '/assets': typeof AssetsIndexRoute
   '/transactions': typeof TransactionsIndexRoute
@@ -97,6 +104,7 @@ export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/todos': typeof TodosRoute
   '/assets/imports': typeof AssetsImportsRouteWithChildren
+  '/settings/account': typeof SettingsAccountRoute
   '/transactions/imports': typeof TransactionsImportsRouteWithChildren
   '/assets': typeof AssetsIndexRoute
   '/transactions': typeof TransactionsIndexRoute
@@ -111,6 +119,7 @@ export interface FileRoutesById {
   '/login': typeof LoginRoute
   '/todos': typeof TodosRoute
   '/assets/imports': typeof AssetsImportsRouteWithChildren
+  '/settings/account': typeof SettingsAccountRoute
   '/transactions/imports': typeof TransactionsImportsRouteWithChildren
   '/assets/': typeof AssetsIndexRoute
   '/transactions/': typeof TransactionsIndexRoute
@@ -126,6 +135,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/todos'
     | '/assets/imports'
+    | '/settings/account'
     | '/transactions/imports'
     | '/assets'
     | '/transactions'
@@ -139,6 +149,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/todos'
     | '/assets/imports'
+    | '/settings/account'
     | '/transactions/imports'
     | '/assets'
     | '/transactions'
@@ -152,6 +163,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/todos'
     | '/assets/imports'
+    | '/settings/account'
     | '/transactions/imports'
     | '/assets/'
     | '/transactions/'
@@ -166,6 +178,7 @@ export interface RootRouteChildren {
   LoginRoute: typeof LoginRoute
   TodosRoute: typeof TodosRoute
   AssetsImportsRoute: typeof AssetsImportsRouteWithChildren
+  SettingsAccountRoute: typeof SettingsAccountRoute
   TransactionsImportsRoute: typeof TransactionsImportsRouteWithChildren
   AssetsIndexRoute: typeof AssetsIndexRoute
   TransactionsIndexRoute: typeof TransactionsIndexRoute
@@ -229,6 +242,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TransactionsImportsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/settings/account': {
+      id: '/settings/account'
+      path: '/settings/account'
+      fullPath: '/settings/account'
+      preLoaderRoute: typeof SettingsAccountRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/assets/imports': {
       id: '/assets/imports'
       path: '/assets/imports'
@@ -283,6 +303,7 @@ const rootRouteChildren: RootRouteChildren = {
   LoginRoute: LoginRoute,
   TodosRoute: TodosRoute,
   AssetsImportsRoute: AssetsImportsRouteWithChildren,
+  SettingsAccountRoute: SettingsAccountRoute,
   TransactionsImportsRoute: TransactionsImportsRouteWithChildren,
   AssetsIndexRoute: AssetsIndexRoute,
   TransactionsIndexRoute: TransactionsIndexRoute,

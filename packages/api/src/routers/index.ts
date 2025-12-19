@@ -3,6 +3,7 @@ import { protectedProcedure, publicProcedure } from "../index";
 import { assetRouter } from "./asset";
 import { bankAccountRouter } from "./bank-account";
 import { fileRouter } from "./file";
+import { settingsRouter } from "./settings";
 import { todoRouter } from "./todo";
 import { transactionRouter } from "./transaction";
 
@@ -21,6 +22,7 @@ export const appRouter = {
 	bankAccount: bankAccountRouter,
 	asset: assetRouter,
 	file: fileRouter,
+	settings: settingsRouter,
 };
 export type AppRouter = typeof appRouter;
 export type AppRouterClient = RouterClient<typeof appRouter>;
