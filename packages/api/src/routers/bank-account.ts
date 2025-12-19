@@ -2,16 +2,16 @@ import { db } from "@vibenance/db";
 import { bankAccount } from "@vibenance/db/schema/transaction";
 import { asc, eq } from "drizzle-orm";
 import z from "zod";
-import { publicProcedure } from "../index";
+import { protectedProcedure } from "../index";
 
 export const bankAccountRouter = {
-	getAll: publicProcedure.handler(async () => {
+	getAll: protectedProcedure.handler(async () => {
 		return await db.query.bankAccount.findMany({
 			orderBy: [asc(bankAccount.name)],
 		});
 	}),
 
-	create: publicProcedure
+	create: protectedProcedure
 		.input(
 			z.object({
 				name: z.string(),
@@ -25,7 +25,7 @@ export const bankAccountRouter = {
 			return await db.insert(bankAccount).values(input);
 		}),
 
-	delete: publicProcedure.input(z.number()).handler(async ({ input }) => {
+	delete: protectedProcedure.input(z.number()).handler(async ({ input }) => {
 		return await db.delete(bankAccount).where(eq(bankAccount.id, input));
 	}),
 };

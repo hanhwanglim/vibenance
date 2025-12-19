@@ -4,11 +4,11 @@ import { file, fileImport } from "@vibenance/db/schema/file";
 import { transaction } from "@vibenance/db/schema/transaction";
 import { and, desc, eq, gte, lt } from "drizzle-orm";
 import z from "zod";
-import { publicProcedure } from "../index";
+import { protectedProcedure } from "../index";
 import { parseFile } from "../services/investment/parse";
 
 export const assetRouter = {
-	getAll: publicProcedure
+	getAll: protectedProcedure
 		.input(
 			z.object({
 				pagination: z.object({
@@ -55,7 +55,7 @@ export const assetRouter = {
 			};
 		}),
 
-	create: publicProcedure
+	create: protectedProcedure
 		.input(
 			z.object({
 				transactions: z.array(
@@ -98,7 +98,7 @@ export const assetRouter = {
 			return objs;
 		}),
 
-	importPreview: publicProcedure
+	importPreview: protectedProcedure
 		.input(z.number())
 		.handler(async ({ input }) => {
 			const fileImport = await db.query.fileImport.findFirst({
@@ -111,16 +111,18 @@ export const assetRouter = {
 			return await parseFile(Bun.file(file?.filePath) as File);
 		}),
 
-	createImport: publicProcedure.input(z.number()).handler(async ({ input }) => {
-		const [obj] = await db.insert(fileImport).values({}).returning();
-		await db
-			.update(file)
-			.set({ fileImportId: obj?.id })
-			.where(eq(file.id, input));
-		return obj;
-	}),
+	createImport: protectedProcedure
+		.input(z.number())
+		.handler(async ({ input }) => {
+			const [obj] = await db.insert(fileImport).values({}).returning();
+			await db
+				.update(file)
+				.set({ fileImportId: obj?.id })
+				.where(eq(file.id, input));
+			return obj;
+		}),
 
-	importList: publicProcedure
+	importList: protectedProcedure
 		.input(
 			z.object({
 				pagination: z.object({

@@ -3,11 +3,11 @@ import path from "node:path";
 import { db } from "@vibenance/db";
 import { file } from "@vibenance/db/schema/file";
 import z from "zod";
-import { publicProcedure } from "../index";
+import { protectedProcedure } from "../index";
 import { parseFile } from "../services/parse";
 
 export const fileRouter = {
-	upload: publicProcedure.input(z.file()).handler(async ({ input }) => {
+	upload: protectedProcedure.input(z.file()).handler(async ({ input }) => {
 		const uploadDir = path.join(
 			"/tmp",
 			`${crypto.randomUUID()}${path.extname(input.name)}`,
@@ -33,13 +33,13 @@ export const fileRouter = {
 		return uploadedFile;
 	}),
 
-	get: publicProcedure.input(z.number()).handler(async ({ input }) => {
+	get: protectedProcedure.input(z.number()).handler(async ({ input }) => {
 		return await db.query.file.findFirst({
 			where: (file, { eq }) => eq(file.id, input),
 		});
 	}),
 
-	preview: publicProcedure.input(z.number()).handler(async ({ input }) => {
+	preview: protectedProcedure.input(z.number()).handler(async ({ input }) => {
 		const fileImport = await db.query.fileImport.findFirst({
 			where: (fileImport, { eq }) => eq(fileImport.id, input),
 			with: {

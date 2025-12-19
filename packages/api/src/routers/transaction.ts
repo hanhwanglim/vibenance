@@ -20,10 +20,10 @@ import {
 	sum,
 } from "drizzle-orm";
 import z from "zod";
-import { publicProcedure } from "../index";
+import { protectedProcedure } from "../index";
 
 export const transactionRouter = {
-	getAll: publicProcedure
+	getAll: protectedProcedure
 		.input(
 			z.object({
 				pagination: z.object({
@@ -72,7 +72,7 @@ export const transactionRouter = {
 			};
 		}),
 
-	create: publicProcedure
+	create: protectedProcedure
 		.input(
 			z.object({
 				transactions: z.array(
@@ -112,7 +112,7 @@ export const transactionRouter = {
 			return objs;
 		}),
 
-	summary: publicProcedure
+	summary: protectedProcedure
 		.input(
 			z.object({
 				dateRange: z.object({ from: z.date(), to: z.date() }).optional(),
@@ -158,7 +158,7 @@ export const transactionRouter = {
 			};
 		}),
 
-	categoryBreakdown: publicProcedure.handler(async () => {
+	categoryBreakdown: protectedProcedure.handler(async () => {
 		const categoriesPromise = db
 			.select({
 				name: category.name,
@@ -212,7 +212,7 @@ export const transactionRouter = {
 		};
 	}),
 
-	spendingTrend: publicProcedure.handler(async () => {
+	spendingTrend: protectedProcedure.handler(async () => {
 		const data = await db
 			.select({
 				bin: sql<string>`date_trunc('month', ${transaction.timestamp})`,
@@ -242,7 +242,7 @@ export const transactionRouter = {
 		};
 	}),
 
-	categoryTrend: publicProcedure
+	categoryTrend: protectedProcedure
 		.input(
 			z
 				.object({
@@ -380,11 +380,11 @@ export const transactionRouter = {
 			};
 		}),
 
-	listCategories: publicProcedure.handler(async () => {
+	listCategories: protectedProcedure.handler(async () => {
 		return await db.query.category.findMany();
 	}),
 
-	updateCategory: publicProcedure
+	updateCategory: protectedProcedure
 		.input(z.object({ id: z.number(), categoryId: z.number().nullable() }))
 		.handler(async ({ input }) => {
 			return await db
@@ -393,16 +393,18 @@ export const transactionRouter = {
 				.where(eq(transaction.id, input.id));
 		}),
 
-	createImport: publicProcedure.input(z.number()).handler(async ({ input }) => {
-		const [obj] = await db.insert(fileImport).values({}).returning();
-		await db
-			.update(file)
-			.set({ fileImportId: obj?.id })
-			.where(eq(file.id, input));
-		return obj;
-	}),
+	createImport: protectedProcedure
+		.input(z.number())
+		.handler(async ({ input }) => {
+			const [obj] = await db.insert(fileImport).values({}).returning();
+			await db
+				.update(file)
+				.set({ fileImportId: obj?.id })
+				.where(eq(file.id, input));
+			return obj;
+		}),
 
-	importList: publicProcedure
+	importList: protectedProcedure
 		.input(
 			z.object({
 				pagination: z.object({
