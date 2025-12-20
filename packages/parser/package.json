@@ -2,11 +2,15 @@
 	"name": "parser",
 	"version": "0.0.0",
 	"private": true,
+	"bin": {
+		"vibenance-parser": "./src/cli/index.ts"
+	},
 	"scripts": {
 		"dev": "echo 'Add dev script here'",
 		"build": "echo 'Add build script here'",
 		"test": "echo 'Add test script here'",
-		"lint": "echo 'Add lint script here'"
+		"lint": "echo 'Add lint script here'",
+		"cli": "bun run src/cli/index.ts"
 	},
 	"peerDependencies": {
 		"typescript": "^5"

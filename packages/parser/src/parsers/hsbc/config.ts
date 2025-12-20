@@ -1,3 +1,6 @@
+import type { BunFile } from "bun";
+import { PDFParse } from "pdf-parse";
+
 export const HsbcPdfHeaders = [
 	"Received By Us",
 	"Transaction Date",
@@ -10,4 +13,15 @@ export interface HsbcTransactionRow {
 	"Transaction Date": Date;
 	Details: string;
 	Amount: string;
+}
+
+export async function isHsbcPdf(file: BunFile) {
+	const parser = new PDFParse({ data: await file.arrayBuffer() });
+
+	const { pages } = await parser.getText();
+	if (pages.length < 1) return false;
+	const isHsbc = pages.at(0)?.text.includes("HSBC") || false;
+
+	await parser.destroy();
+	return isHsbc;
 }
