@@ -1,3 +1,4 @@
+import { relations } from "drizzle-orm";
 import { pgTable, serial, text, timestamp } from "drizzle-orm/pg-core";
 import { user } from "./auth";
 
@@ -8,6 +9,7 @@ export const telegramCredential = pgTable("telegram_credential", {
 	userId: text("user_id")
 		.notNull()
 		.references(() => user.id),
+	key: text("key").notNull(),
 
 	createdAt: timestamp("created_at").defaultNow().notNull(),
 	updatedAt: timestamp("updated_at")
@@ -15,3 +17,13 @@ export const telegramCredential = pgTable("telegram_credential", {
 		.$onUpdate(() => /* @__PURE__ */ new Date())
 		.notNull(),
 });
+
+export const telegramCredentialRelations = relations(
+	telegramCredential,
+	({ one }) => ({
+		user: one(user, {
+			fields: [telegramCredential.userId],
+			references: [user.id],
+		}),
+	}),
+);

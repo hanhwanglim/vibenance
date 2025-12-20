@@ -6,11 +6,22 @@ export type CreateContextOptions = {
 };
 
 export async function createContext({ context }: CreateContextOptions) {
+	const apiKey = context.req.header("x-api-key");
+	let key = null;
+	if (apiKey) {
+		const result = await auth.api.verifyApiKey({ body: { key: apiKey } });
+		if (result.valid) {
+			key = result.key;
+		}
+	}
+
 	const session = await auth.api.getSession({
 		headers: context.req.raw.headers,
 	});
+
 	return {
 		session,
+		key,
 	};
 }
 

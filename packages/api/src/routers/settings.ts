@@ -10,21 +10,23 @@ export const settingsRouter = {
 	createTelegramCredential: protectedProcedure
 		.input(z.object({ telegramUserId: z.string(), telegramChatId: z.string() }))
 		.handler(async ({ input, context }) => {
-			const credential = await db
-				.insert(telegramCredential)
-				.values({ ...input, userId: context.session.user.id })
-				.returning();
-			await auth.api.createApiKey({
+			const key = await auth.api.createApiKey({
 				body: {
 					name: "telegram-bot-api-key",
 					expiresIn: 60 * 60 * 24 * 7,
 					userId: context.session.user.id,
-					prefix: "vibenance",
 					rateLimitEnabled: false,
 				},
 			});
 
-			return credential;
+			const credential = await db
+				.insert(telegramCredential)
+				// Yes setting the key in the credential is fucking stupid.
+				// But its server to server rpc communication so it should be ok
+				.values({ ...input, key: key.key, userId: context.session.user.id })
+				.returning();
+
+			return { credential };
 		}),
 
 	list: protectedProcedure.handler(async ({ context }) => {
