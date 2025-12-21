@@ -2,8 +2,11 @@
 
 import type { BunFile } from "bun";
 import { detectParser } from "../core/detect";
+import type { TransactionRow as InvestmentTransactionRow } from "../core/investment";
 import type { TransactionRow } from "../core/transaction";
 import { parse as parseAmex } from "../parsers/amex/csv";
+import { parse as parseChip } from "../parsers/chip/pdf";
+import { parse as parseCoinbase } from "../parsers/coinbase/csv";
 import { parse as parseHsbc } from "../parsers/hsbc/pdf";
 import { parse as parseMonzo } from "../parsers/monzo/csv";
 import { formatTable } from "./table";
@@ -46,7 +49,7 @@ async function main() {
 	console.log("Parsing file...\n");
 
 	try {
-		let transactions: Array<TransactionRow>;
+		let transactions: Array<TransactionRow | InvestmentTransactionRow>;
 
 		switch (parserType) {
 			case "monzo":
@@ -57,6 +60,12 @@ async function main() {
 				break;
 			case "hsbc":
 				transactions = await parseHsbc(file);
+				break;
+			case "coinbase":
+				transactions = await parseCoinbase(file);
+				break;
+			case "chip":
+				transactions = await parseChip(file);
 				break;
 			default:
 				throw new Error(`Unknown parser type: ${parserType}`);

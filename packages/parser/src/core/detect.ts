@@ -1,10 +1,18 @@
 import type { BunFile } from "bun";
 import Papa from "papaparse";
 import { AmexCsvHeaders } from "../parsers/amex/config";
+import { isChipPdf } from "../parsers/chip/config";
+import { isCoinbaseCsv } from "../parsers/coinbase/config";
 import { isHsbcPdf } from "../parsers/hsbc/config";
 import { MonzoCsvHeaders } from "../parsers/monzo/config";
 
-export type ParserType = "monzo" | "amex" | "hsbc" | "unknown";
+export type ParserType =
+	| "monzo"
+	| "amex"
+	| "hsbc"
+	| "chip"
+	| "coinbase"
+	| "unknown";
 
 export async function detectParser(file: BunFile): Promise<ParserType> {
 	const fileName = file.name || "";
@@ -13,6 +21,9 @@ export async function detectParser(file: BunFile): Promise<ParserType> {
 	if (extension === "pdf") {
 		if (await isHsbcPdf(file)) {
 			return "hsbc";
+		}
+		if (await isChipPdf(file)) {
+			return "chip";
 		}
 	}
 
@@ -33,6 +44,8 @@ export async function detectParser(file: BunFile): Promise<ParserType> {
 		if (AmexCsvHeaders.every((header) => headers.includes(header))) {
 			return "amex";
 		}
+
+		if (await isCoinbaseCsv(file)) return "coinbase";
 	}
 
 	return "unknown";
