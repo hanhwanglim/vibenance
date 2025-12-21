@@ -4,6 +4,8 @@ import type { TransactionRow as InvestmentTransactionRow } from "../core/investm
 import type { TransactionRow } from "../core/transaction";
 import { AmexCsvHeaders } from "../parsers/amex/config";
 import { parse as parseAmex } from "../parsers/amex/csv";
+import { isChasePdf } from "../parsers/chase/config";
+import { parse as parseChase } from "../parsers/chase/pdf";
 import { isChipPdf } from "../parsers/chip/config";
 import { parse as parseChip } from "../parsers/chip/pdf";
 import { isCoinbaseCsv } from "../parsers/coinbase/config";
@@ -19,6 +21,7 @@ export type ParserType =
 	| "hsbc"
 	| "chip"
 	| "coinbase"
+	| "chase"
 	| "unknown";
 
 export async function detectParser(file: BunFile): Promise<ParserType> {
@@ -31,6 +34,9 @@ export async function detectParser(file: BunFile): Promise<ParserType> {
 		}
 		if (await isChipPdf(file)) {
 			return "chip";
+		}
+		if (await isChasePdf(file)) {
+			return "chase";
 		}
 	}
 
@@ -78,6 +84,9 @@ export async function parseFile(file: BunFile, parserType: ParserType) {
 			break;
 		case "chip":
 			transactions = await parseChip(file);
+			break;
+		case "chase":
+			transactions = await parseChase(file);
 			break;
 		default:
 			throw new Error(`Unknown parser type: ${parserType}`);
