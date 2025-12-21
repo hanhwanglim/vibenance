@@ -1,10 +1,17 @@
 import type { BunFile } from "bun";
 import Papa from "papaparse";
+import type { TransactionRow as InvestmentTransactionRow } from "../core/investment";
+import type { TransactionRow } from "../core/transaction";
 import { AmexCsvHeaders } from "../parsers/amex/config";
+import { parse as parseAmex } from "../parsers/amex/csv";
 import { isChipPdf } from "../parsers/chip/config";
+import { parse as parseChip } from "../parsers/chip/pdf";
 import { isCoinbaseCsv } from "../parsers/coinbase/config";
+import { parse as parseCoinbase } from "../parsers/coinbase/csv";
 import { isHsbcPdf } from "../parsers/hsbc/config";
+import { parse as parseHsbc } from "../parsers/hsbc/pdf";
 import { MonzoCsvHeaders } from "../parsers/monzo/config";
+import { parse as parseMonzo } from "../parsers/monzo/csv";
 
 export type ParserType =
 	| "monzo"
@@ -49,4 +56,30 @@ export async function detectParser(file: BunFile): Promise<ParserType> {
 	}
 
 	return "unknown";
+}
+
+export async function parseFile(file: BunFile, parserType: ParserType) {
+	let transactions: Array<TransactionRow | InvestmentTransactionRow>;
+
+	switch (parserType) {
+		case "monzo":
+			transactions = await parseMonzo(file);
+			break;
+		case "amex":
+			transactions = await parseAmex(file);
+			break;
+		case "hsbc":
+			transactions = await parseHsbc(file);
+			break;
+		case "coinbase":
+			transactions = await parseCoinbase(file);
+			break;
+		case "chip":
+			transactions = await parseChip(file);
+			break;
+		default:
+			throw new Error(`Unknown parser type: ${parserType}`);
+	}
+
+	return transactions;
 }
