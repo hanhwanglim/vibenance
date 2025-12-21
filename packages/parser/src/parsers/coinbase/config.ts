@@ -38,7 +38,7 @@ export async function isCoinbaseCsv(file: BunFile) {
 		return false;
 	}
 
-	if (result.data.at(0).at(0) !== "Transaction") {
+	if (result.data.at(0).at(0) !== "Transactions") {
 		return false;
 	}
 

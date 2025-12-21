@@ -52,7 +52,9 @@ export async function detectParser(file: BunFile): Promise<ParserType> {
 			return "amex";
 		}
 
-		if (await isCoinbaseCsv(file)) return "coinbase";
+		if (await isCoinbaseCsv(file)) {
+			return "coinbase";
+		}
 	}
 
 	return "unknown";

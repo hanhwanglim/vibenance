@@ -77,7 +77,7 @@ export const transactionRouter = {
 			z.object({
 				transactions: z.array(
 					z.object({
-						transactionHash: z.string(),
+						transactionId: z.string(),
 						timestamp: z.date(),
 						name: z.string(),
 						currency: z.string(),

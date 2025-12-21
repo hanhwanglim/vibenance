@@ -31,7 +31,8 @@ export async function parse(file: BunFile) {
 			amount: row.Amount,
 			categoryId: category?.id || null,
 			category: category || null,
-			reference: row["Notes and #tags"],
+			reference:
+				row["Notes and #tags"].length > 0 ? row["Notes and #tags"] : undefined,
 			errors: errorRows.get(index),
 		};
 

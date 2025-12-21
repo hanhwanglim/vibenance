@@ -35,7 +35,7 @@ export function ImportDialog() {
 				importMutation.mutate(data.id, {
 					onSuccess: (data) => {
 						navigate({
-							to: "/transactions/import/$id",
+							to: "/transactions/imports/$id",
 							params: { id: String(data.id) },
 						});
 					},

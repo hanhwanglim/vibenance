@@ -46,7 +46,7 @@ export const category = pgTable("category", {
 
 export const transaction = pgTable("transaction", {
 	id: serial("id").primaryKey(),
-	transactionHash: text("transaction_hash").notNull().unique(),
+	transactionId: text("transaction_id").notNull().unique(),
 	timestamp: timestamp("timestamp").notNull(),
 	accountId: integer("account_id")
 		.notNull()

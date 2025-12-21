@@ -2,10 +2,10 @@ import { db } from "@vibenance/db";
 import { investmentTransaction } from "@vibenance/db/schema/asset";
 import { file, fileImport } from "@vibenance/db/schema/file";
 import { transaction } from "@vibenance/db/schema/transaction";
+import { detectParser, parseFile } from "@vibenance/parser/core/parse";
 import { and, desc, eq, gte, lt } from "drizzle-orm";
 import z from "zod";
 import { protectedProcedure } from "../index";
-import { parseFile } from "../services/investment/parse";
 
 export const assetRouter = {
 	getAll: protectedProcedure
@@ -107,8 +107,10 @@ export const assetRouter = {
 					files: true,
 				},
 			});
-			const file = fileImport?.files[0];
-			return await parseFile(Bun.file(file?.filePath) as File);
+			const filePath = fileImport?.files[0]?.filePath;
+			const file = Bun.file(filePath);
+			const parseType = await detectParser(file);
+			return await parseFile(file, parseType);
 		}),
 
 	createImport: protectedProcedure

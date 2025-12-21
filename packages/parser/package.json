@@ -1,7 +1,15 @@
 {
-	"name": "parser",
+	"name": "@vibenance/parser",
 	"version": "0.0.0",
 	"private": true,
+	"exports": {
+		".": {
+			"default": "./src/index.ts"
+		},
+		"./*": {
+			"default": "./src/*.ts"
+		}
+	},
 	"bin": {
 		"vibenance-parser": "./src/cli/index.ts"
 	},

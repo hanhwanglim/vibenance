@@ -2,9 +2,9 @@ import crypto from "node:crypto";
 import path from "node:path";
 import { db } from "@vibenance/db";
 import { file } from "@vibenance/db/schema/file";
+import { detectParser, parseFile } from "@vibenance/parser/core/parse";
 import z from "zod";
 import { protectedProcedure } from "../index";
-import { parseFile } from "../services/parse";
 
 export const fileRouter = {
 	upload: protectedProcedure.input(z.file()).handler(async ({ input }) => {
@@ -46,8 +46,10 @@ export const fileRouter = {
 				files: true,
 			},
 		});
-		const file = fileImport?.files[0];
 
-		return await parseFile(Bun.file(file?.filePath) as File);
+		const filePath = fileImport?.files[0]?.filePath;
+		const file = Bun.file(filePath);
+		const parseType = await detectParser(file);
+		return await parseFile(file, parseType);
 	}),
 };

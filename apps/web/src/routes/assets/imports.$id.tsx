@@ -50,7 +50,7 @@ function RouteComponent() {
 		const payload = {
 			accountId: Number(selectedAccountId),
 			fileImportId: Number(id),
-			transactions: previewData?.transactions,
+			transactions: previewData,
 		};
 
 		importMutation.mutate(payload, {
@@ -91,10 +91,7 @@ function RouteComponent() {
 					{importMutation.isPending ? "Importing..." : "Import Transactions"}
 				</Button>
 			</div>
-			<TransactionPreviewTable
-				fileId={Number(id)}
-				data={previewData?.transactions || []}
-			/>
+			<TransactionPreviewTable data={previewData || []} />
 		</div>
 	);
 }

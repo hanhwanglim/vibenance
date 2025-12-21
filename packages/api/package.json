@@ -24,6 +24,7 @@
 		"@orpc/zod": "catalog:",
 		"@vibenance/auth": "workspace:*",
 		"@vibenance/db": "workspace:*",
+		"@vibenance/parser": "workspace:*",
 		"dotenv": "catalog:",
 		"drizzle-orm": "catalog:",
 		"hono": "catalog:",
