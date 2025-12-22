@@ -1,16 +1,15 @@
+import type { TransactionInsert } from "@vibenance/db/schema/transaction";
+
+type TransactionCreate = Omit<
+	TransactionInsert,
+	"id" | "accountId" | "categoryId"
+>;
+
 interface ImportSession {
 	userId: number;
 	fileId: number;
 	fileImportId: number;
-	transactions: Array<{
-		transactionHash: string;
-		timestamp: Date;
-		name: string;
-		currency: string;
-		amount: string;
-		categoryId?: number | null;
-		reference?: string;
-	}>;
+	transactions: Array<TransactionCreate>;
 	expiresAt: Date;
 }
 

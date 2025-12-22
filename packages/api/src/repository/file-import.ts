@@ -1,5 +1,6 @@
 import { db } from "@vibenance/db";
 import { fileImport } from "@vibenance/db/schema/file";
+import { eq } from "drizzle-orm";
 
 type FileImportUpdate = Partial<typeof fileImport.$inferInsert>;
 

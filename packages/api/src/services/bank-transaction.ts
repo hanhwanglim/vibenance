@@ -28,10 +28,10 @@ export const BankTransactionService = {
 			throw new Error("INTERNAL SERVER ERROR");
 		}
 
-		const [file] = await FileRepository.update(fileId, {
+		await FileRepository.update(fileId, {
 			fileImportId: fileImport.id,
 		});
-		return file || null;
+		return fileImport || null;
 	},
 
 	bulkCreate: async (
