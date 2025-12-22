@@ -41,7 +41,7 @@ function RouteComponent() {
 	);
 
 	const { data: previewData } = useQuery(
-		orpc.file.preview.queryOptions({ input: Number(id) }),
+		orpc.transaction.previewImport.queryOptions({ input: Number(id) }),
 	);
 
 	const importMutation = useMutation(

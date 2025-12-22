@@ -1,10 +1,6 @@
 import { db } from "@vibenance/db";
-import { file, fileImport } from "@vibenance/db/schema/file";
-import {
-	category,
-	type TransactionInsert,
-	transaction,
-} from "@vibenance/db/schema/transaction";
+import { fileImport } from "@vibenance/db/schema/file";
+import { category, transaction } from "@vibenance/db/schema/transaction";
 import {
 	and,
 	asc,
@@ -21,6 +17,7 @@ import {
 } from "drizzle-orm";
 import z from "zod";
 import { protectedProcedure } from "../index";
+import { BankTransactionService } from "../services/bank-transaction";
 
 export const transactionRouter = {
 	getAll: protectedProcedure
@@ -91,25 +88,11 @@ export const transactionRouter = {
 			}),
 		)
 		.handler(async ({ input }) => {
-			const transactions = input.transactions.map((tx) => {
-				return {
-					...tx,
-					accountId: input.accountId,
-					fileImportId: input.fileImportId,
-				};
-			});
-
-			const objs = await db
-				.insert(transaction)
-				.values(transactions as TransactionInsert[])
-				.onConflictDoNothing();
-
-			await db
-				.update(fileImport)
-				.set({ status: "success" })
-				.where(eq(fileImport.id, input.fileImportId));
-
-			return objs;
+			return await BankTransactionService.bulkCreate(
+				input.transactions,
+				input.accountId,
+				input.fileImportId,
+			);
 		}),
 
 	summary: protectedProcedure
@@ -387,21 +370,19 @@ export const transactionRouter = {
 	updateCategory: protectedProcedure
 		.input(z.object({ id: z.number(), categoryId: z.number().nullable() }))
 		.handler(async ({ input }) => {
-			return await db
-				.update(transaction)
-				.set({ categoryId: input.categoryId })
-				.where(eq(transaction.id, input.id));
+			BankTransactionService.updateCategory(input.id, input.categoryId);
+		}),
+
+	previewImport: protectedProcedure
+		.input(z.number())
+		.handler(async ({ input }) => {
+			return BankTransactionService.previewImport(input);
 		}),
 
 	createImport: protectedProcedure
 		.input(z.number())
 		.handler(async ({ input }) => {
-			const [obj] = await db.insert(fileImport).values({}).returning();
-			await db
-				.update(file)
-				.set({ fileImportId: obj?.id })
-				.where(eq(file.id, input));
-			return obj;
+			return await BankTransactionService.createImport(input);
 		}),
 
 	importList: protectedProcedure
