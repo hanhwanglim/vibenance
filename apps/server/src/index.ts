@@ -8,6 +8,7 @@ import { createContext } from "@vibenance/api/context";
 import { appRouter } from "@vibenance/api/routers/index";
 import { auth } from "@vibenance/auth";
 import { Hono } from "hono";
+import { serveStatic } from "hono/bun";
 import { cors } from "hono/cors";
 import { logger } from "hono/logger";
 import { bot } from "./bot";
@@ -72,9 +73,30 @@ app.use("/*", async (c, next) => {
 	await next();
 });
 
-app.get("/", (c) => {
-	return c.text("OK");
-});
+if (process.env.NODE_ENV === "production") {
+	const staticPath = process.env.STATIC_PATH || "../web/dist";
+
+	app.use(
+		"/*",
+		serveStatic({
+			root: staticPath,
+			rewriteRequestPath: (path) => {
+				return path.startsWith("/") ? path.slice(1) : path;
+			},
+		}),
+	);
+
+	app.get(
+		"*",
+		serveStatic({
+			path: `${staticPath}/index.html`,
+		}),
+	);
+} else {
+	app.get("/", (c) => {
+		return c.text("OK");
+	});
+}
 
 bot.start();
 

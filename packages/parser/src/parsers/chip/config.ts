@@ -1,5 +1,4 @@
 import type { BunFile } from "bun";
-import { PDFParse } from "pdf-parse";
 
 export const ChipPdfHeaders = [
 	"Date",
@@ -16,6 +15,8 @@ export interface ChipTransactionRow {
 }
 
 export async function isChipPdf(file: BunFile) {
+	const { PDFParse } = await import("pdf-parse");
+
 	const parser = new PDFParse({ data: await file.arrayBuffer() });
 	try {
 		const { pages } = await parser.getText();

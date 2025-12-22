@@ -1,5 +1,4 @@
 import type { BunFile } from "bun";
-import { PDFParse } from "pdf-parse";
 
 export interface ChaseTransactionRow {
 	Date: Date;
@@ -9,6 +8,8 @@ export interface ChaseTransactionRow {
 }
 
 export async function isChasePdf(file: BunFile) {
+	const { PDFParse } = await import("pdf-parse");
+
 	const parser = new PDFParse({ data: await file.arrayBuffer() });
 	try {
 		const { pages } = await parser.getText();

@@ -1,5 +1,4 @@
 import type { BunFile } from "bun";
-import { PDFParse } from "pdf-parse";
 
 export const HsbcPdfHeaders = [
 	"Received By Us",
@@ -16,6 +15,8 @@ export interface HsbcTransactionRow {
 }
 
 export async function isHsbcPdf(file: BunFile) {
+	const { PDFParse } = await import("pdf-parse");
+
 	const parser = new PDFParse({ data: await file.arrayBuffer() });
 
 	const { pages } = await parser.getText();

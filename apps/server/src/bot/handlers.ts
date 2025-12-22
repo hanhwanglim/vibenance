@@ -1,7 +1,6 @@
 import { BankAccountService } from "@vibenance/api/services/bank-account";
 import { BankTransactionService } from "@vibenance/api/services/bank-transaction";
-import { FileImportService, FileService } from "@vibenance/api/services/file";
-import { account } from "@vibenance/db/schema/auth";
+import { FileService } from "@vibenance/api/services/file";
 import { type CommandContext, type Context, InlineKeyboard } from "grammy";
 import { botState } from "./state";
 import { sendError } from "./utils";
