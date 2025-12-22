@@ -28,7 +28,6 @@
 		"dotenv": "catalog:",
 		"drizzle-orm": "catalog:",
 		"hono": "catalog:",
-		"papaparse": "^5.5.3",
 		"zod": "^4.1.11"
 	}
 }

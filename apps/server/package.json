@@ -10,7 +10,7 @@
 		"start": "bun run dist/index.js"
 	},
 	"dependencies": {
-		"@orpc/client": "^1.13.0",
+		"@orpc/client": "catalog:",
 		"@orpc/openapi": "catalog:",
 		"@orpc/server": "catalog:",
 		"@orpc/zod": "catalog:",
