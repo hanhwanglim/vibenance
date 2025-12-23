@@ -1,5 +1,6 @@
 import { db } from "@vibenance/db";
 import { transaction } from "@vibenance/db/schema/transaction";
+import { eq } from "drizzle-orm";
 
 type TransactionInsert = typeof transaction.$inferInsert;
 

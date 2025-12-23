@@ -79,7 +79,7 @@ const columns: ColumnDef<TransactionSelect>[] = [
 			const handleChange = (value: string) => {
 				const mutation = table.options.meta.updateCategoryMutation;
 				const payload = { id: row.original.id, categoryId: null };
-				if (value) {
+				if (value !== "null") {
 					payload.categoryId = Number(value);
 				}
 				mutation.mutate(payload, {
