@@ -22,7 +22,7 @@
 		"dotenv": "catalog:",
 		"grammy": "^1.38.4",
 		"hono": "catalog:",
-		"zod": "^4.1.11"
+		"zod": "catalog:"
 	},
 	"devDependencies": {
 		"typescript": "^5.8.2",

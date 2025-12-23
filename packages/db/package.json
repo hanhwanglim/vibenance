@@ -37,6 +37,6 @@
 		"dotenv": "catalog:",
 		"drizzle-orm": "catalog:",
 		"pg": "^8.14.1",
-		"zod": "^4.1.11"
+		"zod": "catalog:"
 	}
 }

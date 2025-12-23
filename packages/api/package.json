@@ -28,6 +28,6 @@
 		"dotenv": "catalog:",
 		"drizzle-orm": "catalog:",
 		"hono": "catalog:",
-		"zod": "^4.1.11"
+		"zod": "catalog:"
 	}
 }
