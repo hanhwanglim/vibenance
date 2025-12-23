@@ -11,10 +11,10 @@ import {
 	SelectValue,
 } from "@/components/ui/select";
 import { authClient } from "@/lib/auth-client";
-import { TransactionPreviewTable } from "@/modules/assets/components/transaction-preview-table";
+import { TransactionPreviewTable } from "@/modules/transactions/components/transaction-preview-table";
 import { orpc } from "@/utils/orpc";
 
-export const Route = createFileRoute("/assets/imports/$id")({
+export const Route = createFileRoute("/_app/transactions/imports/$id")({
 	component: RouteComponent,
 	beforeLoad: async ({ params }) => {
 		const session = await authClient.getSession();
@@ -22,10 +22,7 @@ export const Route = createFileRoute("/assets/imports/$id")({
 
 		const fileId = Number(params.id);
 		const file = orpc.file.get.queryOptions({ input: fileId });
-
-		if (!file) {
-			redirect({ to: "/assets", throw: true });
-		}
+		if (!file) redirect({ to: "/transactions", throw: true });
 
 		return { session, file };
 	},
@@ -34,6 +31,7 @@ export const Route = createFileRoute("/assets/imports/$id")({
 function RouteComponent() {
 	const { id } = Route.useParams();
 	const navigate = useNavigate();
+
 	const [selectedAccountId, setSelectedAccountId] = useState<string>("");
 
 	const { data: bankAccounts } = useQuery(
@@ -41,10 +39,12 @@ function RouteComponent() {
 	);
 
 	const { data: previewData } = useQuery(
-		orpc.asset.importPreview.queryOptions({ input: Number(id) }),
+		orpc.transaction.previewImport.queryOptions({ input: Number(id) }),
 	);
 
-	const importMutation = useMutation(orpc.asset.create.mutationOptions({}));
+	const importMutation = useMutation(
+		orpc.transaction.create.mutationOptions({}),
+	);
 
 	const handleImport = () => {
 		const payload = {
@@ -58,7 +58,7 @@ function RouteComponent() {
 				toast.success(
 					`Successfully imported ${payload.transactions.length} transactions`,
 				);
-				navigate({ to: "/assets" });
+				navigate({ to: "/transactions" });
 			},
 			onError: (error) => {
 				toast.error(`Failed to import transactions: ${error.message}`);
@@ -91,7 +91,7 @@ function RouteComponent() {
 					{importMutation.isPending ? "Importing..." : "Import Transactions"}
 				</Button>
 			</div>
-			<TransactionPreviewTable data={previewData || []} />
+			<TransactionPreviewTable fileId={Number(id)} data={previewData || []} />
 		</div>
 	);
 }

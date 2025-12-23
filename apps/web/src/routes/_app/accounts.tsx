@@ -6,7 +6,7 @@ import { Dialog } from "@/components/ui/dialog";
 import { AccountCards } from "@/modules/accounts/components/account-card";
 import { AccountDialog } from "@/modules/accounts/components/create-account-dialog";
 
-export const Route = createFileRoute("/accounts")({
+export const Route = createFileRoute("/_app/accounts")({
 	component: RouteComponent,
 });
 

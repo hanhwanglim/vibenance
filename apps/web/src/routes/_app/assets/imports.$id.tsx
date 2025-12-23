@@ -11,10 +11,10 @@ import {
 	SelectValue,
 } from "@/components/ui/select";
 import { authClient } from "@/lib/auth-client";
-import { TransactionPreviewTable } from "@/modules/transactions/components/transaction-preview-table";
+import { TransactionPreviewTable } from "@/modules/assets/components/transaction-preview-table";
 import { orpc } from "@/utils/orpc";
 
-export const Route = createFileRoute("/transactions/imports/$id")({
+export const Route = createFileRoute("/_app/assets/imports/$id")({
 	component: RouteComponent,
 	beforeLoad: async ({ params }) => {
 		const session = await authClient.getSession();
@@ -24,7 +24,7 @@ export const Route = createFileRoute("/transactions/imports/$id")({
 		const file = orpc.file.get.queryOptions({ input: fileId });
 
 		if (!file) {
-			redirect({ to: "/transactions", throw: true });
+			redirect({ to: "/assets", throw: true });
 		}
 
 		return { session, file };
@@ -41,12 +41,10 @@ function RouteComponent() {
 	);
 
 	const { data: previewData } = useQuery(
-		orpc.transaction.previewImport.queryOptions({ input: Number(id) }),
+		orpc.asset.importPreview.queryOptions({ input: Number(id) }),
 	);
 
-	const importMutation = useMutation(
-		orpc.transaction.create.mutationOptions({}),
-	);
+	const importMutation = useMutation(orpc.asset.create.mutationOptions({}));
 
 	const handleImport = () => {
 		const payload = {
@@ -60,7 +58,7 @@ function RouteComponent() {
 				toast.success(
 					`Successfully imported ${payload.transactions.length} transactions`,
 				);
-				navigate({ to: "/transactions" });
+				navigate({ to: "/assets" });
 			},
 			onError: (error) => {
 				toast.error(`Failed to import transactions: ${error.message}`);
@@ -93,7 +91,7 @@ function RouteComponent() {
 					{importMutation.isPending ? "Importing..." : "Import Transactions"}
 				</Button>
 			</div>
-			<TransactionPreviewTable fileId={Number(id)} data={previewData || []} />
+			<TransactionPreviewTable data={previewData || []} />
 		</div>
 	);
 }

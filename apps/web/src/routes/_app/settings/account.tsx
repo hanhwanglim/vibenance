@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { orpc, queryClient } from "@/utils/orpc";
 
-export const Route = createFileRoute("/settings/account")({
+export const Route = createFileRoute("/_app/settings/account")({
 	component: RouteComponent,
 });
 

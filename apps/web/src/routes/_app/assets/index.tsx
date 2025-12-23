@@ -33,7 +33,7 @@ import { authClient } from "@/lib/auth-client";
 import { ImportDialog } from "@/modules/assets/components/import-dialog";
 import { TransactionTable } from "@/modules/assets/components/transaction-table";
 
-export const Route = createFileRoute("/assets/")({
+export const Route = createFileRoute("/_app/assets/")({
 	component: RouteComponent,
 	beforeLoad: async () => {
 		const session = await authClient.getSession();

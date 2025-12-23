@@ -9,131 +9,128 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as TodosRouteImport } from './routes/todos'
 import { Route as LoginRouteImport } from './routes/login'
-import { Route as DashboardRouteImport } from './routes/dashboard'
-import { Route as AccountsRouteImport } from './routes/accounts'
-import { Route as IndexRouteImport } from './routes/index'
-import { Route as TransactionsIndexRouteImport } from './routes/transactions/index'
-import { Route as AssetsIndexRouteImport } from './routes/assets/index'
-import { Route as TransactionsImportsRouteImport } from './routes/transactions/imports'
-import { Route as SettingsAccountRouteImport } from './routes/settings/account'
-import { Route as AssetsImportsRouteImport } from './routes/assets/imports'
-import { Route as TransactionsImportsIdRouteImport } from './routes/transactions/imports.$id'
-import { Route as AssetsImportsIdRouteImport } from './routes/assets/imports.$id'
+import { Route as AppRouteImport } from './routes/_app'
+import { Route as AppIndexRouteImport } from './routes/_app/index'
+import { Route as AppDashboardRouteImport } from './routes/_app/dashboard'
+import { Route as AppAccountsRouteImport } from './routes/_app/accounts'
+import { Route as AppTransactionsIndexRouteImport } from './routes/_app/transactions/index'
+import { Route as AppAssetsIndexRouteImport } from './routes/_app/assets/index'
+import { Route as AppTransactionsImportsRouteImport } from './routes/_app/transactions/imports'
+import { Route as AppSettingsAccountRouteImport } from './routes/_app/settings/account'
+import { Route as AppAssetsImportsRouteImport } from './routes/_app/assets/imports'
+import { Route as AppTransactionsImportsIdRouteImport } from './routes/_app/transactions/imports.$id'
+import { Route as AppAssetsImportsIdRouteImport } from './routes/_app/assets/imports.$id'
 
-const TodosRoute = TodosRouteImport.update({
-  id: '/todos',
-  path: '/todos',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
   path: '/login',
   getParentRoute: () => rootRouteImport,
 } as any)
-const DashboardRoute = DashboardRouteImport.update({
-  id: '/dashboard',
-  path: '/dashboard',
+const AppRoute = AppRouteImport.update({
+  id: '/_app',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AccountsRoute = AccountsRouteImport.update({
-  id: '/accounts',
-  path: '/accounts',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const IndexRoute = IndexRouteImport.update({
+const AppIndexRoute = AppIndexRouteImport.update({
   id: '/',
   path: '/',
-  getParentRoute: () => rootRouteImport,
+  getParentRoute: () => AppRoute,
 } as any)
-const TransactionsIndexRoute = TransactionsIndexRouteImport.update({
+const AppDashboardRoute = AppDashboardRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppAccountsRoute = AppAccountsRouteImport.update({
+  id: '/accounts',
+  path: '/accounts',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppTransactionsIndexRoute = AppTransactionsIndexRouteImport.update({
   id: '/transactions/',
   path: '/transactions/',
-  getParentRoute: () => rootRouteImport,
+  getParentRoute: () => AppRoute,
 } as any)
-const AssetsIndexRoute = AssetsIndexRouteImport.update({
+const AppAssetsIndexRoute = AppAssetsIndexRouteImport.update({
   id: '/assets/',
   path: '/assets/',
-  getParentRoute: () => rootRouteImport,
+  getParentRoute: () => AppRoute,
 } as any)
-const TransactionsImportsRoute = TransactionsImportsRouteImport.update({
+const AppTransactionsImportsRoute = AppTransactionsImportsRouteImport.update({
   id: '/transactions/imports',
   path: '/transactions/imports',
-  getParentRoute: () => rootRouteImport,
+  getParentRoute: () => AppRoute,
 } as any)
-const SettingsAccountRoute = SettingsAccountRouteImport.update({
+const AppSettingsAccountRoute = AppSettingsAccountRouteImport.update({
   id: '/settings/account',
   path: '/settings/account',
-  getParentRoute: () => rootRouteImport,
+  getParentRoute: () => AppRoute,
 } as any)
-const AssetsImportsRoute = AssetsImportsRouteImport.update({
+const AppAssetsImportsRoute = AppAssetsImportsRouteImport.update({
   id: '/assets/imports',
   path: '/assets/imports',
-  getParentRoute: () => rootRouteImport,
+  getParentRoute: () => AppRoute,
 } as any)
-const TransactionsImportsIdRoute = TransactionsImportsIdRouteImport.update({
+const AppTransactionsImportsIdRoute =
+  AppTransactionsImportsIdRouteImport.update({
+    id: '/$id',
+    path: '/$id',
+    getParentRoute: () => AppTransactionsImportsRoute,
+  } as any)
+const AppAssetsImportsIdRoute = AppAssetsImportsIdRouteImport.update({
   id: '/$id',
   path: '/$id',
-  getParentRoute: () => TransactionsImportsRoute,
-} as any)
-const AssetsImportsIdRoute = AssetsImportsIdRouteImport.update({
-  id: '/$id',
-  path: '/$id',
-  getParentRoute: () => AssetsImportsRoute,
+  getParentRoute: () => AppAssetsImportsRoute,
 } as any)
 
 export interface FileRoutesByFullPath {
-  '/': typeof IndexRoute
-  '/accounts': typeof AccountsRoute
-  '/dashboard': typeof DashboardRoute
   '/login': typeof LoginRoute
-  '/todos': typeof TodosRoute
-  '/assets/imports': typeof AssetsImportsRouteWithChildren
-  '/settings/account': typeof SettingsAccountRoute
-  '/transactions/imports': typeof TransactionsImportsRouteWithChildren
-  '/assets': typeof AssetsIndexRoute
-  '/transactions': typeof TransactionsIndexRoute
-  '/assets/imports/$id': typeof AssetsImportsIdRoute
-  '/transactions/imports/$id': typeof TransactionsImportsIdRoute
+  '/accounts': typeof AppAccountsRoute
+  '/dashboard': typeof AppDashboardRoute
+  '/': typeof AppIndexRoute
+  '/assets/imports': typeof AppAssetsImportsRouteWithChildren
+  '/settings/account': typeof AppSettingsAccountRoute
+  '/transactions/imports': typeof AppTransactionsImportsRouteWithChildren
+  '/assets': typeof AppAssetsIndexRoute
+  '/transactions': typeof AppTransactionsIndexRoute
+  '/assets/imports/$id': typeof AppAssetsImportsIdRoute
+  '/transactions/imports/$id': typeof AppTransactionsImportsIdRoute
 }
 export interface FileRoutesByTo {
-  '/': typeof IndexRoute
-  '/accounts': typeof AccountsRoute
-  '/dashboard': typeof DashboardRoute
   '/login': typeof LoginRoute
-  '/todos': typeof TodosRoute
-  '/assets/imports': typeof AssetsImportsRouteWithChildren
-  '/settings/account': typeof SettingsAccountRoute
-  '/transactions/imports': typeof TransactionsImportsRouteWithChildren
-  '/assets': typeof AssetsIndexRoute
-  '/transactions': typeof TransactionsIndexRoute
-  '/assets/imports/$id': typeof AssetsImportsIdRoute
-  '/transactions/imports/$id': typeof TransactionsImportsIdRoute
+  '/accounts': typeof AppAccountsRoute
+  '/dashboard': typeof AppDashboardRoute
+  '/': typeof AppIndexRoute
+  '/assets/imports': typeof AppAssetsImportsRouteWithChildren
+  '/settings/account': typeof AppSettingsAccountRoute
+  '/transactions/imports': typeof AppTransactionsImportsRouteWithChildren
+  '/assets': typeof AppAssetsIndexRoute
+  '/transactions': typeof AppTransactionsIndexRoute
+  '/assets/imports/$id': typeof AppAssetsImportsIdRoute
+  '/transactions/imports/$id': typeof AppTransactionsImportsIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
-  '/': typeof IndexRoute
-  '/accounts': typeof AccountsRoute
-  '/dashboard': typeof DashboardRoute
+  '/_app': typeof AppRouteWithChildren
   '/login': typeof LoginRoute
-  '/todos': typeof TodosRoute
-  '/assets/imports': typeof AssetsImportsRouteWithChildren
-  '/settings/account': typeof SettingsAccountRoute
-  '/transactions/imports': typeof TransactionsImportsRouteWithChildren
-  '/assets/': typeof AssetsIndexRoute
-  '/transactions/': typeof TransactionsIndexRoute
-  '/assets/imports/$id': typeof AssetsImportsIdRoute
-  '/transactions/imports/$id': typeof TransactionsImportsIdRoute
+  '/_app/accounts': typeof AppAccountsRoute
+  '/_app/dashboard': typeof AppDashboardRoute
+  '/_app/': typeof AppIndexRoute
+  '/_app/assets/imports': typeof AppAssetsImportsRouteWithChildren
+  '/_app/settings/account': typeof AppSettingsAccountRoute
+  '/_app/transactions/imports': typeof AppTransactionsImportsRouteWithChildren
+  '/_app/assets/': typeof AppAssetsIndexRoute
+  '/_app/transactions/': typeof AppTransactionsIndexRoute
+  '/_app/assets/imports/$id': typeof AppAssetsImportsIdRoute
+  '/_app/transactions/imports/$id': typeof AppTransactionsImportsIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
-    | '/'
+    | '/login'
     | '/accounts'
     | '/dashboard'
-    | '/login'
-    | '/todos'
+    | '/'
     | '/assets/imports'
     | '/settings/account'
     | '/transactions/imports'
@@ -143,11 +140,10 @@ export interface FileRouteTypes {
     | '/transactions/imports/$id'
   fileRoutesByTo: FileRoutesByTo
   to:
-    | '/'
+    | '/login'
     | '/accounts'
     | '/dashboard'
-    | '/login'
-    | '/todos'
+    | '/'
     | '/assets/imports'
     | '/settings/account'
     | '/transactions/imports'
@@ -157,42 +153,27 @@ export interface FileRouteTypes {
     | '/transactions/imports/$id'
   id:
     | '__root__'
-    | '/'
-    | '/accounts'
-    | '/dashboard'
+    | '/_app'
     | '/login'
-    | '/todos'
-    | '/assets/imports'
-    | '/settings/account'
-    | '/transactions/imports'
-    | '/assets/'
-    | '/transactions/'
-    | '/assets/imports/$id'
-    | '/transactions/imports/$id'
+    | '/_app/accounts'
+    | '/_app/dashboard'
+    | '/_app/'
+    | '/_app/assets/imports'
+    | '/_app/settings/account'
+    | '/_app/transactions/imports'
+    | '/_app/assets/'
+    | '/_app/transactions/'
+    | '/_app/assets/imports/$id'
+    | '/_app/transactions/imports/$id'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
-  IndexRoute: typeof IndexRoute
-  AccountsRoute: typeof AccountsRoute
-  DashboardRoute: typeof DashboardRoute
+  AppRoute: typeof AppRouteWithChildren
   LoginRoute: typeof LoginRoute
-  TodosRoute: typeof TodosRoute
-  AssetsImportsRoute: typeof AssetsImportsRouteWithChildren
-  SettingsAccountRoute: typeof SettingsAccountRoute
-  TransactionsImportsRoute: typeof TransactionsImportsRouteWithChildren
-  AssetsIndexRoute: typeof AssetsIndexRoute
-  TransactionsIndexRoute: typeof TransactionsIndexRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/todos': {
-      id: '/todos'
-      path: '/todos'
-      fullPath: '/todos'
-      preLoaderRoute: typeof TodosRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/login': {
       id: '/login'
       path: '/login'
@@ -200,113 +181,138 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LoginRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/dashboard': {
-      id: '/dashboard'
-      path: '/dashboard'
-      fullPath: '/dashboard'
-      preLoaderRoute: typeof DashboardRouteImport
+    '/_app': {
+      id: '/_app'
+      path: ''
+      fullPath: ''
+      preLoaderRoute: typeof AppRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/accounts': {
-      id: '/accounts'
-      path: '/accounts'
-      fullPath: '/accounts'
-      preLoaderRoute: typeof AccountsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/': {
-      id: '/'
+    '/_app/': {
+      id: '/_app/'
       path: '/'
       fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
-      parentRoute: typeof rootRouteImport
+      preLoaderRoute: typeof AppIndexRouteImport
+      parentRoute: typeof AppRoute
     }
-    '/transactions/': {
-      id: '/transactions/'
+    '/_app/dashboard': {
+      id: '/_app/dashboard'
+      path: '/dashboard'
+      fullPath: '/dashboard'
+      preLoaderRoute: typeof AppDashboardRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/accounts': {
+      id: '/_app/accounts'
+      path: '/accounts'
+      fullPath: '/accounts'
+      preLoaderRoute: typeof AppAccountsRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/transactions/': {
+      id: '/_app/transactions/'
       path: '/transactions'
       fullPath: '/transactions'
-      preLoaderRoute: typeof TransactionsIndexRouteImport
-      parentRoute: typeof rootRouteImport
+      preLoaderRoute: typeof AppTransactionsIndexRouteImport
+      parentRoute: typeof AppRoute
     }
-    '/assets/': {
-      id: '/assets/'
+    '/_app/assets/': {
+      id: '/_app/assets/'
       path: '/assets'
       fullPath: '/assets'
-      preLoaderRoute: typeof AssetsIndexRouteImport
-      parentRoute: typeof rootRouteImport
+      preLoaderRoute: typeof AppAssetsIndexRouteImport
+      parentRoute: typeof AppRoute
     }
-    '/transactions/imports': {
-      id: '/transactions/imports'
+    '/_app/transactions/imports': {
+      id: '/_app/transactions/imports'
       path: '/transactions/imports'
       fullPath: '/transactions/imports'
-      preLoaderRoute: typeof TransactionsImportsRouteImport
-      parentRoute: typeof rootRouteImport
+      preLoaderRoute: typeof AppTransactionsImportsRouteImport
+      parentRoute: typeof AppRoute
     }
-    '/settings/account': {
-      id: '/settings/account'
+    '/_app/settings/account': {
+      id: '/_app/settings/account'
       path: '/settings/account'
       fullPath: '/settings/account'
-      preLoaderRoute: typeof SettingsAccountRouteImport
-      parentRoute: typeof rootRouteImport
+      preLoaderRoute: typeof AppSettingsAccountRouteImport
+      parentRoute: typeof AppRoute
     }
-    '/assets/imports': {
-      id: '/assets/imports'
+    '/_app/assets/imports': {
+      id: '/_app/assets/imports'
       path: '/assets/imports'
       fullPath: '/assets/imports'
-      preLoaderRoute: typeof AssetsImportsRouteImport
-      parentRoute: typeof rootRouteImport
+      preLoaderRoute: typeof AppAssetsImportsRouteImport
+      parentRoute: typeof AppRoute
     }
-    '/transactions/imports/$id': {
-      id: '/transactions/imports/$id'
+    '/_app/transactions/imports/$id': {
+      id: '/_app/transactions/imports/$id'
       path: '/$id'
       fullPath: '/transactions/imports/$id'
-      preLoaderRoute: typeof TransactionsImportsIdRouteImport
-      parentRoute: typeof TransactionsImportsRoute
+      preLoaderRoute: typeof AppTransactionsImportsIdRouteImport
+      parentRoute: typeof AppTransactionsImportsRoute
     }
-    '/assets/imports/$id': {
-      id: '/assets/imports/$id'
+    '/_app/assets/imports/$id': {
+      id: '/_app/assets/imports/$id'
       path: '/$id'
       fullPath: '/assets/imports/$id'
-      preLoaderRoute: typeof AssetsImportsIdRouteImport
-      parentRoute: typeof AssetsImportsRoute
+      preLoaderRoute: typeof AppAssetsImportsIdRouteImport
+      parentRoute: typeof AppAssetsImportsRoute
     }
   }
 }
 
-interface AssetsImportsRouteChildren {
-  AssetsImportsIdRoute: typeof AssetsImportsIdRoute
+interface AppAssetsImportsRouteChildren {
+  AppAssetsImportsIdRoute: typeof AppAssetsImportsIdRoute
 }
 
-const AssetsImportsRouteChildren: AssetsImportsRouteChildren = {
-  AssetsImportsIdRoute: AssetsImportsIdRoute,
+const AppAssetsImportsRouteChildren: AppAssetsImportsRouteChildren = {
+  AppAssetsImportsIdRoute: AppAssetsImportsIdRoute,
 }
 
-const AssetsImportsRouteWithChildren = AssetsImportsRoute._addFileChildren(
-  AssetsImportsRouteChildren,
-)
+const AppAssetsImportsRouteWithChildren =
+  AppAssetsImportsRoute._addFileChildren(AppAssetsImportsRouteChildren)
 
-interface TransactionsImportsRouteChildren {
-  TransactionsImportsIdRoute: typeof TransactionsImportsIdRoute
+interface AppTransactionsImportsRouteChildren {
+  AppTransactionsImportsIdRoute: typeof AppTransactionsImportsIdRoute
 }
 
-const TransactionsImportsRouteChildren: TransactionsImportsRouteChildren = {
-  TransactionsImportsIdRoute: TransactionsImportsIdRoute,
+const AppTransactionsImportsRouteChildren: AppTransactionsImportsRouteChildren =
+  {
+    AppTransactionsImportsIdRoute: AppTransactionsImportsIdRoute,
+  }
+
+const AppTransactionsImportsRouteWithChildren =
+  AppTransactionsImportsRoute._addFileChildren(
+    AppTransactionsImportsRouteChildren,
+  )
+
+interface AppRouteChildren {
+  AppAccountsRoute: typeof AppAccountsRoute
+  AppDashboardRoute: typeof AppDashboardRoute
+  AppIndexRoute: typeof AppIndexRoute
+  AppAssetsImportsRoute: typeof AppAssetsImportsRouteWithChildren
+  AppSettingsAccountRoute: typeof AppSettingsAccountRoute
+  AppTransactionsImportsRoute: typeof AppTransactionsImportsRouteWithChildren
+  AppAssetsIndexRoute: typeof AppAssetsIndexRoute
+  AppTransactionsIndexRoute: typeof AppTransactionsIndexRoute
 }
 
-const TransactionsImportsRouteWithChildren =
-  TransactionsImportsRoute._addFileChildren(TransactionsImportsRouteChildren)
+const AppRouteChildren: AppRouteChildren = {
+  AppAccountsRoute: AppAccountsRoute,
+  AppDashboardRoute: AppDashboardRoute,
+  AppIndexRoute: AppIndexRoute,
+  AppAssetsImportsRoute: AppAssetsImportsRouteWithChildren,
+  AppSettingsAccountRoute: AppSettingsAccountRoute,
+  AppTransactionsImportsRoute: AppTransactionsImportsRouteWithChildren,
+  AppAssetsIndexRoute: AppAssetsIndexRoute,
+  AppTransactionsIndexRoute: AppTransactionsIndexRoute,
+}
+
+const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
 
 const rootRouteChildren: RootRouteChildren = {
-  IndexRoute: IndexRoute,
-  AccountsRoute: AccountsRoute,
-  DashboardRoute: DashboardRoute,
+  AppRoute: AppRouteWithChildren,
   LoginRoute: LoginRoute,
-  TodosRoute: TodosRoute,
-  AssetsImportsRoute: AssetsImportsRouteWithChildren,
-  SettingsAccountRoute: SettingsAccountRoute,
-  TransactionsImportsRoute: TransactionsImportsRouteWithChildren,
-  AssetsIndexRoute: AssetsIndexRoute,
-  TransactionsIndexRoute: TransactionsIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

@@ -1,8 +1,9 @@
 import { createFileRoute, Outlet, redirect } from "@tanstack/react-router";
+import { Toaster } from "@/components/ui/sonner";
+import Layout from "@/layouts/layout";
 import { authClient } from "@/lib/auth-client";
-import { ImportHistoryTable } from "@/modules/transactions/components/import-history-table";
 
-export const Route = createFileRoute("/transactions/imports")({
+export const Route = createFileRoute("/_app")({
 	component: RouteComponent,
 	beforeLoad: async () => {
 		const session = await authClient.getSession();
@@ -12,9 +13,14 @@ export const Route = createFileRoute("/transactions/imports")({
 });
 
 function RouteComponent() {
-	if (location.pathname !== "/transactions/import") {
-		return <Outlet />;
-	}
-
-	return <ImportHistoryTable />;
+	return (
+		<>
+			<div className="min-h-svh">
+				<Layout>
+					<Outlet />
+				</Layout>
+			</div>
+			<Toaster richColors />
+		</>
+	);
 }
