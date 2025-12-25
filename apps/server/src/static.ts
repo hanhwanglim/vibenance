@@ -21,7 +21,8 @@ function setupProductionStaticServing(app: Hono) {
 	app.get(
 		"*",
 		serveStatic({
-			path: `${config.staticPath}/index.html`,
+			root: config.staticPath,
+			rewriteRequestPath: () => "index.html",
 		}),
 	);
 }
