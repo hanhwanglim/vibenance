@@ -5,9 +5,12 @@ import { QueryCache, QueryClient } from "@tanstack/react-query";
 import type { AppRouterClient } from "@vibenance/api/routers/index";
 import { toast } from "sonner";
 
+const serverUrl = import.meta.env.VITE_SERVER_URL || "http://localhost:3000";
+
 export const queryClient = new QueryClient({
 	queryCache: new QueryCache({
 		onError: (error) => {
+			console.error(error);
 			toast.error(`Error: ${error.message}`, {
 				action: {
 					label: "retry",
@@ -21,7 +24,7 @@ export const queryClient = new QueryClient({
 });
 
 export const link = new RPCLink({
-	url: `${import.meta.env.VITE_SERVER_URL}/rpc`,
+	url: `${serverUrl}/rpc`,
 	fetch(url, options) {
 		return fetch(url, {
 			...options,
