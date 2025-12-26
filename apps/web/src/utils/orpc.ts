@@ -5,7 +5,11 @@ import { QueryCache, QueryClient } from "@tanstack/react-query";
 import type { AppRouterClient } from "@vibenance/api/routers/index";
 import { toast } from "sonner";
 
-const serverUrl = import.meta.env.VITE_SERVER_URL || "http://localhost:3000";
+// In production, use relative URLs since web app is served from the same server
+// In development, use localhost:3000 as fallback
+const serverUrl =
+	import.meta.env.VITE_SERVER_URL ||
+	(import.meta.env.PROD ? "" : "http://localhost:3000");
 
 export const queryClient = new QueryClient({
 	queryCache: new QueryCache({
