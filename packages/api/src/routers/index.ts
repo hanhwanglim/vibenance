@@ -5,7 +5,6 @@ import { assetRouter } from "./asset";
 import { bankAccountRouter } from "./bank-account";
 import { fileRouter } from "./file";
 import { settingsRouter } from "./settings";
-import { todoRouter } from "./todo";
 import { transactionRouter } from "./transaction";
 
 export const appRouter = {
@@ -18,7 +17,6 @@ export const appRouter = {
 			user: context.session?.user,
 		};
 	}),
-	todo: todoRouter,
 	transaction: transactionRouter,
 	bankAccount: bankAccountRouter,
 	asset: assetRouter,
