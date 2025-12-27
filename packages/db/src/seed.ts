@@ -30,19 +30,19 @@ const defaultCategories = [
 const defaultAccounts = [
 	{
 		name: "Amex",
-		type: "credit_card",
+		type: "credit_card" as const,
 		accountNumber: "12897128",
 		bankName: "American Express",
 		color: "silver",
 	},
 	{
 		name: "Monzo",
-		type: "current",
+		type: "current" as const,
 		accountNumber: "98675787",
 		bankName: "Monzo",
 		color: "orange",
 	},
-];
+] as const;
 
 async function main() {
 	console.log("Starting seed...");
@@ -98,13 +98,17 @@ async function main() {
 main();
 
 function generateTransaction(
-	accountIds: number[],
-	categoryIds: number[],
+	accountIds: string[],
+	categoryIds: string[],
 ): TransactionInsert {
+	const accountId = sample(accountIds);
+	if (!accountId) {
+		throw new Error("No account IDs available");
+	}
 	return {
 		timestamp: faker.date.past(),
-		accountId: sample(accountIds),
-		transactionHash: faker.string.uuid(),
+		accountId,
+		transactionId: faker.string.uuid(),
 		name: faker.string.alphanumeric(),
 		currency: faker.finance.currencyCode(),
 		amount: faker.finance.amount(),

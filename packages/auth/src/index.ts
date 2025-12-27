@@ -2,6 +2,7 @@ import { db } from "@vibenance/db";
 import * as schema from "@vibenance/db/schema/auth";
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
+import { config } from "./config";
 
 export const auth = betterAuth({
 	database: drizzleAdapter(db, {
@@ -9,7 +10,7 @@ export const auth = betterAuth({
 
 		schema: schema,
 	}),
-	trustedOrigins: [process.env.CORS_ORIGIN || ""],
+	trustedOrigins: [config.corsOrigin || ""],
 	emailAndPassword: {
 		enabled: true,
 	},
