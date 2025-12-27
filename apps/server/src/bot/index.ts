@@ -1,6 +1,6 @@
 import { Bot, GrammyError, HttpError } from "grammy";
 import { handleDocuments, handleImport, help, start } from "./handlers";
-import { logging } from "./middleware";
+import { authenticate, logging } from "./middleware";
 
 if (!process.env.TELEGRAM_BOT_TOKEN) {
 	console.error("[BOT]\tBot token not set");
@@ -10,7 +10,7 @@ if (!process.env.TELEGRAM_BOT_TOKEN) {
 console.log("Starting Telegram Worker");
 export const bot = new Bot(process.env.TELEGRAM_BOT_TOKEN);
 
-bot.use(logging);
+bot.use(logging, authenticate);
 
 bot.command("start", start);
 bot.command("help", help);
