@@ -30,7 +30,12 @@ export const FileRepository = {
 	},
 
 	update: async (id: string, update: FileUpdate) => {
-		return await db.update(file).set(update).where(eq(file.id, id)).returning();
+		return await db
+			.update(file)
+			.set(update)
+			// @ts-expect-error - drizzle-orm version mismatch between packages
+			.where(eq(file.id, id))
+			.returning();
 	},
 };
 

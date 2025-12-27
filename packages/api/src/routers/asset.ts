@@ -49,7 +49,10 @@ export const assetRouter = {
 		)
 		.handler(async ({ input }) => {
 			return AssetService.bulkCreate(
-				input.transactions,
+				input.transactions.map((tx) => ({
+					...tx,
+					type: tx.type as "buy" | "sell" | "deposit" | "reward" | "other",
+				})),
 				input.accountId,
 				input.fileImportId,
 			);

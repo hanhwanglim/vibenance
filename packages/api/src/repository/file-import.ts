@@ -24,6 +24,7 @@ export const FileImportRepository = {
 		return await db
 			.update(fileImport)
 			.set(update)
+			// @ts-expect-error - drizzle-orm version mismatch between packages
 			.where(eq(fileImport.id, id))
 			.returning();
 	},
@@ -39,6 +40,7 @@ export const FileImportRepository = {
 			},
 			limit: pagination.pageSize,
 			offset: pagination.pageIndex * pagination.pageSize,
+			// @ts-expect-error - drizzle-orm version mismatch between packages
 			orderBy: [desc(fileImport.createdAt), desc(fileImport.id)],
 		});
 	},

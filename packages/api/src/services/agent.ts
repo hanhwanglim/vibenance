@@ -1,4 +1,5 @@
 import { google } from "@ai-sdk/google";
+import type { StreamTextResult } from "ai";
 import { convertToModelMessages, streamText, type UIMessage } from "ai";
 import { AssetService } from "./asset";
 import { BankAccountService } from "./bank-account";
@@ -33,15 +34,21 @@ async function getFinancialSummary() {
 			type: acc.type,
 			bankName: acc.bankName,
 		})),
-		recentTransactions: recentTransactions.map((tx) => ({
-			id: tx.id,
-			timestamp: tx.timestamp,
-			name: tx.name,
-			amount: tx.amount,
-			currency: tx.currency,
-			account: tx.account?.name,
-			category: tx.category?.name,
-		})),
+		recentTransactions: recentTransactions.map((tx) => {
+			const txWithRelations = tx as typeof tx & {
+				account?: { name: string } | null;
+				category?: { name: string } | null;
+			};
+			return {
+				id: tx.id,
+				timestamp: tx.timestamp,
+				name: tx.name,
+				amount: tx.amount,
+				currency: tx.currency,
+				account: txWithRelations.account?.name,
+				category: txWithRelations.category?.name,
+			};
+		}),
 		assetTransactions: assetTransactions.map((tx) => ({
 			id: tx.id,
 			timestamp: tx.timestamp,
@@ -56,7 +63,9 @@ async function getFinancialSummary() {
 }
 
 export const AgentService = {
-	stream: async (messages: UIMessage[]) => {
+	stream: async (
+		messages: UIMessage[],
+	): Promise<StreamTextResult<never, never>> => {
 		const financialData = await getFinancialSummary();
 
 		const systemPrompt = `You are a helpful personal finance assistant. You have access to the user's financial data:

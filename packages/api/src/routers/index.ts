@@ -7,7 +7,7 @@ import { fileRouter } from "./file";
 import { settingsRouter } from "./settings";
 import { transactionRouter } from "./transaction";
 
-export const appRouter = {
+const appRouter = {
 	healthCheck: publicProcedure.handler(() => {
 		return "OK";
 	}),
@@ -24,5 +24,6 @@ export const appRouter = {
 	settings: settingsRouter,
 	agent: agentRouter,
 };
+
 export type AppRouter = typeof appRouter;
 export type AppRouterClient = RouterClient<typeof appRouter>;

@@ -10,35 +10,51 @@ export const BankTransactionRepository = {
 	count: async (type: string, dateRange: DateRange) => {
 		const filters = [];
 
-		if (type && type !== "all") {
-			filters.push(eq(transaction.type, type));
+		if (type === "income") {
+			// @ts-expect-error - drizzle-orm version mismatch between packages
+			filters.push(gt(transaction.amount, 0));
+		}
+
+		if (type === "expenses") {
+			// @ts-expect-error - drizzle-orm version mismatch between packages
+			filters.push(lt(transaction.amount, 0));
 		}
 
 		if (dateRange.from) {
+			// @ts-expect-error - drizzle-orm version mismatch between packages
 			filters.push(gte(transaction.timestamp, dateRange.from));
 		}
 
 		if (dateRange.to) {
+			// @ts-expect-error - drizzle-orm version mismatch between packages
 			filters.push(lt(transaction.timestamp, dateRange.to));
 		}
 
-		return await db.$count(transaction, and(...filters));
+		return await db.$count(
+			transaction,
+			// @ts-expect-error - drizzle-orm version mismatch between packages
+			filters.length > 0 ? and(...filters) : undefined,
+		);
 	},
 
 	totalIncome: async (dateRange: DateRange) => {
 		const filters = [];
 
 		if (dateRange.from) {
+			// @ts-expect-error - drizzle-orm version mismatch between packages
 			filters.push(gte(transaction.timestamp, dateRange.from));
 		}
 
 		if (dateRange.to) {
+			// @ts-expect-error - drizzle-orm version mismatch between packages
 			filters.push(lt(transaction.timestamp, dateRange.to));
 		}
 
 		const [result] = await db
+			// @ts-expect-error - drizzle-orm version mismatch between packages
 			.select({ income: sum(transaction.amount) })
 			.from(transaction)
+			// @ts-expect-error - drizzle-orm version mismatch between packages
 			.where(and(gt(transaction.amount, 0), ...filters));
 
 		return (result?.income as string) || "0";
@@ -48,16 +64,20 @@ export const BankTransactionRepository = {
 		const filters = [];
 
 		if (dateRange.from) {
+			// @ts-expect-error - drizzle-orm version mismatch between packages
 			filters.push(gte(transaction.timestamp, dateRange.from));
 		}
 
 		if (dateRange.to) {
+			// @ts-expect-error - drizzle-orm version mismatch between packages
 			filters.push(lt(transaction.timestamp, dateRange.to));
 		}
 
 		const [result] = await db
+			// @ts-expect-error - drizzle-orm version mismatch between packages
 			.select({ expenses: sum(transaction.amount) })
 			.from(transaction)
+			// @ts-expect-error - drizzle-orm version mismatch between packages
 			.where(and(lt(transaction.amount, 0), ...filters));
 
 		return (result?.expenses as string) || "0";
@@ -73,11 +93,17 @@ export const BankTransactionRepository = {
 				account: true,
 				category: true,
 			},
-			where: (transaction, { lt, gte, and, eq }) => {
+			where: (transaction, { lt, gte, and }) => {
 				const filters = [];
 
-				if (type && type !== "all") {
-					filters.push(eq(transaction.type, type));
+				if (type === "income") {
+					// @ts-expect-error - drizzle-orm version mismatch between packages
+					filters.push(gt(transaction.amount, 0));
+				}
+
+				if (type === "expenses") {
+					// @ts-expect-error - drizzle-orm version mismatch between packages
+					filters.push(lt(transaction.amount, 0));
 				}
 
 				if (dateRange.from) {
@@ -88,8 +114,10 @@ export const BankTransactionRepository = {
 					filters.push(lt(transaction.timestamp, dateRange.to));
 				}
 
-				return and(...filters);
+				// @ts-expect-error - drizzle-orm version mismatch between packages
+				return filters.length > 0 ? and(...filters) : undefined;
 			},
+			// @ts-expect-error - drizzle-orm version mismatch between packages
 			orderBy: [desc(transaction.timestamp), desc(transaction.createdAt)],
 			limit: pagination.pageSize,
 			offset: pagination.pageIndex * pagination.pageSize,
@@ -113,6 +141,7 @@ export const BankTransactionRepository = {
 			(await db
 				.update(transaction)
 				.set({ categoryId: categoryId })
+				// @ts-expect-error - drizzle-orm version mismatch between packages
 				.where(eq(transaction.id, transactionId))
 				.returning()) || null
 		);

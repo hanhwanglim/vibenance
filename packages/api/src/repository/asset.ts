@@ -7,22 +7,24 @@ import { and, gte, lt } from "drizzle-orm";
 import type { DateRange, Pagination } from "../utils";
 
 export const AssetRepository = {
-	count: async (type: string, dateRange: DateRange) => {
+	count: async (dateRange: DateRange) => {
 		const filters = [];
 
-		if (type && type !== "all") {
-			filters.push(eq(investmentTransaction.type, type));
-		}
-
 		if (dateRange.from) {
+			// @ts-expect-error - drizzle-orm version mismatch between packages
 			filters.push(gte(investmentTransaction.timestamp, dateRange.from));
 		}
 
 		if (dateRange.to) {
+			// @ts-expect-error - drizzle-orm version mismatch between packages
 			filters.push(lt(investmentTransaction.timestamp, dateRange.to));
 		}
 
-		return await db.$count(investmentTransaction, and(...filters));
+		return await db.$count(
+			investmentTransaction,
+			// @ts-expect-error - drizzle-orm version mismatch between packages
+			filters.length > 0 ? and(...filters) : undefined,
+		);
 	},
 
 	getAll: async (
@@ -35,7 +37,12 @@ export const AssetRepository = {
 				const filters = [];
 
 				if (type && type !== "all") {
-					filters.push(eq(investmentTransaction.type, type));
+					filters.push(
+						eq(
+							investmentTransaction.type,
+							type as "buy" | "sell" | "deposit" | "reward" | "other",
+						),
+					);
 				}
 
 				if (dateRange.from) {

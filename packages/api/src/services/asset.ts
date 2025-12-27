@@ -16,7 +16,7 @@ export const AssetService = {
 		dateRange: DateRange,
 		pagination: Pagination,
 	) => {
-		const count = await AssetRepository.count(type, dateRange);
+		const count = await AssetRepository.count(dateRange);
 		const transactions = await AssetRepository.getAll(
 			type,
 			dateRange,

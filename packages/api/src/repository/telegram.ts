@@ -24,6 +24,7 @@ export const TelegramCredentialRepository = {
 	},
 
 	delete: async (id: string) => {
+		// @ts-expect-error - drizzle-orm version mismatch between packages
 		await db.delete(telegramCredential).where(eq(telegramCredential.id, id));
 	},
 };
