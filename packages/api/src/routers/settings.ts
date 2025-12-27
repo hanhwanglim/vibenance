@@ -1,6 +1,6 @@
 import { db } from "@vibenance/db";
 import { telegramCredential } from "@vibenance/db/schema/telegram";
-import { and, eq } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 import z from "zod";
 import { protectedProcedure } from "../index";
 

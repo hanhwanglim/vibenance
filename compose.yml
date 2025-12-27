@@ -30,7 +30,7 @@ services:
       - "3000:3000"
     environment:
       NODE_ENV: production
-      DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:-password}@postgres:5432/vibenance
+      DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:-password}@db:5432/vibenance
       CORS_ORIGIN: ${CORS_ORIGIN:-http://localhost:3000}
       STATIC_PATH: /app/apps/web/dist
       TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN:-}
