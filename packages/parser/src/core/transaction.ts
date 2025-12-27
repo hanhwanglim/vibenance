@@ -9,7 +9,7 @@ export type TransactionRow = {
 	currency: string;
 	amount: string;
 	reference?: string;
-	categoryId: number | null;
+	categoryId: string | null;
 	category: Category | null;
 	errors?: string;
 };

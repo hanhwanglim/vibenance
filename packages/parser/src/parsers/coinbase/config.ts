@@ -38,11 +38,19 @@ export async function isCoinbaseCsv(file: BunFile) {
 		return false;
 	}
 
-	if (result.data.at(0).at(0) !== "Transactions") {
+	const firstRow = result.data.at(0);
+	if (
+		!firstRow ||
+		!Array.isArray(firstRow) ||
+		firstRow.at(0) !== "Transactions"
+	) {
 		return false;
 	}
 
-	return CoinbaseCsvHeaders.every((header) =>
-		result.data.at(2).includes(header),
-	);
+	const headerRow = result.data.at(2);
+	if (!headerRow || !Array.isArray(headerRow)) {
+		return false;
+	}
+
+	return CoinbaseCsvHeaders.every((header) => headerRow.includes(header));
 }

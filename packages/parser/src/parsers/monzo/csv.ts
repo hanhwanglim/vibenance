@@ -19,8 +19,27 @@ export async function parse(file: BunFile) {
 	);
 
 	data.data.forEach((row, index) => {
-		const [day, month, year] = row.Date.split("/").map(Number);
-		const [hours, mins, secs] = row.Time.split(":").map(Number);
+		const dateParts = row.Date.split("/").map(Number);
+		const timeParts = row.Time.split(":").map(Number);
+
+		if (dateParts.length < 3 || timeParts.length < 3) {
+			return;
+		}
+
+		const [day, month, year] = dateParts;
+		const [hours, mins, secs] = timeParts;
+
+		if (
+			day === undefined ||
+			month === undefined ||
+			year === undefined ||
+			hours === undefined ||
+			mins === undefined ||
+			secs === undefined
+		) {
+			return;
+		}
+
 		const category = categoryMap.get(row.Category);
 
 		const transaction: TransactionRow = {

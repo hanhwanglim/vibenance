@@ -74,6 +74,10 @@ function parseTransactionLine(line: string[]): ChaseTransactionRow | null {
 
 	const [date, details, _, amount, balance] = parsedLine;
 
+	if (!date || !details || !amount || !balance) {
+		return null;
+	}
+
 	return {
 		Date: parseDate(date),
 		"Transaction details": details,
@@ -106,9 +110,17 @@ function parseDate(dateStr: string): Date {
 		Dec: 11,
 	};
 
+	if (!month) {
+		throw new Error(`Invalid date format: ${dateStr}`);
+	}
+
 	const monthIndex = monthMap[month];
 	if (monthIndex === undefined) {
 		throw new Error(`Invalid month: ${month}`);
+	}
+
+	if (!year || !day) {
+		throw new Error(`Invalid date format: ${dateStr}`);
 	}
 
 	const fullYear = Number.parseInt(year, 10);

@@ -2,6 +2,7 @@
 
 import type { BunFile } from "bun";
 import { detectParser, parseFile } from "../core/parse";
+import type { TransactionRow } from "../core/transaction";
 import { formatTable } from "./table";
 
 async function main() {
@@ -14,6 +15,10 @@ async function main() {
 	}
 
 	const filePath = args[0];
+	if (!filePath) {
+		console.error("Error: File path is required");
+		process.exit(1);
+	}
 	let file: BunFile;
 
 	try {
@@ -28,7 +33,6 @@ async function main() {
 		process.exit(1);
 	}
 
-	// Detect parser type
 	const parserType = await detectParser(file);
 
 	if (parserType === "unknown") {
@@ -43,8 +47,11 @@ async function main() {
 
 	try {
 		const transactions = await parseFile(file, parserType);
-		console.log(`Found ${transactions.length} transaction(s)\n`);
-		console.log(formatTable(transactions));
+		const regularTransactions = transactions.filter(
+			(tx): tx is TransactionRow => "categoryId" in tx,
+		);
+		console.log(`Found ${regularTransactions.length} transaction(s)\n`);
+		console.log(formatTable(regularTransactions));
 	} catch (error) {
 		console.error("Error parsing file:");
 		console.error(error);

@@ -2,6 +2,7 @@
 	"name": "@vibenance/parser",
 	"version": "0.0.0",
 	"private": true,
+	"type": "module",
 	"exports": {
 		".": {
 			"default": "./src/index.ts"
@@ -14,6 +15,7 @@
 		"vibenance-parser": "./src/cli/index.ts"
 	},
 	"scripts": {
+		"check-types": "tsc -b",
 		"cli": "bun run src/cli/index.ts"
 	},
 	"peerDependencies": {
@@ -24,6 +26,7 @@
 		"pdf-parse": "^2.4.5"
 	},
 	"devDependencies": {
+		"@types/papaparse": "^5.5.2",
 		"@vibenance/config": "workspace:*",
 		"@vibenance/db": "workspace:*"
 	}

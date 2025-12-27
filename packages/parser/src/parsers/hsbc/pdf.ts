@@ -64,21 +64,27 @@ function parseTransactionLine(line: string): HsbcTransactionRow | null {
 	const receivedDate = dates[0];
 	const transactionDate = dates[1];
 
+	if (!transactionDate) {
+		return null;
+	}
+
 	const secondDateEndIndex =
 		line.indexOf(transactionDate) + transactionDate.length;
 	const rest = line.substring(secondDateEndIndex).trim();
 
 	// Amount is at the end - match last number (with optional commas and CR suffix)
 	const amountMatch = rest.match(/([\d,]+\.?\d*)\s*(CR)?\s*$/);
-	if (!amountMatch) {
+	if (!amountMatch || !amountMatch[1]) {
 		return null;
 	}
 
-	const amountStr = amountMatch[1].replace(/,/g, "");
+	const originalAmountStr = amountMatch[1];
+	const amountStr = originalAmountStr.replace(/,/g, "");
+
 	const isCredit = amountMatch[2] === "CR";
 	const amount = isCredit ? amountStr : `-${amountStr}`;
 
-	const amountStartIndex = rest.lastIndexOf(amountMatch[1]);
+	const amountStartIndex = rest.lastIndexOf(originalAmountStr);
 	const details = rest.substring(0, amountStartIndex).trim();
 
 	return {
@@ -112,9 +118,17 @@ function parseDate(dateStr: string): Date {
 		Dec: 11,
 	};
 
+	if (!month) {
+		throw new Error(`Invalid date format: ${dateStr}`);
+	}
+
 	const monthIndex = monthMap[month];
 	if (monthIndex === undefined) {
 		throw new Error(`Invalid month: ${month}`);
+	}
+
+	if (!year || !day) {
+		throw new Error(`Invalid date format: ${dateStr}`);
 	}
 
 	// Convert 2-digit year to 4-digit (assuming 2000s)
