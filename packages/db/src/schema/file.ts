@@ -61,3 +61,8 @@ export const fileImportRelations = relations(fileImport, ({ many }) => ({
 	investmentTransactions: many(investmentTransaction),
 	files: many(file),
 }));
+
+export type FileInsert = typeof file.$inferInsert;
+export type FileUpdate = Partial<Omit<FileInsert, "id" | "createdAt">>;
+
+export type FileImportUpdate = Partial<typeof fileImport.$inferInsert>;

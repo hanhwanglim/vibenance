@@ -1,31 +1,26 @@
-import { db } from "@vibenance/db";
-import { telegramCredential } from "@vibenance/db/schema/telegram";
-import { eq } from "drizzle-orm";
 import z from "zod";
 import { protectedProcedure } from "../index";
+import { TelegramCredentialService } from "../services/telegram";
 
 export const settingsRouter = {
 	createTelegramCredential: protectedProcedure
 		.input(z.object({ telegramUserId: z.string(), telegramChatId: z.string() }))
 		.handler(async ({ input, context }) => {
-			const credential = await db
-				.insert(telegramCredential)
-				.values({ ...input, userId: context.session.user.id })
-				.returning();
+			const credential = await TelegramCredentialService.create({
+				...input,
+				userId: context.session.user.id,
+			});
 
 			return { credential };
 		}),
 
 	list: protectedProcedure.handler(async ({ context }) => {
-		return (
-			(await db.query.telegramCredential.findFirst({
-				where: (telegramCredential, { eq }) =>
-					eq(telegramCredential.userId, context.session.user.id),
-			})) || null
+		return await TelegramCredentialService.findByUserId(
+			context.session.user.id,
 		);
 	}),
 
-	delete: protectedProcedure.input(z.number()).handler(async ({ input }) => {
-		await db.delete(telegramCredential).where(eq(telegramCredential.id, input));
+	delete: protectedProcedure.input(z.string()).handler(async ({ input }) => {
+		await TelegramCredentialService.delete(input);
 	}),
 };

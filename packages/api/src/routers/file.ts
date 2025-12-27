@@ -8,7 +8,7 @@ export const fileRouter = {
 		return await FileService.uploadFile(input);
 	}),
 
-	get: protectedProcedure.input(z.number()).handler(async ({ input }) => {
+	get: protectedProcedure.input(z.string()).handler(async ({ input }) => {
 		try {
 			return await FileService.getFile(input);
 		} catch (error) {

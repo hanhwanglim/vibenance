@@ -1,10 +1,10 @@
-import crypto from "node:crypto";
 import path from "node:path";
+import type { FileUpdate } from "@vibenance/db/schema/file";
 import type z from "zod";
 import { FileRepository } from "../repository/file";
 
 export const FileService = {
-	getFile: async (id: number) => {
+	getFile: async (id: string) => {
 		const file = await FileRepository.findById(id);
 		if (!file) {
 			throw new Error("NOT FOUND");
@@ -37,6 +37,8 @@ export const FileService = {
 
 		return uploadedFile;
 	},
-};
 
-export const FileImportService = {};
+	update: async (id: string, update: FileUpdate) => {
+		return await FileRepository.update(id, update);
+	},
+};

@@ -26,3 +26,5 @@ export const telegramCredentialRelations = relations(
 		}),
 	}),
 );
+
+export type TelegramCredentialInsert = typeof telegramCredential.$inferInsert;

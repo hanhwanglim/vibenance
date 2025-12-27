@@ -1,8 +1,9 @@
 import type { TransactionInsert } from "@vibenance/db/schema/transaction";
 import { detectParser, parseFile } from "@vibenance/parser/core/parse";
 import { BankTransactionRepository } from "../repository/bank-transaction";
-import { FileRepository } from "../repository/file";
-import { FileImportRepository } from "../repository/file-import";
+import type { DateRange, Pagination } from "../utils";
+import { FileService } from "./file";
+import { FileImportService } from "./file-import";
 
 type TransactionCreate = Omit<
 	TransactionInsert,
@@ -10,8 +11,23 @@ type TransactionCreate = Omit<
 >;
 
 export const BankTransactionService = {
-	previewImport: async (id: number) => {
-		const fileImport = await FileImportRepository.findById(id);
+	getAll: async (
+		type: string,
+		dateRange: DateRange,
+		pagination: Pagination,
+	) => {
+		const count = await BankTransactionRepository.count(type, dateRange);
+		const transactions = await BankTransactionRepository.getAll(
+			type,
+			dateRange,
+			pagination,
+		);
+
+		return { count, transactions };
+	},
+
+	previewImport: async (id: string) => {
+		const fileImport = await FileImportService.findById(id);
 		if (!fileImport || !fileImport.files[0]) {
 			throw new Error("NOT FOUND");
 		}
@@ -22,13 +38,13 @@ export const BankTransactionService = {
 		return await parseFile(file, parseType);
 	},
 
-	createImport: async (fileId: number) => {
-		const fileImport = await FileImportRepository.create();
+	createImport: async (fileId: string) => {
+		const fileImport = await FileImportService.create();
 		if (!fileImport) {
 			throw new Error("INTERNAL SERVER ERROR");
 		}
 
-		await FileRepository.update(fileId, {
+		await FileService.update(fileId, {
 			fileImportId: fileImport.id,
 		});
 		return fileImport || null;
@@ -36,8 +52,8 @@ export const BankTransactionService = {
 
 	bulkCreate: async (
 		transactions: Array<TransactionCreate>,
-		accountId: number,
-		fileImportId: number,
+		accountId: string,
+		fileImportId: string,
 	) => {
 		const txs = transactions.map((tx) => {
 			return {
@@ -48,12 +64,31 @@ export const BankTransactionService = {
 		});
 
 		const objs = await BankTransactionRepository.bulkCreate(txs);
-		await FileImportRepository.update(fileImportId, { status: "success" });
+		await FileImportService.update(fileImportId, { status: "success" });
 
 		return objs;
 	},
 
-	updateCategory: async (transactionId: number, categoryId: number | null) => {
+	getSummary: async (dateRange: DateRange) => {
+		const [count, totalIncome, totalExpenses] = await Promise.all([
+			BankTransactionRepository.count("all", dateRange),
+			BankTransactionRepository.totalIncome(dateRange),
+			BankTransactionRepository.totalExpenses(dateRange),
+		]);
+
+		return {
+			count: count,
+			totalIncome: totalIncome,
+			totalExpenses: totalExpenses,
+			netAmount: Number(totalIncome) - Number(totalExpenses),
+		};
+	},
+
+	listCategories: async () => {
+		return await BankTransactionRepository.listCategories();
+	},
+
+	updateCategory: async (transactionId: string, categoryId: string | null) => {
 		return await BankTransactionRepository.updateCategory(
 			transactionId,
 			categoryId,

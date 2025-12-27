@@ -52,3 +52,6 @@ export const investmentTransactionRelations = relations(
 		}),
 	}),
 );
+
+export type InvestmentTransactionInsert =
+	typeof investmentTransaction.$inferInsert;

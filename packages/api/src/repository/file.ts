@@ -1,12 +1,13 @@
 import { db } from "@vibenance/db";
-import { file } from "@vibenance/db/schema/file";
+import {
+	type FileInsert,
+	type FileUpdate,
+	file,
+} from "@vibenance/db/schema/file";
 import { eq } from "drizzle-orm";
 
-type FileInsert = typeof file.$inferInsert;
-type FileUpdate = Partial<Omit<FileInsert, "id" | "createdAt">>;
-
 export const FileRepository = {
-	findById: async (id: number) => {
+	findById: async (id: string) => {
 		return (
 			(await db.query.file.findFirst({
 				where: (file, { eq }) => eq(file.id, id),
@@ -28,13 +29,13 @@ export const FileRepository = {
 		return uploadedFile || null;
 	},
 
-	update: async (id: number, update: FileUpdate) => {
+	update: async (id: string, update: FileUpdate) => {
 		return await db.update(file).set(update).where(eq(file.id, id)).returning();
 	},
 };
 
 export const FileImportRepository = {
-	findById: async (id: number) => {
+	findById: async (id: string) => {
 		return (
 			(await db.query.fileImport.findFirst({
 				where: (fileImport, { eq }) => eq(fileImport.id, id),
