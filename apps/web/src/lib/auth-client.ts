@@ -4,9 +4,9 @@ import { createAuthClient } from "better-auth/react";
 
 const serverUrl =
 	import.meta.env.VITE_SERVER_URL ||
-	(import.meta.env.PROD ? "" : "http://localhost:3000");
+	(import.meta.env.PROD ? undefined : "http://localhost:3000");
 
 export const authClient = createAuthClient({
-	baseURL: serverUrl,
+	...(serverUrl && { baseURL: serverUrl }),
 	plugins: [inferAdditionalFields<typeof auth>()],
 });

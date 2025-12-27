@@ -28,7 +28,7 @@ export const queryClient = new QueryClient({
 });
 
 export const link = new RPCLink({
-	url: `${serverUrl}/rpc`,
+	url: serverUrl ? `${serverUrl}/rpc` : "/rpc",
 	fetch(url, options) {
 		return fetch(url, {
 			...options,
