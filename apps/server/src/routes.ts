@@ -1,13 +1,12 @@
-import type { OpenAPIHandler } from "@orpc/openapi/fetch";
-import type { RPCHandler } from "@orpc/server/fetch";
 import { createContext } from "@vibenance/api/context";
 import { auth } from "@vibenance/auth";
 import type { Hono } from "hono";
+import type { createApiHandler, createRpcHandler } from "./handlers";
 
 export function setupRoutes(
 	app: Hono,
-	apiHandler: OpenAPIHandler,
-	rpcHandler: RPCHandler,
+	apiHandler: ReturnType<typeof createApiHandler>,
+	rpcHandler: ReturnType<typeof createRpcHandler>,
 ) {
 	app.on(["POST", "GET"], "/api/auth/*", (c) => auth.handler(c.req.raw));
 
@@ -24,7 +23,7 @@ export function setupRoutes(
 		}
 
 		const apiResult = await apiHandler.handle(c.req.raw, {
-			prefix: "/api-reference",
+			prefix: "/api",
 			context: context,
 		});
 

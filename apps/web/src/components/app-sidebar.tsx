@@ -1,4 +1,5 @@
 import {
+	Bot,
 	ChartNoAxesCombined,
 	LayoutDashboard,
 	PiggyBank,
@@ -47,6 +48,11 @@ const data = {
 			title: "Accounts",
 			url: "/accounts",
 			icon: Wallet,
+		},
+		{
+			title: "Finance Agent",
+			url: "/agent",
+			icon: Bot,
 		},
 		{
 			title: "Budget",

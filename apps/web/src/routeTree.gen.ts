@@ -13,6 +13,7 @@ import { Route as LoginRouteImport } from './routes/login'
 import { Route as AppRouteImport } from './routes/_app'
 import { Route as AppIndexRouteImport } from './routes/_app/index'
 import { Route as AppDashboardRouteImport } from './routes/_app/dashboard'
+import { Route as AppAgentRouteImport } from './routes/_app/agent'
 import { Route as AppAccountsRouteImport } from './routes/_app/accounts'
 import { Route as AppTransactionsIndexRouteImport } from './routes/_app/transactions/index'
 import { Route as AppAssetsIndexRouteImport } from './routes/_app/assets/index'
@@ -39,6 +40,11 @@ const AppIndexRoute = AppIndexRouteImport.update({
 const AppDashboardRoute = AppDashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppAgentRoute = AppAgentRouteImport.update({
+  id: '/agent',
+  path: '/agent',
   getParentRoute: () => AppRoute,
 } as any)
 const AppAccountsRoute = AppAccountsRouteImport.update({
@@ -86,6 +92,7 @@ const AppAssetsImportsIdRoute = AppAssetsImportsIdRouteImport.update({
 export interface FileRoutesByFullPath {
   '/login': typeof LoginRoute
   '/accounts': typeof AppAccountsRoute
+  '/agent': typeof AppAgentRoute
   '/dashboard': typeof AppDashboardRoute
   '/': typeof AppIndexRoute
   '/assets/imports': typeof AppAssetsImportsRouteWithChildren
@@ -99,6 +106,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/accounts': typeof AppAccountsRoute
+  '/agent': typeof AppAgentRoute
   '/dashboard': typeof AppDashboardRoute
   '/': typeof AppIndexRoute
   '/assets/imports': typeof AppAssetsImportsRouteWithChildren
@@ -114,6 +122,7 @@ export interface FileRoutesById {
   '/_app': typeof AppRouteWithChildren
   '/login': typeof LoginRoute
   '/_app/accounts': typeof AppAccountsRoute
+  '/_app/agent': typeof AppAgentRoute
   '/_app/dashboard': typeof AppDashboardRoute
   '/_app/': typeof AppIndexRoute
   '/_app/assets/imports': typeof AppAssetsImportsRouteWithChildren
@@ -129,6 +138,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/login'
     | '/accounts'
+    | '/agent'
     | '/dashboard'
     | '/'
     | '/assets/imports'
@@ -142,6 +152,7 @@ export interface FileRouteTypes {
   to:
     | '/login'
     | '/accounts'
+    | '/agent'
     | '/dashboard'
     | '/'
     | '/assets/imports'
@@ -156,6 +167,7 @@ export interface FileRouteTypes {
     | '/_app'
     | '/login'
     | '/_app/accounts'
+    | '/_app/agent'
     | '/_app/dashboard'
     | '/_app/'
     | '/_app/assets/imports'
@@ -200,6 +212,13 @@ declare module '@tanstack/react-router' {
       path: '/dashboard'
       fullPath: '/dashboard'
       preLoaderRoute: typeof AppDashboardRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/agent': {
+      id: '/_app/agent'
+      path: '/agent'
+      fullPath: '/agent'
+      preLoaderRoute: typeof AppAgentRouteImport
       parentRoute: typeof AppRoute
     }
     '/_app/accounts': {
@@ -288,6 +307,7 @@ const AppTransactionsImportsRouteWithChildren =
 
 interface AppRouteChildren {
   AppAccountsRoute: typeof AppAccountsRoute
+  AppAgentRoute: typeof AppAgentRoute
   AppDashboardRoute: typeof AppDashboardRoute
   AppIndexRoute: typeof AppIndexRoute
   AppAssetsImportsRoute: typeof AppAssetsImportsRouteWithChildren
@@ -299,6 +319,7 @@ interface AppRouteChildren {
 
 const AppRouteChildren: AppRouteChildren = {
   AppAccountsRoute: AppAccountsRoute,
+  AppAgentRoute: AppAgentRoute,
   AppDashboardRoute: AppDashboardRoute,
   AppIndexRoute: AppIndexRoute,
   AppAssetsImportsRoute: AppAssetsImportsRouteWithChildren,

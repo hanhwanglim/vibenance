@@ -1,5 +1,6 @@
 import type { RouterClient } from "@orpc/server";
 import { protectedProcedure, publicProcedure } from "../index";
+import { agentRouter } from "./agent";
 import { assetRouter } from "./asset";
 import { bankAccountRouter } from "./bank-account";
 import { fileRouter } from "./file";
@@ -23,6 +24,7 @@ export const appRouter = {
 	asset: assetRouter,
 	file: fileRouter,
 	settings: settingsRouter,
+	agent: agentRouter,
 };
 export type AppRouter = typeof appRouter;
 export type AppRouterClient = RouterClient<typeof appRouter>;
