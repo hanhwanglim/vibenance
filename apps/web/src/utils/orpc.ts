@@ -5,12 +5,6 @@ import { QueryCache, QueryClient } from "@tanstack/react-query";
 import type { AppRouterClient } from "@vibenance/api/routers/index";
 import { toast } from "sonner";
 
-// In production, use relative URLs since web app is served from the same server
-// In development, use localhost:3000 as fallback
-const serverUrl =
-	import.meta.env.VITE_SERVER_URL ||
-	(import.meta.env.PROD ? "" : "http://localhost:3000");
-
 export const queryClient = new QueryClient({
 	queryCache: new QueryCache({
 		onError: (error) => {
@@ -28,7 +22,15 @@ export const queryClient = new QueryClient({
 });
 
 export const link = new RPCLink({
-	url: serverUrl ? `${serverUrl}/rpc` : "/rpc",
+	url: () => {
+		if (typeof window === "undefined") {
+			throw new Error("RPCLink is not allowed on the server side.");
+		}
+		if (import.meta.env.VITE_SERVER_URL) {
+			return `${import.meta.env.VITE_SERVER_URL}/rpc`;
+		}
+		return `${window.location.origin}/rpc`;
+	},
 	fetch(url, options) {
 		return fetch(url, {
 			...options,

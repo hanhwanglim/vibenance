@@ -2,11 +2,7 @@ import type { auth } from "@vibenance/auth";
 import { inferAdditionalFields } from "better-auth/client/plugins";
 import { createAuthClient } from "better-auth/react";
 
-const serverUrl =
-	import.meta.env.VITE_SERVER_URL ||
-	(import.meta.env.PROD ? undefined : "http://localhost:3000");
-
 export const authClient = createAuthClient({
-	...(serverUrl && { baseURL: serverUrl }),
+	baseURL: import.meta.env.VITE_SERVER_URL || "",
 	plugins: [inferAdditionalFields<typeof auth>()],
 });
