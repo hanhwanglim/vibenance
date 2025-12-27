@@ -1,12 +1,12 @@
 import { relations } from "drizzle-orm";
-import { pgTable, serial, text, timestamp } from "drizzle-orm/pg-core";
+import { pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core";
 import { user } from "./auth";
 
 export const telegramCredential = pgTable("telegram_credential", {
-	id: serial("id").primaryKey(),
+	id: uuid("id").defaultRandom().primaryKey(),
 	telegramUserId: text("telegram_user_id").notNull(),
 	telegramChatId: text("telegram_chat_id").notNull(),
-	userId: text("user_id")
+	userId: uuid("user_id")
 		.notNull()
 		.references(() => user.id),
 	key: text("key").notNull(),

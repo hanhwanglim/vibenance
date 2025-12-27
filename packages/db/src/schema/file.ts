@@ -3,9 +3,9 @@ import {
 	integer,
 	pgEnum,
 	pgTable,
-	serial,
 	text,
 	timestamp,
+	uuid,
 } from "drizzle-orm/pg-core";
 import { investmentTransaction } from "./asset";
 import { transaction } from "./transaction";
@@ -23,13 +23,13 @@ export const importStatusEnum = pgEnum("import_status", [
 ]);
 
 export const file = pgTable("file", {
-	id: serial("id").primaryKey(),
+	id: uuid("id").defaultRandom().primaryKey(),
 	fileName: text("file_name").notNull(),
 	filePath: text("file_path").notNull(),
 	fileHash: text("file_hash").notNull(),
 	fileSize: integer("file_size").notNull(),
 	source: fileSourceEnum("source").notNull().default("other"),
-	fileImportId: integer("file_import_id").references(() => fileImport.id),
+	fileImportId: uuid("file_import_id").references(() => fileImport.id),
 
 	createdAt: timestamp("created_at").defaultNow().notNull(),
 	updatedAt: timestamp("updated_at")
@@ -39,7 +39,7 @@ export const file = pgTable("file", {
 });
 
 export const fileImport = pgTable("file_import", {
-	id: serial("id").primaryKey(),
+	id: uuid("id").defaultRandom().primaryKey(),
 	status: importStatusEnum("status").notNull().default("pending"),
 
 	createdAt: timestamp("created_at").defaultNow().notNull(),

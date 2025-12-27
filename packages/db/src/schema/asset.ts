@@ -1,12 +1,11 @@
 import { relations } from "drizzle-orm";
 import {
-	integer,
 	numeric,
 	pgEnum,
 	pgTable,
-	serial,
 	text,
 	timestamp,
+	uuid,
 } from "drizzle-orm/pg-core";
 import { fileImport } from "./file";
 import { bankAccount } from "./transaction";
@@ -20,10 +19,10 @@ export const investmentTransactionTypeEnum = pgEnum("transaction_type", [
 ]);
 
 export const investmentTransaction = pgTable("investment_transaction", {
-	id: serial("id").primaryKey(),
+	id: uuid("id").defaultRandom().primaryKey(),
 	transactionId: text("transaction_id").notNull().unique(),
 	timestamp: timestamp("timestamp").notNull(),
-	accountId: integer("account_id")
+	accountId: uuid("account_id")
 		.notNull()
 		.references(() => bankAccount.id),
 	name: text("name").notNull(),
@@ -35,7 +34,7 @@ export const investmentTransaction = pgTable("investment_transaction", {
 	fees: numeric("fees", { precision: 50, scale: 18 }).notNull(),
 	total: numeric("total", { precision: 50, scale: 18 }).notNull(),
 	reference: text("reference"),
-	fileImportId: integer("file_import_id").references(() => fileImport.id),
+	fileImportId: uuid("file_import_id").references(() => fileImport.id),
 
 	createdAt: timestamp("created_at").defaultNow().notNull(),
 	updatedAt: timestamp("updated_at")
