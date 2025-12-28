@@ -10,6 +10,7 @@ interface ImportSession {
 	fileId: string;
 	fileImportId: string;
 	transactions: Array<TransactionCreate>;
+	accounts: Array<{ id: string; name: string }>;
 	expiresAt: Date;
 }
 
@@ -21,6 +22,7 @@ class BotStateManager {
 		fileId: string,
 		fileImportId: string,
 		transactions: ImportSession["transactions"],
+		accounts: ImportSession["accounts"],
 		ttlMinutes = 10,
 	): void {
 		const expiresAt = new Date();
@@ -31,6 +33,7 @@ class BotStateManager {
 			fileId,
 			fileImportId,
 			transactions,
+			accounts,
 			expiresAt,
 		});
 	}

@@ -16,7 +16,7 @@ bot.command("start", start);
 bot.command("help", help);
 
 bot.on("message:document", handleDocuments);
-bot.callbackQuery(/^import:(\d+):(\d+)$/, handleImport);
+bot.callbackQuery(/^import:(\d+)$/, handleImport);
 
 bot.catch((err) => {
 	const ctx = err.ctx;

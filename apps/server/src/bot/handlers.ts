@@ -47,11 +47,17 @@ export async function handleDocuments(ctx: Context) {
 			throw new Error("No valid transactions found");
 		}
 
+		const accounts = await BankAccountService.listAccounts();
+		if (accounts.length === 0) {
+			throw new Error("No bank accounts found. Please create account first.");
+		}
+
 		botState.createSession(
 			ctx.chatId,
 			uploadedFile.id,
 			fileImport.id,
 			preview as TransactionRow[],
+			accounts.map((account) => ({ id: account.id, name: account.name })),
 		);
 
 		const previewMessage =
@@ -59,16 +65,11 @@ export async function handleDocuments(ctx: Context) {
 			`Total transactions: ${preview.length}\n\n` +
 			"Please select a bank account to import these transactions:";
 
-		const accounts = await BankAccountService.listAccounts();
-		if (accounts.length === 0) {
-			throw new Error("No bank accounts found. Please create account first.");
-		}
-
 		const keyboard = new InlineKeyboard();
-		for (const account of accounts) {
-			keyboard
-				.text(account.name, `import:${fileImport.id}:${account.id}`)
-				.row();
+		for (let i = 0; i < accounts.length; i++) {
+			const account = accounts[i];
+			if (!account) continue;
+			keyboard.text(account.name, `import:${i}`).row();
 		}
 
 		await ctx.reply(previewMessage, { reply_markup: keyboard });
@@ -85,16 +86,15 @@ export async function handleDocuments(ctx: Context) {
 
 export async function handleImport(ctx: Context) {
 	const match = ctx.match;
-	if (!match || match.length < 3) return;
+	if (!match || match.length < 2) return;
 
 	if (!ctx.chatId) return;
 
-	const fileImportId = match[1];
-	const accountId = match[2];
-	if (!fileImportId || !accountId) return;
+	const accountIndex = Number.parseInt(match[1] || "", 10);
+	if (Number.isNaN(accountIndex)) return;
 
 	const session = botState.getSession(ctx.chatId);
-	if (!session || session.fileImportId !== fileImportId) {
+	if (!session) {
 		await ctx.answerCallbackQuery({
 			text: "Session expired. Please upload the file again.",
 			show_alert: true,
@@ -102,12 +102,31 @@ export async function handleImport(ctx: Context) {
 		return;
 	}
 
+	if (accountIndex < 0 || accountIndex >= session.accounts.length) {
+		await ctx.answerCallbackQuery({
+			text: "Invalid account selection.",
+			show_alert: true,
+		});
+		return;
+	}
+
+	const selectedAccount = session.accounts[accountIndex];
+	if (!selectedAccount) {
+		await ctx.answerCallbackQuery({
+			text: "Invalid account selection.",
+			show_alert: true,
+		});
+		return;
+	}
+
+	const accountId = selectedAccount.id;
+
 	try {
 		await ctx.answerCallbackQuery({ text: "Importing transactions..." });
 		await BankTransactionService.bulkCreate(
 			session.transactions,
 			accountId,
-			fileImportId,
+			session.fileImportId,
 		);
 
 		botState.deleteSession(ctx.chatId);
