@@ -1,9 +1,4 @@
-import {
-	createFileRoute,
-	Outlet,
-	redirect,
-	useLocation,
-} from "@tanstack/react-router";
+import { createFileRoute, Outlet, useLocation } from "@tanstack/react-router";
 import { ChevronDownIcon, ListFilter } from "lucide-react";
 import { useState } from "react";
 import type { DateRange } from "react-day-picker";
@@ -29,22 +24,11 @@ import {
 	SelectValue,
 } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { authClient } from "@/lib/auth-client";
 import { ImportDialog } from "@/modules/assets/components/import-dialog";
 import { TransactionTable } from "@/modules/assets/components/transaction-table";
 
 export const Route = createFileRoute("/_app/assets/")({
 	component: RouteComponent,
-	beforeLoad: async () => {
-		const session = await authClient.getSession();
-		if (!session.data) {
-			redirect({
-				to: "/login",
-				throw: true,
-			});
-		}
-		return { session };
-	},
 });
 
 function RouteComponent() {
