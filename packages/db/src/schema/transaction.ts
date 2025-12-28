@@ -7,7 +7,7 @@ import {
 	timestamp,
 	uuid,
 } from "drizzle-orm/pg-core";
-import { fileImport } from "./file.js";
+import { fileImport } from "./file";
 
 export const accountTypeEnum = pgEnum("account_type", [
 	"savings",
