@@ -7,7 +7,7 @@ import { botState } from "./state";
 import { sendError } from "./utils";
 
 export async function start(ctx: CommandContext<Context>) {
-	await ctx.reply("Hi");
+	await ctx.reply(`Hi!\nChat ID: ${ctx.chatId}\nUser ID: ${ctx.from?.id}`);
 }
 
 export async function help(ctx: CommandContext<Context>) {

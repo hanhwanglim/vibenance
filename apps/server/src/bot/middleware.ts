@@ -35,10 +35,14 @@ export async function authenticate(ctx: Context, next: NextFunction) {
 	});
 
 	if (credential) {
-		await next();
-	} else {
-		console.warn(
-			`[BOT] unrecognized user [${ctx.from?.id}] chat id ${ctx.chatId}`,
-		);
+		return await next();
+	}
+
+	console.warn(
+		`[BOT] unrecognized user [${ctx.from?.id}] chat id ${ctx.chatId}`,
+	);
+
+	if (ctx.hasCommand("start")) {
+		return await next();
 	}
 }
