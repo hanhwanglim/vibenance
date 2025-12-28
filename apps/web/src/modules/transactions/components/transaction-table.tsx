@@ -82,11 +82,15 @@ const columns: ColumnDef<TransactionRow>[] = [
 			const defaultValue = row.original.categoryId?.toString() || "null";
 			const selectKey = `select-${row.original.id}-${pageIndex}`;
 
-			const handleChange = (value: string) => {
-				const { mutate } = useMutation(
-					orpc.transaction.updateCategory.mutationOptions(),
-				);
+			const { mutate } = useMutation(
+				orpc.transaction.updateCategory.mutationOptions(),
+			);
 
+			const { data: categories } = useQuery(
+				orpc.transaction.listCategories.queryOptions(),
+			);
+
+			const handleChange = (value: string) => {
 				const payload: { id: string; categoryId: string | null } = {
 					id: row.original.id,
 					categoryId: value,
@@ -101,10 +105,6 @@ const columns: ColumnDef<TransactionRow>[] = [
 					},
 				});
 			};
-
-			const { data: categories } = useQuery(
-				orpc.transaction.listCategories.queryOptions(),
-			);
 
 			return (
 				<>
