@@ -1,6 +1,7 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
+import type { DateRange } from "react-day-picker";
 import { Label, Pie, PieChart } from "recharts";
 import {
 	Card,
@@ -24,23 +25,14 @@ const chartConfig = {
 	},
 } satisfies ChartConfig;
 
-export function CategoryChart() {
+export function CategoryChart({ dateRange }: { dateRange?: DateRange }) {
 	const { data: categoryBreakdown, isLoading } = useQuery(
-		orpc.transaction.categoryBreakdown.queryOptions(),
+		orpc.transaction.categoryBreakdown.queryOptions({
+			input: { dateRange: dateRange },
+		}),
 	);
 
-	if (isLoading) {
-		return (
-			<Card>
-				<CardHeader>
-					<CardTitle>Spending by Category</CardTitle>
-					<CardDescription>No expense data available</CardDescription>
-				</CardHeader>
-			</Card>
-		);
-	}
-
-	if (categoryBreakdown?.count === 0) {
+	if (!categoryBreakdown?.categories || isLoading) {
 		return (
 			<Card>
 				<CardHeader>

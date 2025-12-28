@@ -1,6 +1,7 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
+import type { DateRange } from "@vibenance/api/utils";
 import { TrendingUp } from "lucide-react";
 import { CartesianGrid, Line, LineChart, XAxis, YAxis } from "recharts";
 import {
@@ -28,14 +29,18 @@ const chartConfig = {
 	},
 } satisfies ChartConfig;
 
-const formatter = new Intl.DateTimeFormat("en", { month: "short" });
-
-export function SpendingTrendChart() {
-	const { data: spendingTrend } = useQuery(
-		orpc.transaction.spendingTrend.queryOptions(),
+export function SpendingTrendChart({
+	dateRange,
+}: {
+	dateRange: DateRange | undefined;
+}) {
+	const { data: spendingTrend, isLoading } = useQuery(
+		orpc.transaction.spendingTrend.queryOptions({
+			input: { dateRange: dateRange },
+		}),
 	);
 
-	if (spendingTrend?.data.length === 0) {
+	if (spendingTrend?.data.length === 0 || isLoading) {
 		return (
 			<Card>
 				<CardHeader>
@@ -45,6 +50,11 @@ export function SpendingTrendChart() {
 			</Card>
 		);
 	}
+
+	const formatter = new Intl.DateTimeFormat(
+		"en",
+		spendingTrend?.format as Intl.DateTimeFormatOptions | undefined,
+	);
 
 	const chartData = spendingTrend?.data.map((point) => {
 		return {
@@ -81,7 +91,7 @@ export function SpendingTrendChart() {
 						/>
 						<Line
 							dataKey="sum"
-							type="natural"
+							type="linear"
 							stroke="var(--chart-1)"
 							strokeWidth={2}
 							dot={false}

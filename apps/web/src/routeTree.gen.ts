@@ -18,6 +18,7 @@ import { Route as AppAccountsRouteImport } from './routes/_app/accounts'
 import { Route as AppTransactionsIndexRouteImport } from './routes/_app/transactions/index'
 import { Route as AppAssetsIndexRouteImport } from './routes/_app/assets/index'
 import { Route as AppTransactionsImportsRouteImport } from './routes/_app/transactions/imports'
+import { Route as AppTransactionsAllRouteImport } from './routes/_app/transactions/all'
 import { Route as AppSettingsAccountRouteImport } from './routes/_app/settings/account'
 import { Route as AppAssetsImportsRouteImport } from './routes/_app/assets/imports'
 import { Route as AppTransactionsImportsIdRouteImport } from './routes/_app/transactions/imports.$id'
@@ -67,6 +68,11 @@ const AppTransactionsImportsRoute = AppTransactionsImportsRouteImport.update({
   path: '/transactions/imports',
   getParentRoute: () => AppRoute,
 } as any)
+const AppTransactionsAllRoute = AppTransactionsAllRouteImport.update({
+  id: '/transactions/all',
+  path: '/transactions/all',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppSettingsAccountRoute = AppSettingsAccountRouteImport.update({
   id: '/settings/account',
   path: '/settings/account',
@@ -97,6 +103,7 @@ export interface FileRoutesByFullPath {
   '/': typeof AppIndexRoute
   '/assets/imports': typeof AppAssetsImportsRouteWithChildren
   '/settings/account': typeof AppSettingsAccountRoute
+  '/transactions/all': typeof AppTransactionsAllRoute
   '/transactions/imports': typeof AppTransactionsImportsRouteWithChildren
   '/assets': typeof AppAssetsIndexRoute
   '/transactions': typeof AppTransactionsIndexRoute
@@ -111,6 +118,7 @@ export interface FileRoutesByTo {
   '/': typeof AppIndexRoute
   '/assets/imports': typeof AppAssetsImportsRouteWithChildren
   '/settings/account': typeof AppSettingsAccountRoute
+  '/transactions/all': typeof AppTransactionsAllRoute
   '/transactions/imports': typeof AppTransactionsImportsRouteWithChildren
   '/assets': typeof AppAssetsIndexRoute
   '/transactions': typeof AppTransactionsIndexRoute
@@ -127,6 +135,7 @@ export interface FileRoutesById {
   '/_app/': typeof AppIndexRoute
   '/_app/assets/imports': typeof AppAssetsImportsRouteWithChildren
   '/_app/settings/account': typeof AppSettingsAccountRoute
+  '/_app/transactions/all': typeof AppTransactionsAllRoute
   '/_app/transactions/imports': typeof AppTransactionsImportsRouteWithChildren
   '/_app/assets/': typeof AppAssetsIndexRoute
   '/_app/transactions/': typeof AppTransactionsIndexRoute
@@ -143,6 +152,7 @@ export interface FileRouteTypes {
     | '/'
     | '/assets/imports'
     | '/settings/account'
+    | '/transactions/all'
     | '/transactions/imports'
     | '/assets'
     | '/transactions'
@@ -157,6 +167,7 @@ export interface FileRouteTypes {
     | '/'
     | '/assets/imports'
     | '/settings/account'
+    | '/transactions/all'
     | '/transactions/imports'
     | '/assets'
     | '/transactions'
@@ -172,6 +183,7 @@ export interface FileRouteTypes {
     | '/_app/'
     | '/_app/assets/imports'
     | '/_app/settings/account'
+    | '/_app/transactions/all'
     | '/_app/transactions/imports'
     | '/_app/assets/'
     | '/_app/transactions/'
@@ -249,6 +261,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppTransactionsImportsRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/transactions/all': {
+      id: '/_app/transactions/all'
+      path: '/transactions/all'
+      fullPath: '/transactions/all'
+      preLoaderRoute: typeof AppTransactionsAllRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/_app/settings/account': {
       id: '/_app/settings/account'
       path: '/settings/account'
@@ -312,6 +331,7 @@ interface AppRouteChildren {
   AppIndexRoute: typeof AppIndexRoute
   AppAssetsImportsRoute: typeof AppAssetsImportsRouteWithChildren
   AppSettingsAccountRoute: typeof AppSettingsAccountRoute
+  AppTransactionsAllRoute: typeof AppTransactionsAllRoute
   AppTransactionsImportsRoute: typeof AppTransactionsImportsRouteWithChildren
   AppAssetsIndexRoute: typeof AppAssetsIndexRoute
   AppTransactionsIndexRoute: typeof AppTransactionsIndexRoute
@@ -324,6 +344,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppIndexRoute: AppIndexRoute,
   AppAssetsImportsRoute: AppAssetsImportsRouteWithChildren,
   AppSettingsAccountRoute: AppSettingsAccountRoute,
+  AppTransactionsAllRoute: AppTransactionsAllRoute,
   AppTransactionsImportsRoute: AppTransactionsImportsRouteWithChildren,
   AppAssetsIndexRoute: AppAssetsIndexRoute,
   AppTransactionsIndexRoute: AppTransactionsIndexRoute,

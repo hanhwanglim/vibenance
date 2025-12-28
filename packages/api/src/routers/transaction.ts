@@ -58,89 +58,17 @@ export const transactionRouter = {
 			return await BankTransactionService.getSummary(input.dateRange);
 		}),
 
-	// categoryBreakdown: protectedProcedure.handler(async () => {
-	// 	const categoriesPromise = db
-	// 		.select({
-	// 			name: category.name,
-	// 			sum: sum(transaction.amount),
-	// 		})
-	// 		.from(transaction)
-	// 		.leftJoin(category, eq(transaction.categoryId, category.id))
-	// 		.where(lt(transaction.amount, 0))
-	// 		.groupBy(category.name)
-	// 		.orderBy(({ sum }) => asc(sum)); // expenses are negative
+	categoryBreakdown: protectedProcedure
+		.input(z.object({ dateRange: dateRange.optional() }))
+		.handler(async ({ input }) => {
+			return await BankTransactionService.categoryBreakdown(input.dateRange);
+		}),
 
-	// 	const totalExpensesPromise = db
-	// 		.select({ sum: sum(transaction.amount) })
-	// 		.from(transaction)
-	// 		.where(lt(transaction.amount, "0"));
-
-	// 	const [categories, totalExpenses] = await Promise.all([
-	// 		categoriesPromise,
-	// 		totalExpensesPromise,
-	// 	]);
-
-	// 	// Keep top 6 categories, group the rest into "Others"
-	// 	const maxCategories = 6;
-	// 	const topCategories = categories.slice(0, maxCategories);
-	// 	const otherCategories = categories.slice(maxCategories);
-
-	// 	const formattedCategories = topCategories.map((category, index) => {
-	// 		return {
-	// 			category: category.name || "Uncategorized",
-	// 			sum: -Number(category.sum),
-	// 			fill: `var(--chart-${(index % 6) + 1})`,
-	// 		};
-	// 	});
-
-	// 	// Add "Others" category if there are remaining categories
-	// 	if (otherCategories.length > 0) {
-	// 		const othersSum = otherCategories.reduce(
-	// 			(acc, cat) => acc + Number(cat.sum || 0),
-	// 			0,
-	// 		);
-	// 		formattedCategories.push({
-	// 			category: "Others",
-	// 			sum: -othersSum,
-	// 			fill: "var(--chart-7)",
-	// 		});
-	// 	}
-
-	// 	return {
-	// 		categories: formattedCategories,
-	// 		sum: totalExpenses[0]?.sum,
-	// 	};
-	// }),
-
-	// spendingTrend: protectedProcedure.handler(async () => {
-	// 	const data = await db
-	// 		.select({
-	// 			bin: sql<string>`date_trunc('month', ${transaction.timestamp})`,
-	// 			sum: sum(transaction.amount),
-	// 		})
-	// 		.from(transaction)
-	// 		.where(lt(transaction.amount, 0))
-	// 		.groupBy(({ bin }) => bin);
-
-	// 	const minPeriod = await db
-	// 		.select({
-	// 			min: min(transaction.timestamp),
-	// 		})
-	// 		.from(transaction)
-	// 		.where(lt(transaction.amount, 0));
-
-	// 	const maxPeriod = await db
-	// 		.select({
-	// 			max: max(transaction.timestamp),
-	// 		})
-	// 		.from(transaction)
-	// 		.where(lt(transaction.amount, 0));
-
-	// 	return {
-	// 		period: { min: minPeriod[0].min, max: maxPeriod[0].max },
-	// 		data: data,
-	// 	};
-	// }),
+	spendingTrend: protectedProcedure
+		.input(z.object({ dateRange: dateRange.optional() }))
+		.handler(async ({ input }) => {
+			return await BankTransactionService.spendingTrend(input.dateRange);
+		}),
 
 	// categoryTrend: protectedProcedure
 	// 	.input(
