@@ -3,19 +3,29 @@ import {
 	type InvestmentTransactionInsert,
 	investmentTransaction,
 } from "@vibenance/db/schema/asset";
-import { and, gte, lt } from "drizzle-orm";
+import { and, eq, gte, lt } from "drizzle-orm";
 import type { DateRange, Pagination } from "../utils";
 
 export const AssetRepository = {
-	count: async (dateRange: DateRange) => {
+	count: async (type: string, dateRange?: DateRange) => {
 		const filters = [];
 
-		if (dateRange.from) {
+		if (type && type !== "all") {
+			filters.push(
+				eq(
+					// @ts-expect-error - drizzle-orm version mismatch between packages
+					investmentTransaction.type,
+					type as "buy" | "sell" | "deposit" | "reward" | "other",
+				),
+			);
+		}
+
+		if (dateRange?.from) {
 			// @ts-expect-error - drizzle-orm version mismatch between packages
 			filters.push(gte(investmentTransaction.timestamp, dateRange.from));
 		}
 
-		if (dateRange.to) {
+		if (dateRange?.to) {
 			// @ts-expect-error - drizzle-orm version mismatch between packages
 			filters.push(lt(investmentTransaction.timestamp, dateRange.to));
 		}
@@ -29,7 +39,7 @@ export const AssetRepository = {
 
 	getAll: async (
 		type: string,
-		dateRange: DateRange,
+		dateRange: DateRange | undefined,
 		pagination: Pagination,
 	) => {
 		return await db.query.investmentTransaction.findMany({
@@ -45,11 +55,11 @@ export const AssetRepository = {
 					);
 				}
 
-				if (dateRange.from) {
+				if (dateRange?.from) {
 					filters.push(gte(investmentTransaction.timestamp, dateRange.from));
 				}
 
-				if (dateRange.to) {
+				if (dateRange?.to) {
 					filters.push(lt(investmentTransaction.timestamp, dateRange.to));
 				}
 

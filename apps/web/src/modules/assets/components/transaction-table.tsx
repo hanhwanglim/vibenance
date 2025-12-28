@@ -4,12 +4,13 @@ import {
 	getCoreRowModel,
 	useReactTable,
 } from "@tanstack/react-table";
-import type { TransactionSelect } from "@vibenance/db/schema/transaction";
+import type { DateRange } from "@vibenance/api/utils";
+import type { InvestmentTransactionRow } from "@vibenance/parser";
 import { useState } from "react";
 import { DataTable, DataTablePagination } from "@/components/ui/data-table";
 import { orpc } from "@/utils/orpc";
 
-const columns: ColumnDef<TransactionSelect>[] = [
+const columns: ColumnDef<InvestmentTransactionRow>[] = [
 	{
 		accessorKey: "timestamp",
 		header: "Time",
@@ -52,10 +53,16 @@ const columns: ColumnDef<TransactionSelect>[] = [
 		cell: ({ row }) => Number(row.original.total).toFixed(2),
 	},
 ];
-export function TransactionTable({ type, dateRange }) {
+export function TransactionTable({
+	type,
+	dateRange,
+}: {
+	type: string;
+	dateRange?: DateRange;
+}) {
 	const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: 10 });
 
-	const transactions = useQuery(
+	const { data: transactions } = useQuery(
 		orpc.asset.getAll.queryOptions({
 			input: { pagination: pagination, type: type, dateRange: dateRange },
 			placeholderData: keepPreviousData,
@@ -63,12 +70,12 @@ export function TransactionTable({ type, dateRange }) {
 	);
 
 	const table = useReactTable({
-		data: transactions.data?.data || [],
+		data: (transactions?.data || []) as InvestmentTransactionRow[],
 		columns,
 		getCoreRowModel: getCoreRowModel(),
 		manualPagination: true,
 		onPaginationChange: setPagination,
-		rowCount: transactions.data?.count || 0,
+		rowCount: transactions?.count || 0,
 		state: {
 			pagination,
 		},

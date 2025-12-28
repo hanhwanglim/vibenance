@@ -4,10 +4,10 @@ import {
 	getPaginationRowModel,
 	useReactTable,
 } from "@tanstack/react-table";
-import type { TransactionSelect } from "@vibenance/db/schema/transaction";
+import type { InvestmentTransactionRow } from "@vibenance/parser";
 import { DataTable, DataTablePagination } from "@/components/ui/data-table";
 
-const columns: ColumnDef<TransactionSelect>[] = [
+const columns: ColumnDef<InvestmentTransactionRow>[] = [
 	{
 		accessorKey: "timestamp",
 		header: "Time",
@@ -51,7 +51,11 @@ const columns: ColumnDef<TransactionSelect>[] = [
 	},
 ];
 
-export function TransactionPreviewTable({ data }) {
+export function TransactionPreviewTable({
+	data,
+}: {
+	data: InvestmentTransactionRow[];
+}) {
 	const table = useReactTable({
 		data: data,
 		columns,

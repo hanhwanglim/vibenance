@@ -15,6 +15,12 @@ import { cn } from "@/lib/utils";
 import { formatCurrency } from "@/utils/formatting";
 import { orpc } from "@/utils/orpc";
 
+type StatCardData = {
+	label: string;
+	value: string;
+	currency?: string;
+};
+
 export function SummaryCards({
 	dateRange,
 }: {
@@ -27,30 +33,30 @@ export function SummaryCards({
 	const cardsData: StatCardData[] = [
 		{
 			label: "Total Income",
-			value: summary?.totalIncome,
+			value: summary?.totalIncome || "0",
 			currency: "GBP",
 		},
 		{
 			label: "Total Expenses",
-			value: summary?.totalExpenses,
+			value: summary?.totalExpenses || "0",
 			currency: "GBP",
 		},
 		{
 			label: "Net Amount",
-			value: Number(summary?.totalIncome) + Number(summary?.totalExpenses),
+			value: summary?.netAmount || "0",
 			currency: "GBP",
 		},
 		{
 			label: "Transactions",
-			value: summary?.count,
+			value: summary?.count.toString() || "0",
 		},
 	];
 
 	if (isLoading) {
 		return (
 			<div className="grid @5xl/main:grid-cols-4 @xl/main:grid-cols-2 grid-cols-1 gap-4 px-4 lg:px-6">
-				{cardsData.map((_) => (
-					<StatCardSkeleton key={`stat-card-skeleton-${crypto.randomUUID()}`} />
+				{cardsData.map((data) => (
+					<StatCardSkeleton key={`stat-card-skeleton-${data.label}`} />
 				))}
 			</div>
 		);
@@ -59,14 +65,16 @@ export function SummaryCards({
 	return (
 		<div className="grid @5xl/main:grid-cols-4 @xl/main:grid-cols-2 grid-cols-1 gap-4 px-4 *:data-[slot=card]:bg-gradient-to-t *:data-[slot=card]:from-primary/5 *:data-[slot=card]:to-card *:data-[slot=card]:shadow-xs lg:px-6 dark:*:data-[slot=card]:bg-card">
 			{cardsData.map((cardData) => {
-				const value = cardData.currency
-					? formatCurrency(Number(cardData.value), cardData.currency)
-					: cardData.value;
 				return (
 					<StatCard
-						key={`summary-${crypto.randomUUID()}`}
+						key={`summary-${cardData.label}`}
 						label={cardData.label}
-						value={value}
+						value={
+							cardData.currency
+								? formatCurrency(Number(cardData.value), cardData.currency)
+								: cardData.value
+						}
+						isPositive={Number(cardData.value) >= 0}
 					/>
 				);
 			})}
@@ -85,7 +93,14 @@ function StatCardSkeleton() {
 	);
 }
 
-function StatCard({ className, label, value, isPositive }) {
+type StatCardProps = {
+	className?: string;
+	label: string;
+	value: string;
+	isPositive: boolean;
+};
+
+function StatCard({ className, label, value, isPositive }: StatCardProps) {
 	const TrendIcon = isPositive ? TrendingUp : TrendingDown;
 
 	return (

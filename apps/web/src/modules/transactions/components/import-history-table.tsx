@@ -1,11 +1,20 @@
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
-import { getCoreRowModel, useReactTable } from "@tanstack/react-table";
+import {
+	type ColumnDef,
+	getCoreRowModel,
+	useReactTable,
+} from "@tanstack/react-table";
+import type { FileImportSelect, FileSelect } from "@vibenance/db/schema/file";
 import { FileIcon } from "lucide-react";
 import { useState } from "react";
 import { DataTable, DataTablePagination } from "@/components/ui/data-table";
 import { orpc } from "@/utils/orpc";
 
-const columns = [
+type FileImportRow = FileImportSelect & {
+	files: Array<FileSelect>;
+};
+
+const columns: ColumnDef<FileImportRow>[] = [
 	{
 		accessorFn: (row) => `${row.files[0].fileName}`,
 		header: "Name",
@@ -45,7 +54,7 @@ export function ImportHistoryTable() {
 	);
 
 	const table = useReactTable({
-		data: importHistory?.data || [],
+		data: (importHistory?.data || []) as FileImportRow[],
 		columns,
 		getCoreRowModel: getCoreRowModel(),
 		manualPagination: true,

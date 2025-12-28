@@ -9,7 +9,7 @@ export const assetRouter = {
 		.input(
 			z.object({
 				pagination,
-				dateRange,
+				dateRange: dateRange.optional(),
 				type: z.string(),
 			}),
 		)

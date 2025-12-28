@@ -13,10 +13,10 @@ type TransactionCreate = Omit<
 export const AssetService = {
 	getAll: async (
 		type: string,
-		dateRange: DateRange,
+		dateRange: DateRange | undefined,
 		pagination: Pagination,
 	) => {
-		const count = await AssetRepository.count(dateRange);
+		const count = await AssetRepository.count(type, dateRange);
 		const transactions = await AssetRepository.getAll(
 			type,
 			dateRange,

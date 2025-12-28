@@ -80,6 +80,7 @@ export const categoryRelations = relations(category, ({ many }) => ({
 }));
 
 export type BankAccountInsert = typeof bankAccount.$inferInsert;
+export type BankAccountSelect = typeof bankAccount.$inferSelect;
 
 export type TransactionInsert = typeof transaction.$inferInsert;
 export type TransactionSelect = typeof transaction.$inferSelect;

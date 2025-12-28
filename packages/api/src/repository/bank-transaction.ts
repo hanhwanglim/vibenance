@@ -7,7 +7,7 @@ import { and, desc, eq, gt, gte, lt, sum } from "drizzle-orm";
 import type { DateRange, Pagination } from "../utils";
 
 export const BankTransactionRepository = {
-	count: async (type: string, dateRange: DateRange) => {
+	count: async (type: string, dateRange: DateRange | undefined) => {
 		const filters = [];
 
 		if (type === "income") {
@@ -20,12 +20,12 @@ export const BankTransactionRepository = {
 			filters.push(lt(transaction.amount, 0));
 		}
 
-		if (dateRange.from) {
+		if (dateRange?.from) {
 			// @ts-expect-error - drizzle-orm version mismatch between packages
 			filters.push(gte(transaction.timestamp, dateRange.from));
 		}
 
-		if (dateRange.to) {
+		if (dateRange?.to) {
 			// @ts-expect-error - drizzle-orm version mismatch between packages
 			filters.push(lt(transaction.timestamp, dateRange.to));
 		}
@@ -37,15 +37,15 @@ export const BankTransactionRepository = {
 		);
 	},
 
-	totalIncome: async (dateRange: DateRange) => {
+	totalIncome: async (dateRange: DateRange | undefined) => {
 		const filters = [];
 
-		if (dateRange.from) {
+		if (dateRange?.from) {
 			// @ts-expect-error - drizzle-orm version mismatch between packages
 			filters.push(gte(transaction.timestamp, dateRange.from));
 		}
 
-		if (dateRange.to) {
+		if (dateRange?.to) {
 			// @ts-expect-error - drizzle-orm version mismatch between packages
 			filters.push(lt(transaction.timestamp, dateRange.to));
 		}
@@ -60,15 +60,15 @@ export const BankTransactionRepository = {
 		return (result?.income as string) || "0";
 	},
 
-	totalExpenses: async (dateRange: DateRange) => {
+	totalExpenses: async (dateRange: DateRange | undefined) => {
 		const filters = [];
 
-		if (dateRange.from) {
+		if (dateRange?.from) {
 			// @ts-expect-error - drizzle-orm version mismatch between packages
 			filters.push(gte(transaction.timestamp, dateRange.from));
 		}
 
-		if (dateRange.to) {
+		if (dateRange?.to) {
 			// @ts-expect-error - drizzle-orm version mismatch between packages
 			filters.push(lt(transaction.timestamp, dateRange.to));
 		}
@@ -85,7 +85,7 @@ export const BankTransactionRepository = {
 
 	getAll: async (
 		type: string,
-		dateRange: DateRange,
+		dateRange: DateRange | undefined,
 		pagination: Pagination,
 	) => {
 		return await db.query.transaction.findMany({
@@ -106,11 +106,11 @@ export const BankTransactionRepository = {
 					filters.push(lt(transaction.amount, 0));
 				}
 
-				if (dateRange.from) {
+				if (dateRange?.from) {
 					filters.push(gte(transaction.timestamp, dateRange.from));
 				}
 
-				if (dateRange.to) {
+				if (dateRange?.to) {
 					filters.push(lt(transaction.timestamp, dateRange.to));
 				}
 

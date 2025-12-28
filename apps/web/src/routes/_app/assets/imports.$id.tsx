@@ -1,5 +1,6 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { createFileRoute, redirect, useNavigate } from "@tanstack/react-router";
+import type { InvestmentTransactionRow } from "@vibenance/parser";
 import { useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -10,24 +11,18 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "@/components/ui/select";
-import { authClient } from "@/lib/auth-client";
 import { TransactionPreviewTable } from "@/modules/assets/components/transaction-preview-table";
 import { orpc } from "@/utils/orpc";
 
 export const Route = createFileRoute("/_app/assets/imports/$id")({
 	component: RouteComponent,
 	beforeLoad: async ({ params }) => {
-		const session = await authClient.getSession();
-		if (!session.data) redirect({ to: "/login", throw: true });
-
-		const fileId = Number(params.id);
-		const file = orpc.file.get.queryOptions({ input: fileId });
-
+		const file = orpc.file.get.queryOptions({ input: params.id });
 		if (!file) {
 			redirect({ to: "/assets", throw: true });
 		}
 
-		return { session, file };
+		return { file };
 	},
 });
 
@@ -41,16 +36,18 @@ function RouteComponent() {
 	);
 
 	const { data: previewData } = useQuery(
-		orpc.asset.importPreview.queryOptions({ input: Number(id) }),
+		orpc.asset.importPreview.queryOptions({ input: id }),
 	);
 
 	const importMutation = useMutation(orpc.asset.create.mutationOptions({}));
 
 	const handleImport = () => {
+		if (!previewData) return;
+
 		const payload = {
-			accountId: Number(selectedAccountId),
-			fileImportId: Number(id),
-			transactions: previewData,
+			accountId: selectedAccountId,
+			fileImportId: id,
+			transactions: previewData as InvestmentTransactionRow[],
 		};
 
 		importMutation.mutate(payload, {
@@ -91,7 +88,9 @@ function RouteComponent() {
 					{importMutation.isPending ? "Importing..." : "Import Transactions"}
 				</Button>
 			</div>
-			<TransactionPreviewTable data={previewData || []} />
+			<TransactionPreviewTable
+				data={(previewData || []) as InvestmentTransactionRow[]}
+			/>
 		</div>
 	);
 }

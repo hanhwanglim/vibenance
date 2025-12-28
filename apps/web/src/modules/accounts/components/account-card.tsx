@@ -1,6 +1,7 @@
 "use client";
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import type { BankAccountSelect } from "@vibenance/db/schema/transaction";
 import { Pencil, Trash2, Wallet } from "lucide-react";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
@@ -8,15 +9,13 @@ import { Button } from "@/components/ui/button";
 import {
 	Card,
 	CardDescription,
-	CardFooter,
 	CardHeader,
 	CardTitle,
 } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
-import { formatCurrency } from "@/utils/formatting";
 import { orpc } from "@/utils/orpc";
 
-const _ACCOUNT_TYPE_LABELS: Record<AccountWithStats["type"], string> = {
+const ACCOUNT_TYPE_LABELS: Record<BankAccountSelect["type"], string> = {
 	savings: "Savings",
 	current: "Current",
 	checking: "Checking",
@@ -25,16 +24,6 @@ const _ACCOUNT_TYPE_LABELS: Record<AccountWithStats["type"], string> = {
 	loan: "Loan",
 	other: "Other",
 };
-
-const _ACCOUNT_TYPE_ORDER: AccountWithStats["type"][] = [
-	"savings",
-	"checking",
-	"current",
-	"credit_card",
-	"investment",
-	"loan",
-	"other",
-];
 
 const COLOR_CLASSES: Record<string, string> = {
 	blue: "border-l-blue-500",
@@ -52,7 +41,6 @@ export function AccountCards() {
 		orpc.bankAccount.getAll.queryOptions({ queryKey: ["bankAccount"] }),
 	);
 
-	// Group accounts by type
 	const groupedAccounts = accounts?.reduce(
 		(acc, account) => {
 			if (!acc[account.type]) {
@@ -61,10 +49,8 @@ export function AccountCards() {
 			acc[account.type].push(account);
 			return acc;
 		},
-		{} as Record<AccountWithStats["type"], AccountWithStats[]>,
+		{} as Record<BankAccountSelect["type"], BankAccountSelect[]>,
 	);
-
-	console.log(groupedAccounts);
 
 	if (isLoading || accounts?.length === 0) {
 		return (
@@ -86,12 +72,13 @@ export function AccountCards() {
 		<div className="space-y-8 px-4 lg:px-6">
 			{groupedAccounts &&
 				Object.keys(groupedAccounts).flatMap((key) => {
+					const typedKey = key as BankAccountSelect["type"];
 					return (
 						<div key={key} className="space-y-4">
 							<h2 className="font-semibold text-xl capitalize">{key}</h2>
 							<div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
-								{groupedAccounts[key].map((account) => {
-									return <AccountCard key={account.id} {...account} />;
+								{groupedAccounts[typedKey].map((account: BankAccountSelect) => {
+									return <AccountCard key={account.id} account={account} />;
 								})}
 							</div>
 						</div>
@@ -101,28 +88,17 @@ export function AccountCards() {
 	);
 }
 
-function AccountCard({
-	id,
-	color,
-	name,
-	type,
-	bankName,
-	accountNumber,
-	createdAt,
-	totalBalance,
-	lastTransactionDate,
-	transactionCount,
-}) {
+function AccountCard({ account }: { account: BankAccountSelect }) {
 	const queryClient = useQueryClient();
 
 	const deleteMutation = useMutation(
 		orpc.bankAccount.delete.mutationOptions({}),
 	);
 
-	const handleDelete = async (id: number) => {
+	const handleDelete = async (id: string) => {
 		if (
 			!confirm(
-				`Are you sure you want to delete "${name}"? This action cannot be undone.`,
+				`Are you sure you want to delete "${account.name}"? This action cannot be undone.`,
 			)
 		) {
 			return;
@@ -136,12 +112,13 @@ function AccountCard({
 			onError: (error) => toast.error(error.message),
 		});
 	};
+
 	return (
 		<Card
 			className={cn(
 				"flex flex-col",
-				color && COLOR_CLASSES[color]
-					? `${COLOR_CLASSES[color]} border-l-4`
+				account.color && COLOR_CLASSES[account.color]
+					? `${COLOR_CLASSES[account.color]} border-l-4`
 					: "",
 			)}
 		>
@@ -149,22 +126,21 @@ function AccountCard({
 				<div className="flex items-start justify-between">
 					<div className="flex-1">
 						<div className="mb-1 flex items-center gap-2">
-							<CardTitle className="text-lg">{name}</CardTitle>
+							<CardTitle className="text-lg">{account.name}</CardTitle>
 							<Badge variant="outline" className="text-xs capitalize">
-								{type}
+								{ACCOUNT_TYPE_LABELS[account.type]}
 							</Badge>
 						</div>
-						{bankName && (
-							<CardDescription className="text-xs">{bankName}</CardDescription>
-						)}
-						{accountNumber && (
-							<CardDescription className="text-muted-foreground text-xs">
-								Account: {accountNumber}
+						{account.bankName && (
+							<CardDescription className="text-xs">
+								{account.bankName}
 							</CardDescription>
 						)}
-						<CardDescription className="mt-1 text-xs">
-							Created {new Date(createdAt).toLocaleDateString()}
-						</CardDescription>
+						{account.accountNumber && (
+							<CardDescription className="text-muted-foreground text-xs">
+								Account: {account.accountNumber}
+							</CardDescription>
+						)}
 					</div>
 					<div className="flex gap-1">
 						<Button
@@ -179,14 +155,14 @@ function AccountCard({
 							variant="ghost"
 							size="icon"
 							className="h-8 w-8 text-destructive hover:text-destructive"
-							onClick={() => handleDelete(id)}
+							onClick={() => handleDelete(account.id)}
 						>
 							<Trash2 className="h-4 w-4" />
 						</Button>
 					</div>
 				</div>
 			</CardHeader>
-			<CardFooter className="mt-auto flex flex-col items-start gap-2 pt-0">
+			{/*<CardFooter className="mt-auto flex flex-col items-start gap-2 pt-0">
 				<div className="flex w-full items-center gap-2">
 					<span className="text-muted-foreground text-sm">Balance:</span>
 					<span className="font-semibold text-lg">
@@ -207,7 +183,7 @@ function AccountCard({
 						</span>
 					</div>
 				)}
-			</CardFooter>
+			</CardFooter>*/}
 		</Card>
 	);
 }

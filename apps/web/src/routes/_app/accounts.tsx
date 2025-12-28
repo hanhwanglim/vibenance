@@ -12,13 +12,7 @@ export const Route = createFileRoute("/_app/accounts")({
 
 function RouteComponent() {
 	const [dialogOpen, setDialogOpen] = useState(false);
-	const [editingAccount, setEditingAccount] = useState<AccountWithStats | null>(
-		null,
-	);
-	const handleDialogSuccess = () => {
-		setDialogOpen(false);
-		setEditingAccount(null);
-	};
+	const [editingAccount, setEditingAccount] = useState<boolean>(false);
 
 	return (
 		<div>
@@ -28,12 +22,12 @@ function RouteComponent() {
 						open={dialogOpen}
 						onOpenChange={(open) => {
 							setDialogOpen(open);
-							if (!open) setEditingAccount(null);
+							if (!open) setEditingAccount(false);
 						}}
 					>
 						<Button
 							onClick={() => {
-								setEditingAccount(null);
+								setEditingAccount(false);
 								setDialogOpen(true);
 							}}
 							className="gap-2"
@@ -43,12 +37,10 @@ function RouteComponent() {
 						</Button>
 						<AccountDialog
 							account={editingAccount}
-							open={dialogOpen}
 							onOpenChange={(open) => {
 								setDialogOpen(open);
-								if (!open) setEditingAccount(null);
+								if (!open) setEditingAccount(false);
 							}}
-							onSuccess={handleDialogSuccess}
 						/>
 					</Dialog>
 				</div>

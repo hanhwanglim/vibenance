@@ -7,13 +7,13 @@ import { FileImportService } from "./file-import";
 
 type TransactionCreate = Omit<
 	TransactionInsert,
-	"id" | "accountId" | "categoryId"
+	"id" | "accountId" | "fileImportId"
 >;
 
 export const BankTransactionService = {
 	getAll: async (
 		type: string,
-		dateRange: DateRange,
+		dateRange: DateRange | undefined,
 		pagination: Pagination,
 	) => {
 		const count = await BankTransactionRepository.count(type, dateRange);
@@ -69,7 +69,7 @@ export const BankTransactionService = {
 		return objs;
 	},
 
-	getSummary: async (dateRange: DateRange) => {
+	getSummary: async (dateRange: DateRange | undefined) => {
 		const [count, totalIncome, totalExpenses] = await Promise.all([
 			BankTransactionRepository.count("all", dateRange),
 			BankTransactionRepository.totalIncome(dateRange),
@@ -80,7 +80,7 @@ export const BankTransactionService = {
 			count: count,
 			totalIncome: totalIncome,
 			totalExpenses: totalExpenses,
-			netAmount: Number(totalIncome) - Number(totalExpenses),
+			netAmount: (Number(totalIncome) - Number(totalExpenses)).toString(),
 		};
 	},
 

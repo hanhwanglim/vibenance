@@ -8,8 +8,8 @@ export const transactionRouter = {
 	getAll: protectedProcedure
 		.input(
 			z.object({
-				pagination,
-				dateRange,
+				pagination: pagination,
+				dateRange: dateRange.optional(),
 				type: z.enum(["all", "income", "expenses"]),
 			}),
 		)
@@ -36,7 +36,7 @@ export const transactionRouter = {
 						name: z.string(),
 						currency: z.string(),
 						amount: z.string(),
-						categoryId: z.number().nullable().optional(),
+						categoryId: z.string().nullable().optional(),
 						reference: z.string().optional(),
 					}),
 				),
@@ -53,7 +53,7 @@ export const transactionRouter = {
 		}),
 
 	summary: protectedProcedure
-		.input(z.object({ dateRange }))
+		.input(z.object({ dateRange: dateRange.optional() }))
 		.handler(async ({ input }) => {
 			return await BankTransactionService.getSummary(input.dateRange);
 		}),

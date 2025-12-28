@@ -1,6 +1,7 @@
 "use client";
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import type { BankAccountSelect } from "@vibenance/db/schema/transaction";
 import { Loader2 } from "lucide-react";
 import { type FormEvent, useState } from "react";
 import { toast } from "sonner";
@@ -44,12 +45,21 @@ const COLOR_OPTIONS = [
 	{ value: "gray", label: "Gray" },
 ] as const;
 
-export function AccountDialog({ account, onOpenChange }) {
-	const [name, setName] = useState("");
-	const [type, setType] = useState<string>("other");
-	const [accountNumber, setAccountNumber] = useState(undefined);
-	const [bankName, setBankName] = useState(undefined);
-	const [color, setColor] = useState(undefined);
+type AccountDialogProps = {
+	account: boolean;
+	onOpenChange: (open: boolean) => void;
+};
+
+export function AccountDialog({ account, onOpenChange }: AccountDialogProps) {
+	const [name, setName] = useState<string>("");
+	const [type, setType] = useState<BankAccountSelect["type"] | undefined>(
+		undefined,
+	);
+	const [accountNumber, setAccountNumber] = useState<string | undefined>(
+		undefined,
+	);
+	const [bankName, setBankName] = useState<string | undefined>(undefined);
+	const [color, setColor] = useState<string | undefined>(undefined);
 	const isEditing = account !== null;
 
 	const queryClient = useQueryClient();
@@ -57,6 +67,11 @@ export function AccountDialog({ account, onOpenChange }) {
 
 	const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
 		e.preventDefault();
+
+		if (!type) {
+			toast.error("Please select an account type");
+			return;
+		}
 
 		mutation.mutate(
 			{
@@ -106,8 +121,11 @@ export function AccountDialog({ account, onOpenChange }) {
 					<Label htmlFor="account-type">Account Type</Label>
 					<Select
 						value={type}
-						onValueChange={setType}
+						onValueChange={(value) =>
+							setType(value as BankAccountSelect["type"])
+						}
 						disabled={mutation.isPending}
+						required
 					>
 						<SelectTrigger id="account-type">
 							<SelectValue placeholder="Select account type" />
@@ -170,7 +188,10 @@ export function AccountDialog({ account, onOpenChange }) {
 					>
 						Cancel
 					</Button>
-					<Button type="submit" disabled={mutation.isPending || !name.trim()}>
+					<Button
+						type="submit"
+						disabled={mutation.isPending || !name.trim() || !type}
+					>
 						{mutation.isPending ? (
 							<>
 								<Loader2 className="mr-2 h-4 w-4 animate-spin" />

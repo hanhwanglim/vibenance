@@ -6,6 +6,7 @@ import {
 } from "@tanstack/react-table";
 import type { TransactionSelect } from "@vibenance/db/schema/transaction";
 import { useState } from "react";
+import type { DateRange } from "react-day-picker";
 import { toast } from "sonner";
 import { Checkbox } from "@/components/ui/checkbox";
 import { DataTable, DataTablePagination } from "@/components/ui/data-table";
@@ -23,7 +24,12 @@ import { Separator } from "@/components/ui/separator";
 import { formatCurrency } from "@/utils/formatting";
 import { orpc } from "@/utils/orpc";
 
-const columns: ColumnDef<TransactionSelect>[] = [
+type TransactionRow = TransactionSelect & {
+	category: { name: string } | null;
+	account: { name: string };
+};
+
+const columns: ColumnDef<TransactionRow>[] = [
 	{
 		id: "select",
 		header: ({ table }) => (
@@ -77,17 +83,28 @@ const columns: ColumnDef<TransactionSelect>[] = [
 			const selectKey = `select-${row.original.id}-${pageIndex}`;
 
 			const handleChange = (value: string) => {
-				const mutation = table.options.meta.updateCategoryMutation;
-				const payload = { id: row.original.id, categoryId: null };
-				if (value !== "null") {
-					payload.categoryId = Number(value);
+				const { mutate } = useMutation(
+					orpc.transaction.updateCategory.mutationOptions(),
+				);
+
+				const payload: { id: string; categoryId: string | null } = {
+					id: row.original.id,
+					categoryId: value,
+				};
+				if (value === "null") {
+					payload.categoryId = null;
 				}
-				mutation.mutate(payload, {
+
+				mutate(payload, {
 					onSuccess: () => {
 						toast.success("Category updated");
 					},
 				});
 			};
+
+			const { data: categories } = useQuery(
+				orpc.transaction.listCategories.queryOptions(),
+			);
 
 			return (
 				<>
@@ -105,7 +122,7 @@ const columns: ColumnDef<TransactionSelect>[] = [
 						<SelectContent>
 							<SelectGroup>
 								<SelectLabel>Category</SelectLabel>
-								{table.options.meta.categories.map((category) => {
+								{categories?.map((category) => {
 									return (
 										<SelectItem
 											key={`table-category-${row.original.id}-${category.id}`}
@@ -135,37 +152,30 @@ const columns: ColumnDef<TransactionSelect>[] = [
 	},
 ];
 
-export function TransactionTable({ type, dateRange }) {
+type TransactionTableProps = {
+	type: "all" | "income" | "expenses";
+	dateRange: DateRange | undefined;
+};
+
+export function TransactionTable({ type, dateRange }: TransactionTableProps) {
 	const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: 10 });
 
-	const transactions = useQuery(
+	const { data: transactions } = useQuery(
 		orpc.transaction.getAll.queryOptions({
 			input: { pagination: pagination, type: type, dateRange: dateRange },
 			placeholderData: keepPreviousData,
 		}),
 	);
 
-	const { data: categories } = useQuery(
-		orpc.transaction.listCategories.queryOptions(),
-	);
-
-	const updateCategoryMutation = useMutation(
-		orpc.transaction.updateCategory.mutationOptions(),
-	);
-
 	const table = useReactTable({
-		data: transactions.data?.data || [],
+		data: (transactions?.data || []) as TransactionRow[],
 		columns,
 		getCoreRowModel: getCoreRowModel(),
 		manualPagination: true,
 		onPaginationChange: setPagination,
-		rowCount: transactions.data?.count || 0,
+		rowCount: transactions?.count || 0,
 		state: {
 			pagination,
-		},
-		meta: {
-			categories: categories,
-			updateCategoryMutation: updateCategoryMutation,
 		},
 	});
 

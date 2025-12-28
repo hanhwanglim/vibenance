@@ -50,13 +50,8 @@ export const Route = createFileRoute("/_app/assets/")({
 function RouteComponent() {
 	const location = useLocation();
 
-	const now = new Date();
-
 	const [open, setOpen] = useState(false);
-	const [dateRange, setDateRange] = useState<DateRange | undefined>({
-		from: new Date(now.getFullYear(), now.getMonth() - 3, now.getDay()),
-		to: now,
-	});
+	const [dateRange, setDateRange] = useState<DateRange | undefined>(undefined);
 
 	if (location.pathname !== "/assets") {
 		return <Outlet />;
@@ -100,8 +95,9 @@ function RouteComponent() {
 										id="date"
 										className="w-52 justify-between font-normal"
 									>
-										{`${dateRange?.from.toLocaleDateString()} - ${dateRange?.to.toLocaleDateString()}` ||
-											"Select Date"}
+										{dateRange?.from && dateRange?.to
+											? `${dateRange.from.toLocaleDateString()} - ${dateRange.to.toLocaleDateString()}`
+											: "Select Date"}
 										<ChevronDownIcon />
 									</Button>
 								</PopoverTrigger>
