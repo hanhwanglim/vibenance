@@ -7,8 +7,8 @@ type TransactionCreate = Omit<
 
 interface ImportSession {
 	userId: number;
-	fileId: number;
-	fileImportId: number;
+	fileId: string;
+	fileImportId: string;
 	transactions: Array<TransactionCreate>;
 	expiresAt: Date;
 }
@@ -18,8 +18,8 @@ class BotStateManager {
 
 	createSession(
 		userId: number,
-		fileId: number,
-		fileImportId: number,
+		fileId: string,
+		fileImportId: string,
 		transactions: ImportSession["transactions"],
 		ttlMinutes = 10,
 	): void {
@@ -50,7 +50,7 @@ class BotStateManager {
 		return session;
 	}
 
-	updateSessionAccount(userId: number, _accountId: number): boolean {
+	updateSessionAccount(userId: number, _accountId: string): boolean {
 		const session = this.getSession(userId);
 		if (!session) {
 			return false;

@@ -7,7 +7,7 @@ import { fileRouter } from "./file";
 import { settingsRouter } from "./settings";
 import { transactionRouter } from "./transaction";
 
-const appRouter = {
+export const appRouter = {
 	healthCheck: publicProcedure.handler(() => {
 		return "OK";
 	}),

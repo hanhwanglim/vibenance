@@ -1,6 +1,7 @@
 import { BankAccountService } from "@vibenance/api/services/bank-account";
 import { BankTransactionService } from "@vibenance/api/services/bank-transaction";
 import { FileService } from "@vibenance/api/services/file";
+import type { TransactionRow } from "@vibenance/parser";
 import { type CommandContext, type Context, InlineKeyboard } from "grammy";
 import { botState } from "./state";
 import { sendError } from "./utils";
@@ -16,6 +17,7 @@ export async function help(ctx: CommandContext<Context>) {
 export async function handleDocuments(ctx: Context) {
 	const document = ctx.message?.document;
 	if (!document) return;
+	if (!ctx.chatId) return;
 
 	ctx.react("👀");
 
@@ -45,7 +47,12 @@ export async function handleDocuments(ctx: Context) {
 			throw new Error("No valid transactions found");
 		}
 
-		botState.createSession(ctx.chatId, uploadedFile.id, fileImport.id, preview);
+		botState.createSession(
+			ctx.chatId,
+			uploadedFile.id,
+			fileImport.id,
+			preview as TransactionRow[],
+		);
 
 		const previewMessage =
 			"File processed successfully!\n\n" +
@@ -80,14 +87,12 @@ export async function handleImport(ctx: Context) {
 	const match = ctx.match;
 	if (!match || match.length < 3) return;
 
-	const fileImportIdStr = match[1];
-	const accountIdStr = match[2];
-	if (!fileImportIdStr || !accountIdStr) return;
+	if (!ctx.chatId) return;
 
-	const fileImportId = Number.parseInt(fileImportIdStr, 10);
-	const accountId = Number.parseInt(accountIdStr, 10);
+	const fileImportId = match[1];
+	const accountId = match[2];
+	if (!fileImportId || !accountId) return;
 
-	// Get session
 	const session = botState.getSession(ctx.chatId);
 	if (!session || session.fileImportId !== fileImportId) {
 		await ctx.answerCallbackQuery({

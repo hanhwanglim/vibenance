@@ -5,12 +5,6 @@ import { RPCHandler } from "@orpc/server/fetch";
 import { ZodToJsonSchemaConverter } from "@orpc/zod/zod4";
 import { appRouter } from "@vibenance/api/routers/index";
 
-function createErrorInterceptor() {
-	return onError((error) => {
-		console.error(error);
-	});
-}
-
 export function createApiHandler() {
 	return new OpenAPIHandler(appRouter, {
 		plugins: [
@@ -18,12 +12,20 @@ export function createApiHandler() {
 				schemaConverters: [new ZodToJsonSchemaConverter()],
 			}),
 		],
-		interceptors: [createErrorInterceptor()],
+		interceptors: [
+			onError((error) => {
+				console.error(error);
+			}),
+		],
 	});
 }
 
 export function createRpcHandler() {
 	return new RPCHandler(appRouter, {
-		interceptors: [createErrorInterceptor()],
+		interceptors: [
+			onError((error) => {
+				console.error(error);
+			}),
+		],
 	});
 }

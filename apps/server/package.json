@@ -18,6 +18,7 @@
 		"@vibenance/api": "workspace:*",
 		"@vibenance/auth": "workspace:*",
 		"@vibenance/db": "workspace:*",
+		"@vibenance/parser": "workspace:*",
 		"better-auth": "catalog:",
 		"dotenv": "catalog:",
 		"grammy": "^1.38.4",

@@ -29,8 +29,8 @@ export async function authenticate(ctx: Context, next: NextFunction) {
 		},
 		where: (telegramCredential, { eq, and }) =>
 			and(
-				eq(telegramCredential.telegramChatId, ctx.chatId),
-				eq(telegramCredential.telegramUserId, ctx.from?.id),
+				eq(telegramCredential.telegramChatId, (ctx.chatId || -1).toString()),
+				eq(telegramCredential.telegramUserId, (ctx.from?.id || -1).toString()),
 			),
 	});
 
