@@ -1,9 +1,9 @@
 import { createFileRoute, Outlet, useLocation } from "@tanstack/react-router";
-import { ChevronDownIcon, ListFilter } from "lucide-react";
+import { ListFilter } from "lucide-react";
 import { useState } from "react";
 import type { DateRange } from "react-day-picker";
+import { DatePeriodPicker } from "@/components/date-period-picker";
 import { Button } from "@/components/ui/button";
-import { Calendar } from "@/components/ui/calendar";
 import {
 	DropdownMenu,
 	DropdownMenuCheckboxItem,
@@ -11,11 +11,6 @@ import {
 	DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Label } from "@/components/ui/label";
-import {
-	Popover,
-	PopoverContent,
-	PopoverTrigger,
-} from "@/components/ui/popover";
 import {
 	Select,
 	SelectContent,
@@ -26,6 +21,7 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ImportDialog } from "@/modules/assets/components/import-dialog";
 import { TransactionTable } from "@/modules/assets/components/transaction-table";
+import { DateTime } from "@/utils/date";
 
 export const Route = createFileRoute("/_app/assets/")({
 	component: RouteComponent,
@@ -34,8 +30,10 @@ export const Route = createFileRoute("/_app/assets/")({
 function RouteComponent() {
 	const location = useLocation();
 
-	const [open, setOpen] = useState(false);
-	const [dateRange, setDateRange] = useState<DateRange | undefined>(undefined);
+	const [dateRange, setDateRange] = useState<DateRange | undefined>({
+		from: new DateTime().subtract(3, "month"),
+		to: new Date(),
+	});
 
 	if (location.pathname !== "/assets") {
 		return <Outlet />;
@@ -68,39 +66,10 @@ function RouteComponent() {
 							<TabsTrigger value="buy">Buy</TabsTrigger>
 							<TabsTrigger value="sell">Sell</TabsTrigger>
 						</TabsList>
-						<div className="flex flex-col gap-3">
-							<Label htmlFor="date" className="sr-only px-1">
-								Select date range
-							</Label>
-							<Popover open={open} onOpenChange={setOpen}>
-								<PopoverTrigger asChild>
-									<Button
-										variant="outline"
-										id="date"
-										className="w-52 justify-between font-normal"
-									>
-										{dateRange?.from && dateRange?.to
-											? `${dateRange.from.toLocaleDateString()} - ${dateRange.to.toLocaleDateString()}`
-											: "Select Date"}
-										<ChevronDownIcon />
-									</Button>
-								</PopoverTrigger>
-								<PopoverContent
-									className="w-auto overflow-hidden p-0"
-									align="start"
-								>
-									<Calendar
-										mode="range"
-										defaultMonth={dateRange?.from}
-										selected={dateRange}
-										onSelect={setDateRange}
-										numberOfMonths={2}
-										className="rounded-lg border shadow-sm"
-										captionLayout="dropdown"
-									/>
-								</PopoverContent>
-							</Popover>
-						</div>
+						<DatePeriodPicker
+							dateRange={dateRange}
+							setDateRange={setDateRange}
+						/>
 					</div>
 					<div className="flex items-center gap-2">
 						<DropdownMenu>
