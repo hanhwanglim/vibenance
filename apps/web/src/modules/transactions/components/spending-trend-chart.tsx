@@ -18,6 +18,7 @@ import {
 	ChartTooltip,
 	ChartTooltipContent,
 } from "@/components/ui/chart";
+import { cn } from "@/lib/utils";
 import { orpc } from "@/utils/orpc";
 
 const chartConfig = {
@@ -30,8 +31,10 @@ const chartConfig = {
 } satisfies ChartConfig;
 
 export function SpendingTrendChart({
+	className,
 	dateRange,
 }: {
+	className?: string;
 	dateRange: DateRange | undefined;
 }) {
 	const { data: spendingTrend, isLoading } = useQuery(
@@ -64,7 +67,7 @@ export function SpendingTrendChart({
 	});
 
 	return (
-		<Card className="h-full">
+		<Card className={cn("h-full", className)}>
 			<CardHeader>
 				<CardTitle>Spending Trend</CardTitle>
 				<CardDescription>Daily expense trends over time</CardDescription>

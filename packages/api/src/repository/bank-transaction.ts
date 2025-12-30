@@ -177,6 +177,26 @@ export const BankTransactionRepository = {
 			// @ts-expect-error - drizzle-orm version mismatch between packages
 			.orderBy(({ bin }) => bin);
 	},
+
+	spendingTrendByCategory: async (dateRange?: DateRange, interval?: string) => {
+		return await db
+			.select({
+				// @ts-expect-error - drizzle-orm version mismatch between packages
+				bin: sql<string>`date_trunc(${sql.raw(`'${interval || "month"}'`)}, ${transaction.timestamp})`,
+				category: category.name,
+				// @ts-expect-error - drizzle-orm version mismatch between packages
+				sum: sum(transaction.amount),
+			})
+			.from(transaction)
+			// @ts-expect-error - drizzle-orm version mismatch between packages
+			.leftJoin(category, eq(transaction.categoryId, category.id))
+			// @ts-expect-error - drizzle-orm version mismatch between packages
+			.where(and(lt(transaction.amount, 0), ...dateRangeFilters(dateRange)))
+			// @ts-expect-error - drizzle-orm version mismatch between packages
+			.groupBy(({ bin, category }) => [bin, category])
+			// @ts-expect-error - drizzle-orm version mismatch between packages
+			.orderBy(({ bin }) => bin);
+	},
 };
 
 function dateRangeFilters(dateRange?: DateRange) {

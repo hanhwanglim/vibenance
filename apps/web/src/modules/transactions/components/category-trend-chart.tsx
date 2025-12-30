@@ -2,7 +2,7 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { TrendingUp } from "lucide-react";
-import { useMemo } from "react";
+import type { DateRange } from "react-day-picker";
 import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from "recharts";
 import {
 	Card,
@@ -18,39 +18,38 @@ import {
 	ChartTooltip,
 	ChartTooltipContent,
 } from "@/components/ui/chart";
+import { cn } from "@/lib/utils";
 import { orpc } from "@/utils/orpc";
 
-const _formatter = new Intl.DateTimeFormat("en", { month: "short" });
+const chartConfig = {
+	bin: {
+		label: "Date",
+	},
+	category: {
+		label: "Category",
+	},
+	sum: {
+		label: "Expenses",
+	},
+} satisfies ChartConfig;
 
-export function CategoryTrendChart() {
-	const now = new Date();
-	const currentYearStart = new Date(now.getFullYear(), 5, 1);
-	const currentYearEnd = new Date(now.getFullYear(), 11, 31);
-
+export function CategoryTrendChart({
+	className,
+	dateRange,
+}: {
+	className?: string;
+	dateRange?: DateRange;
+}) {
 	const { data, isLoading } = useQuery(
-		orpc.transaction.categoryTrend.queryOptions({
-			input: {
-				startDate: currentYearStart,
-				endDate: currentYearEnd,
-			},
+		orpc.transaction.spendingTrendByCategory.queryOptions({
+			input: { dateRange: dateRange },
 		}),
 	);
 
-	const chartConfig = useMemo(() => {
-		if (!data?.categories) return {} satisfies ChartConfig;
-
-		const config: ChartConfig = {};
-		data.categories.forEach((category) => {
-			const categoryName = category.category || "Others";
-			config[`prev_${categoryName}`] = {
-				label: `Previous ${categoryName}`,
-			};
-			config[`curr_${categoryName}`] = {
-				label: `Current ${categoryName}`,
-			};
-		});
-		return config;
-	}, [data?.categories]);
+	const formatter = new Intl.DateTimeFormat(
+		"en",
+		data?.format as Intl.DateTimeFormatOptions | undefined,
+	);
 
 	if (isLoading) {
 		return (
@@ -75,7 +74,7 @@ export function CategoryTrendChart() {
 	}
 
 	return (
-		<Card className="h-full">
+		<Card className={cn("h-full", className)}>
 			<CardHeader>
 				<CardTitle>Category Spending Trends</CardTitle>
 				<CardDescription>
@@ -91,38 +90,23 @@ export function CategoryTrendChart() {
 							tickLine={false}
 							tickMargin={10}
 							axisLine={false}
-							tickFormatter={(value) => value}
+							tickFormatter={(value: string) =>
+								formatter.format(new Date(value))
+							}
 						/>
 						<YAxis tickLine={false} axisLine={false} tickMargin={8} />
 						<ChartTooltip
-							shared={false}
 							cursor={false}
 							content={<ChartTooltipContent indicator="dot" />}
 						/>
-						{data?.categories.map((category, index) => {
-							const categoryName = category.category || "Others";
-							return (
-								<Bar
-									key={`prev-${categoryName}`}
-									dataKey={`prev_${categoryName}`}
-									radius={4}
-									stackId="a"
-									fill={`var(--chart-${(index % 5) + 1})`}
-								/>
-							);
-						})}
-						{data?.categories.map((category, index) => {
-							const categoryName = category.category || "Others";
-							return (
-								<Bar
-									key={`curr-${categoryName}`}
-									dataKey={`curr_${categoryName}`}
-									radius={4}
-									stackId="b"
-									fill={`var(--chart-${(index % 5) + 1})`}
-								/>
-							);
-						})}
+						{data?.categories.map((category, index) => (
+							<Bar
+								key={category}
+								dataKey={category}
+								stackId="a"
+								fill={`var(--chart-${(index % 7) + 1})`}
+							/>
+						))}
 					</BarChart>
 				</ChartContainer>
 			</CardContent>

@@ -127,8 +127,6 @@ export const BankTransactionService = {
 			});
 		}
 
-		console.log(formattedCategories);
-
 		return {
 			categories: formattedCategories,
 			sum: totalExpenses,
@@ -151,6 +149,61 @@ export const BankTransactionService = {
 
 		return {
 			data: data,
+			interval: interval,
+			format: format,
+		};
+	},
+
+	spendingTrendByCategory: async (dateRange?: DateRange) => {
+		let window = dateRange;
+
+		if (!window) {
+			const range = await BankTransactionRepository.spendingPeriod();
+			window = { from: range.min, to: range.max };
+		}
+
+		const { interval, format } = getChartInterval(window.from, window.to);
+		const data = await BankTransactionRepository.spendingTrendByCategory(
+			window,
+			interval,
+		);
+		const categories = new Map<string, null>();
+
+		type TrendItem = {
+			bin: string;
+			category: string | null;
+			sum: string;
+		};
+
+		type FlattenedItem = {
+			bin: string;
+		} & {
+			[categoryName: string]: string | number;
+		};
+
+		const typedData = data as TrendItem[];
+
+		const flattenedData = Object.values(
+			typedData.reduce(
+				(acc: Record<string, FlattenedItem>, item: TrendItem) => {
+					const bin = item.bin;
+					if (!acc[bin]) {
+						acc[bin] = { bin: bin };
+					}
+
+					const categoryName = item.category || "Uncategorized";
+					categories.set(categoryName, null);
+					acc[bin][categoryName] = -Number.parseFloat(item.sum);
+
+					return acc;
+				},
+				{} as Record<string, FlattenedItem>,
+			),
+		);
+
+		return {
+			data: flattenedData,
+			categories: categories.keys().toArray(),
 			interval: interval,
 			format: format,
 		};

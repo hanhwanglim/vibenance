@@ -16,6 +16,7 @@ import {
 	ChartTooltip,
 	ChartTooltipContent,
 } from "@/components/ui/chart";
+import { cn } from "@/lib/utils";
 import { formatCurrency } from "@/utils/formatting";
 import { orpc } from "@/utils/orpc";
 
@@ -25,7 +26,13 @@ const chartConfig = {
 	},
 } satisfies ChartConfig;
 
-export function CategoryChart({ dateRange }: { dateRange?: DateRange }) {
+export function CategoryChart({
+	className,
+	dateRange,
+}: {
+	className?: string;
+	dateRange?: DateRange;
+}) {
 	const { data: categoryBreakdown, isLoading } = useQuery(
 		orpc.transaction.categoryBreakdown.queryOptions({
 			input: { dateRange: dateRange },
@@ -44,7 +51,7 @@ export function CategoryChart({ dateRange }: { dateRange?: DateRange }) {
 	}
 
 	return (
-		<Card className="h-full">
+		<Card className={cn("h-full", className)}>
 			<CardHeader className="items-center pb-0">
 				<CardTitle>Spending by Category</CardTitle>
 				<CardDescription>
