@@ -38,6 +38,10 @@ const data = {
 			title: "Transactions",
 			url: "/transactions",
 			icon: Receipt,
+			items: [
+				{ title: "Dashboard", url: "/transactions" },
+				{ title: "All Transactions", url: "/transactions/all" },
+			],
 		},
 		{
 			title: "Assets",

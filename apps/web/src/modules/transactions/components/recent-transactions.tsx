@@ -8,6 +8,7 @@ import type { TransactionSelect } from "@vibenance/db/schema/transaction";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Card, CardHeader, CardTitle } from "@/components/ui/card";
 import { DataTable } from "@/components/ui/data-table";
+import { cn } from "@/lib/utils";
 import { formatCurrency } from "@/utils/formatting";
 import { orpc } from "@/utils/orpc";
 
@@ -47,7 +48,7 @@ const columns: ColumnDef<TransactionRow>[] = [
 	},
 ];
 
-export function RecentTransactionsTable() {
+export function RecentTransactionsTable({ className }: { className?: string }) {
 	const { data: transactions } = useQuery(
 		orpc.transaction.getAll.queryOptions({
 			input: { pagination: { pageIndex: 0, pageSize: 10 }, type: "all" },
@@ -61,7 +62,7 @@ export function RecentTransactionsTable() {
 	});
 
 	return (
-		<Card>
+		<Card className={cn(className)}>
 			<CardHeader>
 				<CardTitle>Recent Transactions</CardTitle>
 			</CardHeader>
