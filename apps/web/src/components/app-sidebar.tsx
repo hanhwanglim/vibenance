@@ -1,3 +1,4 @@
+import { Link } from "@tanstack/react-router";
 import {
 	Bot,
 	ChartNoAxesCombined,
@@ -9,7 +10,6 @@ import {
 	Wallet,
 } from "lucide-react";
 import type * as React from "react";
-
 import {
 	Sidebar,
 	SidebarContent,
@@ -31,46 +31,52 @@ const data = {
 	navMain: [
 		{
 			title: "Dashboard",
-			url: "/",
+			url: "/" as const,
 			icon: LayoutDashboard,
 		},
 		{
 			title: "Transactions",
-			url: "/transactions",
+			url: "/transactions" as const,
 			icon: Receipt,
 			items: [
-				{ title: "Dashboard", url: "/transactions" },
-				{ title: "All Transactions", url: "/transactions/all" },
+				{ title: "Dashboard", url: "/transactions" as const },
+				{ title: "All Transactions", url: "/transactions/all" as const },
+				{ title: "Import History", url: "/transactions/imports" as const },
 			],
 		},
 		{
 			title: "Assets",
-			url: "/assets",
+			url: "/assets" as const,
 			icon: ChartNoAxesCombined,
+			items: [
+				{ title: "Dashboard", url: "/assets" as const },
+				{ title: "All Transactions", url: "/assets" as const },
+				{ title: "Import History", url: "/assets/imports" as const },
+			],
 		},
 		{
 			title: "Accounts",
-			url: "/accounts",
+			url: "/accounts" as const,
 			icon: Wallet,
 		},
 		{
 			title: "Finance Agent",
-			url: "/agent",
+			url: "/agent" as const,
 			icon: Bot,
 		},
 		{
 			title: "Budget",
-			url: "#",
+			url: "/" as const,
 			icon: PiggyBank,
 		},
 		{
 			title: "Goals",
-			url: "#",
+			url: "/" as const,
 			icon: Target,
 		},
 		{
 			title: "Reports",
-			url: "#",
+			url: "/" as const,
 			icon: TrendingUp,
 		},
 	],
@@ -86,10 +92,10 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 							asChild
 							className="data-[slot=sidebar-menu-button]:!p-1.5"
 						>
-							<a href="/dashboard">
+							<Link to="/dashboard">
 								<LayoutDashboard className="!size-5" />
 								<span className="font-semibold text-base">Vibenance</span>
-							</a>
+							</Link>
 						</SidebarMenuButton>
 					</SidebarMenuItem>
 				</SidebarMenu>
