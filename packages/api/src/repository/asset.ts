@@ -3,7 +3,7 @@ import {
 	type InvestmentTransactionInsert,
 	investmentTransaction,
 } from "@vibenance/db/schema/asset";
-import { and, eq, gte, lt } from "drizzle-orm";
+import { and, eq, gte, lt, sql } from "drizzle-orm";
 import type { DateRange, Pagination } from "../utils";
 
 export const AssetRepository = {
@@ -74,7 +74,12 @@ export const AssetRepository = {
 		return await db
 			.insert(investmentTransaction)
 			.values(transactions)
-			.onConflictDoNothing()
+			.onConflictDoUpdate({
+				target: investmentTransaction.transactionId,
+				set: {
+					metadata: sql.raw(`excluded.${investmentTransaction.metadata.name}`),
+				},
+			})
 			.returning();
 	},
 };
