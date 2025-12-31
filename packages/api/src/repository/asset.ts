@@ -3,7 +3,7 @@ import {
 	type InvestmentTransactionInsert,
 	investmentTransaction,
 } from "@vibenance/db/schema/asset";
-import { and, eq, gte, lt, sql } from "drizzle-orm";
+import { and, desc, eq, gte, lt, sql } from "drizzle-orm";
 import type { DateRange, Pagination } from "../utils";
 
 export const AssetRepository = {
@@ -65,6 +65,11 @@ export const AssetRepository = {
 
 				return and(...filters);
 			},
+			// @ts-expect-error - drizzle-orm version mismatch between packages
+			orderBy: [
+				desc(investmentTransaction.timestamp),
+				desc(investmentTransaction.createdAt),
+			],
 			limit: pagination.pageSize,
 			offset: pagination.pageIndex * pagination.pageSize,
 		});
