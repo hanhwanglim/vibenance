@@ -41,6 +41,10 @@ export const assetRouter = {
 						price: z.string(),
 						fees: z.string(),
 						total: z.string(),
+						metadata: z.record(
+							z.string(),
+							z.union([z.string(), z.number(), z.date(), z.undefined()]),
+						),
 					}),
 				),
 				accountId: z.string(),

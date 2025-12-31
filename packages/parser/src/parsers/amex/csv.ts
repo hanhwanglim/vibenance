@@ -47,6 +47,7 @@ export async function parse(file: BunFile) {
 			categoryId: category?.id || null,
 			category: category || null,
 			errors: errorRows.get(index),
+			metadata: row,
 		};
 
 		transactions.push(transaction);

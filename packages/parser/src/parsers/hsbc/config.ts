@@ -12,6 +12,7 @@ export interface HsbcTransactionRow {
 	"Transaction Date": Date;
 	Details: string;
 	Amount: string;
+	[key: string]: string | number | Date;
 }
 
 export async function isHsbcPdf(file: BunFile) {

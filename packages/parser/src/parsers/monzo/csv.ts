@@ -53,6 +53,7 @@ export async function parse(file: BunFile) {
 			reference:
 				row["Notes and #tags"].length > 0 ? row["Notes and #tags"] : undefined,
 			errors: errorRows.get(index),
+			metadata: row,
 		};
 
 		transactions.push(transaction);

@@ -107,7 +107,10 @@ export const BankTransactionRepository = {
 		return await db
 			.insert(transaction)
 			.values(transactions)
-			.onConflictDoNothing()
+			.onConflictDoUpdate({
+				target: transaction.transactionId,
+				set: { metadata: sql.raw(`excluded.${transaction.metadata.name}`) },
+			})
 			.returning();
 	},
 

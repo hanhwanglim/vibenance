@@ -12,6 +12,7 @@ export interface ChipTransactionRow {
 	Description: string;
 	"Amount (GBP)": string;
 	"Balance (GBP)"?: string;
+	[key: string]: string | number | Date | undefined;
 }
 
 export async function isChipPdf(file: BunFile) {

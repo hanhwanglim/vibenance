@@ -1,5 +1,6 @@
 import { relations } from "drizzle-orm";
 import {
+	json,
 	numeric,
 	pgEnum,
 	pgTable,
@@ -35,6 +36,7 @@ export const investmentTransaction = pgTable("investment_transaction", {
 	total: numeric("total", { precision: 50, scale: 18 }).notNull(),
 	reference: text("reference"),
 	fileImportId: uuid("file_import_id").references(() => fileImport.id),
+	metadata: json(),
 
 	createdAt: timestamp("created_at").defaultNow().notNull(),
 	updatedAt: timestamp("updated_at")

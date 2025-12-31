@@ -1,4 +1,5 @@
 import type { BunFile } from "bun";
+import type { TransactionRow } from "../../core/transaction";
 import type { HsbcTransactionRow } from "./config";
 
 export async function parse(file: BunFile) {
@@ -15,7 +16,7 @@ export async function parse(file: BunFile) {
 	return transactions;
 }
 
-function extractTable(text: string) {
+function extractTable(text: string): TransactionRow[] {
 	const lines = text
 		.split("\n")
 		.map((line) => line.trim())
@@ -46,6 +47,7 @@ function extractTable(text: string) {
 			amount: extractedTransaction.Amount,
 			categoryId: null,
 			category: null,
+			metadata: extractedTransaction,
 		}));
 
 	return transactions;

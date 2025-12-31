@@ -57,6 +57,7 @@ function extractTable(text: string): TransactionRow[] {
 		amount: formatCurrency(row.Amount) || "0",
 		categoryId: null,
 		category: null,
+		metadata: row,
 	}));
 
 	return transactions;

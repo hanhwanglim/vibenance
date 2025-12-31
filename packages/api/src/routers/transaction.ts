@@ -38,6 +38,10 @@ export const transactionRouter = {
 						amount: z.string(),
 						categoryId: z.string().nullable().optional(),
 						reference: z.string().optional(),
+						metadata: z.record(
+							z.string(),
+							z.union([z.string(), z.number(), z.date(), z.undefined()]),
+						),
 					}),
 				),
 				accountId: z.string(),

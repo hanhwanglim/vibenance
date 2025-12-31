@@ -5,6 +5,7 @@ export interface ChaseTransactionRow {
 	"Transaction details": string;
 	Amount: string;
 	Balance: string;
+	[key: string]: string | number | Date;
 }
 
 export async function isChasePdf(file: BunFile) {

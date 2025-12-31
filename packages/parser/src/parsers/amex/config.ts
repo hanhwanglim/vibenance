@@ -24,4 +24,5 @@ export interface AmexTransactionRow {
 	Country: string;
 	Reference: string;
 	Category: string;
+	[key: string]: string | number;
 }

@@ -38,4 +38,5 @@ export interface MonzoTransactionRow {
 	"Category split": string;
 	"Money Out": string;
 	"Money In": string;
+	[key: string]: string | number;
 }

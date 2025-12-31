@@ -27,6 +27,7 @@ export interface CoinbaseTransactionRow {
 	"Total (inclusive of fees and/or spread)": string;
 	"Fees and/or Spread": string;
 	Notes: string;
+	[key: string]: string | number;
 }
 
 export async function isCoinbaseCsv(file: BunFile) {

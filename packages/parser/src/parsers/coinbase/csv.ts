@@ -45,6 +45,7 @@ export async function parse(file: BunFile) {
 			fees: row["Fees and/or Spread"].replace("$", ""),
 			total: row["Total (inclusive of fees and/or spread)"].replace("$", ""),
 			error: errorRows.get(index),
+			metadata: row,
 		};
 
 		transactions.push(transaction);

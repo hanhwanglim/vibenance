@@ -12,4 +12,5 @@ export type TransactionRow = {
 	categoryId: string | null;
 	category: Category | null;
 	errors?: string;
+	metadata: Record<string, string | number | Date | undefined>;
 };

@@ -10,4 +10,5 @@ export type TransactionRow = {
 	fees: string;
 	total: string;
 	errors?: string;
+	metadata: Record<string, string | number | Date | undefined>;
 };

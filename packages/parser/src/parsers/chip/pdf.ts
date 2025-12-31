@@ -38,6 +38,7 @@ function extractTable(text: string): TransactionRow[] {
 			amount: extractedTransaction["Amount (GBP)"],
 			categoryId: null,
 			category: null,
+			metadata: extractedTransaction,
 		}));
 
 	return transactions;
