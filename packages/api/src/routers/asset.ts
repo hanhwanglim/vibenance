@@ -2,7 +2,7 @@ import z from "zod";
 import { protectedProcedure } from "../index";
 import { AssetService } from "../services/asset";
 import { FileImportService } from "../services/file-import";
-import { dateRange, pagination } from "../utils";
+import { dateRange, pagination } from "../utils/filter";
 
 export const assetRouter = {
 	getAll: protectedProcedure

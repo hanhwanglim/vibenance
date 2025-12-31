@@ -8,6 +8,7 @@ export const pagination = z.object({
 export const dateRange = z.object({
 	from: z.date().optional(),
 	to: z.date().optional(),
+	period: z.string().optional(),
 });
 
 export type Pagination = z.infer<typeof pagination>;

@@ -2,7 +2,7 @@ import z from "zod";
 import { protectedProcedure } from "../index";
 import { BankTransactionService } from "../services/bank-transaction";
 import { FileImportService } from "../services/file-import";
-import { dateRange, pagination } from "../utils";
+import { dateRange, pagination } from "../utils/filter";
 
 export const transactionRouter = {
 	getAll: protectedProcedure

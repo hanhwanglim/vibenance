@@ -4,10 +4,10 @@ import {
 	getCoreRowModel,
 	useReactTable,
 } from "@tanstack/react-table";
-import type { DateRange } from "@vibenance/api/utils";
 import type { InvestmentTransactionRow } from "@vibenance/parser";
 import { useState } from "react";
 import { DataTable, DataTablePagination } from "@/components/ui/data-table";
+import type { DateRange } from "@/types";
 import { orpc } from "@/utils/orpc";
 
 const columns: ColumnDef<InvestmentTransactionRow>[] = [

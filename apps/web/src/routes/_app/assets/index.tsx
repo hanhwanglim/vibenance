@@ -31,7 +31,7 @@ function RouteComponent() {
 	const location = useLocation();
 
 	const [dateRange, setDateRange] = useState<DateRange | undefined>({
-		from: new DateTime().subtract(3, "month"),
+		from: new DateTime().subtract(3, "m"),
 		to: new Date(),
 	});
 

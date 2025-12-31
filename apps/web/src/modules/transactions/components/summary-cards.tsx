@@ -1,6 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
 import { TrendingDown, TrendingUp } from "lucide-react";
-import type { DateRange } from "react-day-picker";
 import { Badge } from "@/components/ui/badge";
 import {
 	Card,
@@ -12,14 +11,53 @@ import {
 } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
+import type { DateRange } from "@/types";
+import { DateTime } from "@/utils/date";
 import { formatCurrency } from "@/utils/formatting";
 import { orpc } from "@/utils/orpc";
 
 type StatCardData = {
 	label: string;
-	value: string;
+	value: number;
 	currency?: string;
+	relativeChange?: number;
+	negativeIsGood?: boolean;
+	footer?: string;
+	subfooter?: string;
 };
+
+function calculateRelativeChange(before: number, after: number) {
+	return ((after - before) / Math.max(Math.abs(before), 1)) * 100;
+}
+
+function getPeriod(dateRange: DateRange | undefined) {
+	if (!dateRange?.period) {
+		return "period";
+	}
+
+	switch (dateRange.period) {
+		case "1d":
+			return "yesterday";
+		case "1w":
+			return "week";
+		case "1m":
+			return "month";
+		case "3m":
+			return "three months";
+		case "6m":
+			return "six months";
+		case "1y":
+			return "year";
+		case "3y":
+			return "three years";
+		default:
+			return "period";
+	}
+}
+
+function daysBetween(d1: Date, d2: Date) {
+	return (d1.getTime() - d2.getTime()) / (1000 * 60 * 60 * 24);
+}
 
 export function SummaryCards({
 	dateRange,
@@ -33,22 +71,53 @@ export function SummaryCards({
 	const cardsData: StatCardData[] = [
 		{
 			label: "Total Income",
-			value: summary?.totalIncome || "0",
+			value: summary?.totalIncome || 0,
 			currency: "GBP",
+			relativeChange: calculateRelativeChange(
+				Number(summary?.prevTotalIncome || 0),
+				Number(summary?.totalIncome || 0),
+			),
+			negativeIsGood: true,
+			footer: `Compared to last ${getPeriod(dateRange)}`,
+			subfooter: "Salary",
 		},
 		{
 			label: "Total Expenses",
-			value: summary?.totalExpenses || "0",
+			value: summary?.totalExpenses || 0,
 			currency: "GBP",
+			relativeChange: calculateRelativeChange(
+				Math.abs(Number(summary?.prevTotalExpenses || 0)),
+				Math.abs(Number(summary?.totalExpenses || 0)),
+			),
+			negativeIsGood: false,
+			footer: `Compared to last ${getPeriod(dateRange)}`,
+			subfooter: "Eating Out, Bills, Groceries",
 		},
 		{
 			label: "Net Amount",
-			value: summary?.netAmount || "0",
+			value: summary?.netAmount || 0,
 			currency: "GBP",
+			relativeChange: calculateRelativeChange(
+				Number(summary?.prevNetAmount || 0),
+				Number(summary?.netAmount || 0),
+			),
+			negativeIsGood: true,
+			footer: `Compared to last ${getPeriod(dateRange)}`,
+			subfooter:
+				(summary?.netAmount || 0) >= 0
+					? "Positive cash flow"
+					: "Negative cash flow",
 		},
 		{
 			label: "Transactions",
-			value: summary?.count.toString() || "0",
+			value: summary?.count || 0,
+			relativeChange: calculateRelativeChange(
+				Number(summary?.prevCount || 0),
+				Number(summary?.count || 0),
+			),
+			negativeIsGood: false,
+			footer: `Compared to last ${getPeriod(dateRange)}`,
+			subfooter: `Average ${Math.abs((summary?.count || 0) / daysBetween(dateRange?.from || new Date(), dateRange?.to || new DateTime().add(1, "d"))).toLocaleString()} per day`,
 		},
 	];
 
@@ -65,18 +134,7 @@ export function SummaryCards({
 	return (
 		<div className="grid @5xl/main:grid-cols-4 @xl/main:grid-cols-2 grid-cols-1 gap-4 px-4 *:data-[slot=card]:bg-gradient-to-t *:data-[slot=card]:from-primary/5 *:data-[slot=card]:to-card *:data-[slot=card]:shadow-xs lg:px-6 dark:*:data-[slot=card]:bg-card">
 			{cardsData.map((cardData) => {
-				return (
-					<StatCard
-						key={`summary-${cardData.label}`}
-						label={cardData.label}
-						value={
-							cardData.currency
-								? formatCurrency(Number(cardData.value), cardData.currency)
-								: cardData.value
-						}
-						isPositive={Number(cardData.value) >= 0}
-					/>
-				);
+				return <StatCard key={`summary-${cardData.label}`} stats={cardData} />;
 			})}
 		</div>
 	);
@@ -93,20 +151,24 @@ function StatCardSkeleton() {
 	);
 }
 
-type StatCardProps = {
+function StatCard({
+	className,
+	stats,
+}: {
 	className?: string;
-	label: string;
-	value: string;
-	isPositive: boolean;
-};
-
-function StatCard({ className, label, value, isPositive }: StatCardProps) {
-	const TrendIcon = isPositive ? TrendingUp : TrendingDown;
+	stats: StatCardData;
+}) {
+	const isPositive = Number(stats.relativeChange) >= 0 || !stats.negativeIsGood;
+	const value = stats.currency
+		? formatCurrency(stats.value, stats.currency)
+		: stats.value;
+	const TrendIcon =
+		Number(stats.relativeChange) >= 0 ? TrendingUp : TrendingDown;
 
 	return (
 		<Card className={cn("@container/card", className)}>
 			<CardHeader>
-				<CardDescription>{label}</CardDescription>
+				<CardDescription>{stats.label}</CardDescription>
 				<CardTitle className="font-semibold @[250px]/card:text-3xl text-2xl tabular-nums">
 					{value}
 				</CardTitle>
@@ -121,13 +183,13 @@ function StatCard({ className, label, value, isPositive }: StatCardProps) {
 						)}
 					>
 						<TrendIcon className="h-3 w-3" />
-						123123
+						{stats.relativeChange?.toLocaleString()}%
 					</Badge>
 				</CardAction>
 			</CardHeader>
 			<CardFooter className="flex-col items-start gap-1.5 text-sm">
 				<div className="line-clamp-1 flex gap-2 font-medium">
-					asdkfjasdfjh
+					{stats.footer}
 					<TrendIcon
 						className={cn(
 							"size-4",
@@ -137,7 +199,7 @@ function StatCard({ className, label, value, isPositive }: StatCardProps) {
 						)}
 					/>
 				</div>
-				<div className="text-muted-foreground">asdfasdfh</div>
+				<div className="text-muted-foreground">{stats.subfooter}</div>
 			</CardFooter>
 		</Card>
 	);

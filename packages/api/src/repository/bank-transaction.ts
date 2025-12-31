@@ -5,7 +5,7 @@ import {
 	transaction,
 } from "@vibenance/db/schema/transaction";
 import { and, desc, eq, gt, gte, lt, max, min, sql, sum } from "drizzle-orm";
-import type { DateRange, Pagination } from "../utils";
+import type { DateRange, Pagination } from "../utils/filter";
 
 export const BankTransactionRepository = {
 	count: async (type: string, dateRange: DateRange | undefined) => {

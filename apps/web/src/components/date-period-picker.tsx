@@ -2,7 +2,6 @@
 
 import { CalendarDaysIcon, ChevronDownIcon } from "lucide-react";
 import * as React from "react";
-import type { DateRange } from "react-day-picker";
 import { Button } from "@/components/ui/button";
 import { ButtonGroup } from "@/components/ui/button-group";
 import { Calendar } from "@/components/ui/calendar";
@@ -18,6 +17,7 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "@/components/ui/select";
+import type { DateRange } from "@/types";
 import { DateTime } from "@/utils/date";
 
 type DatePeriodPickerProps = {
@@ -56,7 +56,11 @@ export function DatePeriodPicker({
 						defaultMonth={dateRange?.from ?? now}
 						selected={dateRange}
 						onSelect={(dateRange) => {
-							setDateRange(dateRange);
+							if (dateRange) {
+								setDateRange({ ...dateRange, period: undefined });
+							} else {
+								setDateRange(dateRange);
+							}
 							setValue("custom");
 						}}
 						numberOfMonths={2}
@@ -68,50 +72,11 @@ export function DatePeriodPicker({
 			<Select
 				value={value}
 				onValueChange={(value) => {
-					switch (value) {
-						case "1d":
-							setDateRange({
-								from: new DateTime().subtract(1, "day"),
-								to: new Date(),
-							});
-							break;
-						case "1w":
-							setDateRange({
-								from: new DateTime().subtract(7, "day"),
-								to: new Date(),
-							});
-							break;
-						case "1m":
-							setDateRange({
-								from: new DateTime().subtract(1, "month"),
-								to: new Date(),
-							});
-							break;
-						case "3m":
-							setDateRange({
-								from: new DateTime().subtract(3, "month"),
-								to: new Date(),
-							});
-							break;
-						case "6m":
-							setDateRange({
-								from: new DateTime().subtract(6, "month"),
-								to: new Date(),
-							});
-							break;
-						case "1y":
-							setDateRange({
-								from: new DateTime().subtract(1, "year"),
-								to: new Date(),
-							});
-							break;
-						case "3y":
-							setDateRange({
-								from: new DateTime().subtract(3, "year"),
-								to: new Date(),
-							});
-							break;
-					}
+					setDateRange({
+						from: new DateTime().subtractPeriod(value).truncateTime(),
+						to: new DateTime().truncateTime(),
+						period: value,
+					});
 					setValue(value);
 				}}
 			>

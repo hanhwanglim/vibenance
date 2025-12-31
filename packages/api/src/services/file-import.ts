@@ -1,6 +1,6 @@
 import type { FileImportUpdate } from "@vibenance/db/schema/file";
 import { FileImportRepository } from "../repository/file-import";
-import type { Pagination } from "../utils";
+import type { Pagination } from "../utils/filter";
 
 export const FileImportService = {
 	findById: async (id: string) => {

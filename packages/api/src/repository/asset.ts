@@ -4,7 +4,7 @@ import {
 	investmentTransaction,
 } from "@vibenance/db/schema/asset";
 import { and, desc, eq, gte, lt, sql } from "drizzle-orm";
-import type { DateRange, Pagination } from "../utils";
+import type { DateRange, Pagination } from "../utils/filter";
 
 export const AssetRepository = {
 	count: async (type: string, dateRange?: DateRange) => {
@@ -65,9 +65,10 @@ export const AssetRepository = {
 
 				return and(...filters);
 			},
-			// @ts-expect-error - drizzle-orm version mismatch between packages
 			orderBy: [
+				// @ts-expect-error - drizzle-orm version mismatch between packages
 				desc(investmentTransaction.timestamp),
+				// @ts-expect-error - drizzle-orm version mismatch between packages
 				desc(investmentTransaction.createdAt),
 			],
 			limit: pagination.pageSize,

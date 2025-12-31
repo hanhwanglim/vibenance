@@ -1,7 +1,7 @@
 import { db } from "@vibenance/db";
 import { type FileImportUpdate, fileImport } from "@vibenance/db/schema/file";
 import { desc, eq } from "drizzle-orm";
-import type { Pagination } from "../utils";
+import type { Pagination } from "../utils/filter";
 
 export const FileImportRepository = {
 	findById: async (id: string) => {

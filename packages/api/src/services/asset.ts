@@ -1,7 +1,7 @@
 import type { InvestmentTransactionInsert } from "@vibenance/db/schema/asset";
 import { detectParser, parseFile } from "@vibenance/parser/core/parse";
 import { AssetRepository } from "../repository/asset";
-import type { DateRange, Pagination } from "../utils";
+import type { DateRange, Pagination } from "../utils/filter";
 import { FileService } from "./file";
 import { FileImportService } from "./file-import";
 

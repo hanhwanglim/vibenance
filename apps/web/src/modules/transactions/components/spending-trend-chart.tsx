@@ -1,7 +1,6 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import type { DateRange } from "@vibenance/api/utils";
 import { TrendingUp } from "lucide-react";
 import { CartesianGrid, Line, LineChart, XAxis, YAxis } from "recharts";
 import {
@@ -19,6 +18,7 @@ import {
 	ChartTooltipContent,
 } from "@/components/ui/chart";
 import { cn } from "@/lib/utils";
+import type { DateRange } from "@/types";
 import { orpc } from "@/utils/orpc";
 
 const chartConfig = {

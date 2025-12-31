@@ -1,7 +1,6 @@
 import { createFileRoute, Outlet, useLocation } from "@tanstack/react-router";
 import { ListFilter } from "lucide-react";
 import { useState } from "react";
-import type { DateRange } from "react-day-picker";
 import { DatePeriodPicker } from "@/components/date-period-picker";
 import { Button } from "@/components/ui/button";
 import {
@@ -22,6 +21,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ImportDialog } from "@/modules/transactions/components/import-dialog";
 import { SummaryCards } from "@/modules/transactions/components/summary-cards";
 import { TransactionTable } from "@/modules/transactions/components/transaction-table";
+import type { DateRange } from "@/types";
 import { DateTime } from "@/utils/date";
 
 export const Route = createFileRoute("/_app/transactions/all")({
@@ -32,7 +32,7 @@ function RouteComponent() {
 	const location = useLocation();
 
 	const [dateRange, setDateRange] = useState<DateRange | undefined>({
-		from: new DateTime().subtract(3, "month"),
+		from: new DateTime().subtract(3, "m"),
 		to: new Date(),
 	});
 

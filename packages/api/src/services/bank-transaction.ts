@@ -1,7 +1,8 @@
 import type { TransactionInsert } from "@vibenance/db/schema/transaction";
 import { detectParser, parseFile } from "@vibenance/parser/core/parse";
 import { BankTransactionRepository } from "../repository/bank-transaction";
-import type { DateRange, Pagination } from "../utils";
+import { DateTime } from "../utils/date";
+import type { DateRange, Pagination } from "../utils/filter";
 import { FileService } from "./file";
 import { FileImportService } from "./file-import";
 
@@ -70,17 +71,65 @@ export const BankTransactionService = {
 	},
 
 	getSummary: async (dateRange: DateRange | undefined) => {
+		let range = dateRange;
+		let previousRange = dateRange;
+
+		if (range?.from) {
+			range.from = new DateTime(range.from).truncateTime();
+		}
+		if (range?.to) {
+			range.to = new DateTime(range.to).truncateTime().addPeriod("1d");
+		}
+
+		if (range?.period) {
+			range = {
+				from: new DateTime().truncateTime().subtractPeriod(range.period),
+				to: range.to,
+				period: range.period,
+			};
+			previousRange = {
+				from: (range.from as DateTime).subtractPeriod(range.period as string),
+				to: range.from,
+				period: range.period,
+			};
+		} else if (range?.from && range.to) {
+			const diffInDays =
+				(range.to.getTime() - range.from.getTime()) / (1000 * 60 * 60 * 24);
+			const from = new DateTime(range.from);
+			previousRange = {
+				from: from.subtract(diffInDays, "d"),
+				to: range.from,
+			};
+		}
+
 		const [count, totalIncome, totalExpenses] = await Promise.all([
-			BankTransactionRepository.count("all", dateRange),
-			BankTransactionRepository.totalIncome(dateRange),
-			BankTransactionRepository.totalExpenses(dateRange),
+			BankTransactionRepository.count("all", range),
+			BankTransactionRepository.totalIncome(range),
+			BankTransactionRepository.totalExpenses(range),
 		]);
+
+		let prevCount = 0;
+		let prevTotalIncome = "0";
+		let prevTotalExpenses = "0";
+
+		if (previousRange) {
+			[prevCount, prevTotalIncome, prevTotalExpenses] = await Promise.all([
+				BankTransactionRepository.count("all", previousRange),
+				BankTransactionRepository.totalIncome(previousRange),
+				BankTransactionRepository.totalExpenses(previousRange),
+			]);
+		}
 
 		return {
 			count: count,
-			totalIncome: totalIncome,
-			totalExpenses: totalExpenses,
-			netAmount: (Number(totalIncome) + Number(totalExpenses)).toString(),
+			totalIncome: Number(totalIncome),
+			totalExpenses: -Number(totalExpenses),
+			netAmount: Number(totalIncome) + Number(totalExpenses),
+
+			prevCount: prevCount,
+			prevTotalIncome: Number(prevTotalIncome),
+			prevTotalExpenses: -Number(prevTotalExpenses),
+			prevNetAmount: Number(prevTotalIncome) + Number(prevTotalExpenses),
 		};
 	},
 
