@@ -65,11 +65,23 @@ async function parseInvestmentActivity(
 		return "other";
 	};
 
+	const seenTransactions = new Map();
+
 	result.data.forEach((row, index) => {
 		const type = remapType(row.Description);
+		let hash = generateHash(JSON.stringify(row));
+
+		// There is a chance the transaction is duplicated
+		if (seenTransactions.has(hash)) {
+			const occurence = seenTransactions.get(hash);
+			hash = generateHash(JSON.stringify({ ...row, occurence: occurence }));
+			seenTransactions.set(hash, occurence + 1);
+		} else {
+			seenTransactions.set(hash, 1);
+		}
 
 		const transaction = {
-			transactionId: generateHash(JSON.stringify(row)),
+			transactionId: hash,
 			timestamp: new Date(row.Date),
 			name: `${row.Pot} - ${row.Description}`,
 			type: type,
