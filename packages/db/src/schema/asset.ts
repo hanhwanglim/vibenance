@@ -16,6 +16,9 @@ export const investmentTransactionTypeEnum = pgEnum("transaction_type", [
 	"sell",
 	"deposit",
 	"reward",
+	"dividend",
+	"interest",
+	"fee",
 	"other",
 ]);
 

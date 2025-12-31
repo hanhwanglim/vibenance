@@ -12,6 +12,11 @@ import { isCoinbaseCsv } from "../parsers/coinbase/config";
 import { parse as parseCoinbase } from "../parsers/coinbase/csv";
 import { isHsbcPdf } from "../parsers/hsbc/config";
 import { parse as parseHsbc } from "../parsers/hsbc/pdf";
+import {
+	JPMorganInvestmentActivityCsvHeaders,
+	JPMorganTransactionHistoryCsvHeaders,
+} from "../parsers/jp-morgan/config";
+import { parse as parseJpMorgan } from "../parsers/jp-morgan/csv";
 import { MonzoCsvHeaders } from "../parsers/monzo/config";
 import { parse as parseMonzo } from "../parsers/monzo/csv";
 
@@ -22,6 +27,7 @@ export type ParserType =
 	| "chip"
 	| "coinbase"
 	| "chase"
+	| "jp-morgan"
 	| "unknown";
 
 export async function detectParser(file: BunFile): Promise<ParserType> {
@@ -58,6 +64,22 @@ export async function detectParser(file: BunFile): Promise<ParserType> {
 			return "amex";
 		}
 
+		if (
+			JPMorganInvestmentActivityCsvHeaders.every((header) =>
+				headers.includes(header),
+			)
+		) {
+			return "jp-morgan";
+		}
+
+		if (
+			JPMorganTransactionHistoryCsvHeaders.every((header) =>
+				headers.includes(header),
+			)
+		) {
+			return "jp-morgan";
+		}
+
 		if (await isCoinbaseCsv(file)) {
 			return "coinbase";
 		}
@@ -87,6 +109,9 @@ export async function parseFile(file: BunFile, parserType: ParserType) {
 			break;
 		case "chase":
 			transactions = await parseChase(file);
+			break;
+		case "jp-morgan":
+			transactions = await parseJpMorgan(file);
 			break;
 		default:
 			throw new Error(`Unknown parser type: ${parserType}`);
