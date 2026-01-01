@@ -13,14 +13,14 @@
 		"check-types": "tsc -b"
 	},
 	"devDependencies": {
-		"@types/papaparse": "^5.5.1",
+		"@types/papaparse": "^5.5.2",
 		"@vibenance/config": "workspace:*"
 	},
 	"peerDependencies": {
-		"typescript": "^5"
+		"typescript": "^5.9.3"
 	},
 	"dependencies": {
-		"@ai-sdk/google": "^3.0.1",
+		"@ai-sdk/google": "^3.0.2",
 		"@orpc/client": "catalog:",
 		"@orpc/openapi": "catalog:",
 		"@orpc/server": "catalog:",
@@ -28,7 +28,7 @@
 		"@vibenance/auth": "workspace:*",
 		"@vibenance/db": "workspace:*",
 		"@vibenance/parser": "workspace:*",
-		"ai": "^6.0.3",
+		"ai": "^6.0.5",
 		"dotenv": "catalog:",
 		"drizzle-orm": "catalog:",
 		"hono": "catalog:",

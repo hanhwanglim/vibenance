@@ -19,7 +19,7 @@
 		"cli": "bun run src/cli/index.ts"
 	},
 	"peerDependencies": {
-		"typescript": "^5"
+		"typescript": "^5.9.3"
 	},
 	"dependencies": {
 		"papaparse": "^5.5.3",

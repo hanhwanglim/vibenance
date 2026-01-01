@@ -24,20 +24,20 @@
 		"db:reset": "bun run src/reset.ts"
 	},
 	"devDependencies": {
-		"@types/pg": "^8.11.11",
+		"@types/pg": "^8.16.0",
 		"@vibenance/config": "workspace:*",
-		"drizzle-kit": "^0.31.2",
+		"drizzle-kit": "^0.31.8",
 		"drizzle-seed": "^0.3.1",
 		"tsx": "^4.21.0"
 	},
 	"peerDependencies": {
-		"typescript": "^5"
+		"typescript": "^5.9.3"
 	},
 	"dependencies": {
 		"@faker-js/faker": "^10.1.0",
 		"dotenv": "catalog:",
 		"drizzle-orm": "catalog:",
-		"pg": "^8.14.1",
+		"pg": "^8.16.3",
 		"zod": "catalog:"
 	}
 }
