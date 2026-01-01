@@ -4,7 +4,11 @@ import {
 	getCoreRowModel,
 	useReactTable,
 } from "@tanstack/react-table";
-import type { TransactionSelect } from "@vibenance/db/schema/transaction";
+import type {
+	BankAccountSelect,
+	CategorySelect,
+	TransactionSelect,
+} from "@vibenance/db/schema/transaction";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Card, CardHeader, CardTitle } from "@/components/ui/card";
 import { DataTable } from "@/components/ui/data-table";
@@ -13,8 +17,8 @@ import { formatCurrency } from "@/utils/formatting";
 import { orpc } from "@/utils/orpc";
 
 type TransactionRow = TransactionSelect & {
-	category: { name: string } | null;
-	account: { name: string };
+	category: CategorySelect | null;
+	bankAccount: BankAccountSelect;
 };
 
 const columns: ColumnDef<TransactionRow>[] = [
@@ -25,7 +29,7 @@ const columns: ColumnDef<TransactionRow>[] = [
 			<div className="flex items-center gap-2">
 				<Avatar className="h-8 w-8 rounded-lg grayscale">
 					<AvatarFallback className="rounded-lg">
-						{row.original.account.name
+						{row.original.bankAccount.name
 							.split(" ")
 							.map((s) => s[0])
 							.join("")}

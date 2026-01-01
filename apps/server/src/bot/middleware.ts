@@ -27,11 +27,12 @@ export async function authenticate(ctx: Context, next: NextFunction) {
 		with: {
 			user: true,
 		},
-		where: (telegramCredential, { eq, and }) =>
-			and(
-				eq(telegramCredential.telegramChatId, (ctx.chatId || -1).toString()),
-				eq(telegramCredential.telegramUserId, (ctx.from?.id || -1).toString()),
-			),
+		where: {
+			AND: [
+				{ telegramChatId: { eq: (ctx.chatId || -1).toString() } },
+				{ telegramUserId: { eq: (ctx.from?.id || -1).toString() } },
+			],
+		},
 	});
 
 	if (credential) {

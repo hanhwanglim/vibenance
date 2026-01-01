@@ -1,4 +1,7 @@
-import type { InvestmentTransactionInsert } from "@vibenance/db/schema/asset";
+import type {
+	InvestmentTransactionInsert,
+	InvestmentTransactionType,
+} from "@vibenance/db/schema/asset";
 import { detectParser, parseFile } from "@vibenance/parser/core/parse";
 import { AssetRepository } from "../repository/asset";
 import type { DateRange, Pagination } from "../utils/filter";
@@ -12,7 +15,7 @@ type TransactionCreate = Omit<
 
 export const AssetService = {
 	getAll: async (
-		type: string,
+		type: InvestmentTransactionType | undefined,
 		dateRange: DateRange | undefined,
 		pagination: Pagination,
 	) => {

@@ -1,15 +1,17 @@
 import { db } from "@vibenance/db";
 import { type FileImportUpdate, fileImport } from "@vibenance/db/schema/file";
-import { desc, eq } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 import type { Pagination } from "../utils/filter";
 
 export const FileImportRepository = {
 	findById: async (id: string) => {
 		return (
 			(await db.query.fileImport.findFirst({
-				where: (fileImport, { eq }) => eq(fileImport.id, id),
 				with: {
 					files: true,
+				},
+				where: {
+					id: id,
 				},
 			})) || null
 		);
@@ -24,7 +26,6 @@ export const FileImportRepository = {
 		return await db
 			.update(fileImport)
 			.set(update)
-			// @ts-expect-error - drizzle-orm version mismatch between packages
 			.where(eq(fileImport.id, id))
 			.returning();
 	},
@@ -38,10 +39,11 @@ export const FileImportRepository = {
 			with: {
 				files: true,
 			},
+			orderBy: {
+				createdAt: "desc",
+			},
 			limit: pagination.pageSize,
 			offset: pagination.pageIndex * pagination.pageSize,
-			// @ts-expect-error - drizzle-orm version mismatch between packages
-			orderBy: [desc(fileImport.createdAt), desc(fileImport.id)],
 		});
 	},
 };

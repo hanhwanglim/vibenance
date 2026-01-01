@@ -1,4 +1,3 @@
-import { relations } from "drizzle-orm";
 import { pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core";
 import { user } from "./auth";
 
@@ -16,15 +15,5 @@ export const telegramCredential = pgTable("telegram_credential", {
 		.$onUpdate(() => /* @__PURE__ */ new Date())
 		.notNull(),
 });
-
-export const telegramCredentialRelations = relations(
-	telegramCredential,
-	({ one }) => ({
-		user: one(user, {
-			fields: [telegramCredential.userId],
-			references: [user.id],
-		}),
-	}),
-);
 
 export type TelegramCredentialInsert = typeof telegramCredential.$inferInsert;

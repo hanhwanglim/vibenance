@@ -4,7 +4,7 @@ import {
 	type TransactionInsert,
 	transaction,
 } from "@vibenance/db/schema/transaction";
-import { and, desc, eq, gt, gte, lt, max, min, sql, sum } from "drizzle-orm";
+import { and, eq, gt, gte, lt, max, min, sql, sum } from "drizzle-orm";
 import type { DateRange, Pagination } from "../utils/filter";
 
 export const BankTransactionRepository = {
@@ -12,29 +12,24 @@ export const BankTransactionRepository = {
 		const filters = [];
 
 		if (type === "income") {
-			// @ts-expect-error - drizzle-orm version mismatch between packages
-			filters.push(gt(transaction.amount, 0));
+			filters.push(gt(transaction.amount, "0"));
 		}
 
 		if (type === "expenses") {
-			// @ts-expect-error - drizzle-orm version mismatch between packages
-			filters.push(lt(transaction.amount, 0));
+			filters.push(lt(transaction.amount, "0"));
 		}
 
 		return await db.$count(
 			transaction,
-			// @ts-expect-error - drizzle-orm version mismatch between packages
 			and(...filters, ...dateRangeFilters(dateRange)),
 		);
 	},
 
 	totalIncome: async (dateRange: DateRange | undefined) => {
 		const [result] = await db
-			// @ts-expect-error - drizzle-orm version mismatch between packages
 			.select({ income: sum(transaction.amount) })
 			.from(transaction)
-			// @ts-expect-error - drizzle-orm version mismatch between packages
-			.where(and(gt(transaction.amount, 0), ...dateRangeFilters(dateRange)));
+			.where(and(gt(transaction.amount, "0"), ...dateRangeFilters(dateRange)));
 
 		return (result?.income as string) || "0";
 	},
@@ -43,21 +38,17 @@ export const BankTransactionRepository = {
 		const filters = [];
 
 		if (dateRange?.from) {
-			// @ts-expect-error - drizzle-orm version mismatch between packages
 			filters.push(gte(transaction.timestamp, dateRange.from));
 		}
 
 		if (dateRange?.to) {
-			// @ts-expect-error - drizzle-orm version mismatch between packages
 			filters.push(lt(transaction.timestamp, dateRange.to));
 		}
 
 		const [result] = await db
-			// @ts-expect-error - drizzle-orm version mismatch between packages
 			.select({ expenses: sum(transaction.amount) })
 			.from(transaction)
-			// @ts-expect-error - drizzle-orm version mismatch between packages
-			.where(and(lt(transaction.amount, 0), ...filters));
+			.where(and(lt(transaction.amount, "0"), ...filters));
 
 		return (result?.expenses as string) || "0";
 	},
@@ -67,37 +58,36 @@ export const BankTransactionRepository = {
 		dateRange: DateRange | undefined,
 		pagination: Pagination,
 	) => {
+		const filters = [];
+
+		if (type === "income") {
+			filters.push({ amount: { gt: "0" } });
+		}
+
+		if (type === "expenses") {
+			filters.push({ amount: { lt: "0" } });
+		}
+
+		if (dateRange?.from) {
+			filters.push({ timestamp: { gte: dateRange.from } });
+		}
+
+		if (dateRange?.to) {
+			filters.push({ timestamp: { lt: dateRange.from } });
+		}
+
 		return await db.query.transaction.findMany({
 			with: {
-				account: true,
+				bankAccount: true,
 				category: true,
 			},
-			where: (transaction, { lt, gte, and }) => {
-				const filters = [];
-
-				if (type === "income") {
-					// @ts-expect-error - drizzle-orm version mismatch between packages
-					filters.push(gt(transaction.amount, 0));
-				}
-
-				if (type === "expenses") {
-					// @ts-expect-error - drizzle-orm version mismatch between packages
-					filters.push(lt(transaction.amount, 0));
-				}
-
-				if (dateRange?.from) {
-					filters.push(gte(transaction.timestamp, dateRange.from));
-				}
-
-				if (dateRange?.to) {
-					filters.push(lt(transaction.timestamp, dateRange.to));
-				}
-
-				// @ts-expect-error - drizzle-orm version mismatch between packages
-				return filters.length > 0 ? and(...filters) : undefined;
+			where: {
+				AND: [...filters],
 			},
-			// @ts-expect-error - drizzle-orm version mismatch between packages
-			orderBy: [desc(transaction.timestamp), desc(transaction.createdAt)],
+			orderBy: {
+				timestamp: "desc",
+				createdAt: "desc",
+			},
 			limit: pagination.pageSize,
 			offset: pagination.pageIndex * pagination.pageSize,
 		});
@@ -123,7 +113,6 @@ export const BankTransactionRepository = {
 			(await db
 				.update(transaction)
 				.set({ categoryId: categoryId })
-				// @ts-expect-error - drizzle-orm version mismatch between packages
 				.where(eq(transaction.id, transactionId))
 				.returning()) || null
 		);
@@ -133,30 +122,23 @@ export const BankTransactionRepository = {
 		return await db
 			.select({
 				name: category.name,
-				// @ts-expect-error - drizzle-orm version mismatch between packages
 				sum: sum(transaction.amount),
 			})
 			.from(transaction)
-			// @ts-expect-error - drizzle-orm version mismatch between packages
 			.leftJoin(category, eq(transaction.categoryId, category.id))
-			// @ts-expect-error - drizzle-orm version mismatch between packages
-			.where(and(lt(transaction.amount, 0), ...dateRangeFilters(dateRange)))
+			.where(and(lt(transaction.amount, "0"), ...dateRangeFilters(dateRange)))
 			.groupBy(category.name)
-			// @ts-expect-error - drizzle-orm version mismatch between packages
 			.orderBy(({ sum }) => sum); // expenses are negative
 	},
 
 	spendingPeriod: async () => {
 		const [result] = await db
 			.select({
-				// @ts-expect-error - drizzle-orm version mismatch between packages
 				min: min(transaction.timestamp),
-				// @ts-expect-error - drizzle-orm version mismatch between packages
 				max: max(transaction.timestamp),
 			})
 			.from(transaction)
-			// @ts-expect-error - drizzle-orm version mismatch between packages
-			.where(lt(transaction.amount, 0));
+			.where(lt(transaction.amount, "0"));
 
 		return {
 			min: result?.min as Date | undefined,
@@ -167,37 +149,26 @@ export const BankTransactionRepository = {
 	spendingTrend: async (dateRange?: DateRange, interval?: string) => {
 		return await db
 			.select({
-				// @ts-expect-error - drizzle-orm version mismatch between packages
 				bin: sql<string>`date_trunc(${sql.raw(`'${interval || "month"}'`)}, ${transaction.timestamp})`,
-				// @ts-expect-error - drizzle-orm version mismatch between packages
 				sum: sum(transaction.amount),
 			})
 			.from(transaction)
-			// @ts-expect-error - drizzle-orm version mismatch between packages
-			.where(and(lt(transaction.amount, 0), ...dateRangeFilters(dateRange)))
-			// @ts-expect-error - drizzle-orm version mismatch between packages
+			.where(and(lt(transaction.amount, "0"), ...dateRangeFilters(dateRange)))
 			.groupBy(({ bin }) => bin)
-			// @ts-expect-error - drizzle-orm version mismatch between packages
 			.orderBy(({ bin }) => bin);
 	},
 
 	spendingTrendByCategory: async (dateRange?: DateRange, interval?: string) => {
 		return await db
 			.select({
-				// @ts-expect-error - drizzle-orm version mismatch between packages
 				bin: sql<string>`date_trunc(${sql.raw(`'${interval || "month"}'`)}, ${transaction.timestamp})`,
 				category: category.name,
-				// @ts-expect-error - drizzle-orm version mismatch between packages
 				sum: sum(transaction.amount),
 			})
 			.from(transaction)
-			// @ts-expect-error - drizzle-orm version mismatch between packages
 			.leftJoin(category, eq(transaction.categoryId, category.id))
-			// @ts-expect-error - drizzle-orm version mismatch between packages
-			.where(and(lt(transaction.amount, 0), ...dateRangeFilters(dateRange)))
-			// @ts-expect-error - drizzle-orm version mismatch between packages
+			.where(and(lt(transaction.amount, "0"), ...dateRangeFilters(dateRange)))
 			.groupBy(({ bin, category }) => [bin, category])
-			// @ts-expect-error - drizzle-orm version mismatch between packages
 			.orderBy(({ bin }) => bin);
 	},
 };
@@ -206,12 +177,10 @@ function dateRangeFilters(dateRange?: DateRange) {
 	const filters = [];
 
 	if (dateRange?.from) {
-		// @ts-expect-error - drizzle-orm version mismatch between packages
 		filters.push(gte(transaction.timestamp, dateRange.from));
 	}
 
 	if (dateRange?.to) {
-		// @ts-expect-error - drizzle-orm version mismatch between packages
 		filters.push(lt(transaction.timestamp, dateRange.to));
 	}
 

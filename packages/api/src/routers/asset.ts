@@ -1,3 +1,4 @@
+import { investmentTransactionTypeSchema } from "@vibenance/db/schema/asset";
 import z from "zod";
 import { protectedProcedure } from "../index";
 import { AssetService } from "../services/asset";
@@ -10,7 +11,7 @@ export const assetRouter = {
 			z.object({
 				pagination,
 				dateRange: dateRange.optional(),
-				type: z.string(),
+				type: investmentTransactionTypeSchema.optional(),
 			}),
 		)
 		.handler(async ({ input }) => {
@@ -34,7 +35,7 @@ export const assetRouter = {
 						transactionId: z.string(),
 						timestamp: z.date(),
 						name: z.string(),
-						type: z.string(),
+						type: investmentTransactionTypeSchema,
 						asset: z.string(),
 						quantity: z.string(),
 						currency: z.string(),
@@ -53,10 +54,7 @@ export const assetRouter = {
 		)
 		.handler(async ({ input }) => {
 			return AssetService.bulkCreate(
-				input.transactions.map((tx) => ({
-					...tx,
-					type: tx.type as "buy" | "sell" | "deposit" | "reward" | "other",
-				})),
+				input.transactions,
 				input.accountId,
 				input.fileImportId,
 			);

@@ -1,76 +1,64 @@
 import { db } from "@vibenance/db";
 import {
 	type InvestmentTransactionInsert,
+	type InvestmentTransactionType,
 	investmentTransaction,
 } from "@vibenance/db/schema/asset";
-import { and, desc, eq, gte, lt, sql } from "drizzle-orm";
+import { and, eq, gte, lt, sql } from "drizzle-orm";
 import type { DateRange, Pagination } from "../utils/filter";
 
 export const AssetRepository = {
-	count: async (type: string, dateRange?: DateRange) => {
+	count: async (
+		type: InvestmentTransactionType | undefined,
+		dateRange?: DateRange,
+	) => {
 		const filters = [];
 
-		if (type && type !== "all") {
-			filters.push(
-				eq(
-					// @ts-expect-error - drizzle-orm version mismatch between packages
-					investmentTransaction.type,
-					type as "buy" | "sell" | "deposit" | "reward" | "other",
-				),
-			);
+		if (type) {
+			filters.push(eq(investmentTransaction.type, type));
 		}
 
 		if (dateRange?.from) {
-			// @ts-expect-error - drizzle-orm version mismatch between packages
 			filters.push(gte(investmentTransaction.timestamp, dateRange.from));
 		}
 
 		if (dateRange?.to) {
-			// @ts-expect-error - drizzle-orm version mismatch between packages
 			filters.push(lt(investmentTransaction.timestamp, dateRange.to));
 		}
 
 		return await db.$count(
 			investmentTransaction,
-			// @ts-expect-error - drizzle-orm version mismatch between packages
 			filters.length > 0 ? and(...filters) : undefined,
 		);
 	},
 
 	getAll: async (
-		type: string,
+		type: InvestmentTransactionType | undefined,
 		dateRange: DateRange | undefined,
 		pagination: Pagination,
 	) => {
+		const filters = [];
+
+		if (type) {
+			filters.push({ type: { eq: type } });
+		}
+
+		if (dateRange?.from) {
+			filters.push({ timestamp: { gte: dateRange.from } });
+		}
+
+		if (dateRange?.to) {
+			filters.push({ timestamp: { lt: dateRange.to } });
+		}
+
 		return await db.query.investmentTransaction.findMany({
-			where: (investmentTransaction, { lt, gte, and, eq }) => {
-				const filters = [];
-
-				if (type && type !== "all") {
-					filters.push(
-						eq(
-							investmentTransaction.type,
-							type as "buy" | "sell" | "deposit" | "reward" | "other",
-						),
-					);
-				}
-
-				if (dateRange?.from) {
-					filters.push(gte(investmentTransaction.timestamp, dateRange.from));
-				}
-
-				if (dateRange?.to) {
-					filters.push(lt(investmentTransaction.timestamp, dateRange.to));
-				}
-
-				return and(...filters);
+			where: {
+				AND: [...filters],
 			},
-			orderBy: [
-				// @ts-expect-error - drizzle-orm version mismatch between packages
-				desc(investmentTransaction.timestamp),
-				// @ts-expect-error - drizzle-orm version mismatch between packages
-				desc(investmentTransaction.createdAt),
-			],
+			orderBy: {
+				timestamp: "desc",
+				createdAt: "desc",
+			},
 			limit: pagination.pageSize,
 			offset: pagination.pageIndex * pagination.pageSize,
 		});

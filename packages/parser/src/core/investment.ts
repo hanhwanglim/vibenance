@@ -1,8 +1,10 @@
+import type { InvestmentTransactionType } from "@vibenance/db/schema/asset";
+
 export type TransactionRow = {
 	transactionId: string;
 	timestamp: Date;
 	name: string;
-	type: string;
+	type: InvestmentTransactionType;
 	asset: string;
 	quantity: string;
 	currency: string;

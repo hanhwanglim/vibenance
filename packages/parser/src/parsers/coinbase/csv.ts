@@ -17,19 +17,19 @@ export async function parse(file: BunFile) {
 	const remapType = (type: string) => {
 		const upper = type.toLowerCase();
 		if (upper.indexOf("buy") >= 0) {
-			return "buy";
+			return "buy" as const;
 		}
 		if (upper.indexOf("sell") >= 0) {
-			return "sell";
+			return "sell" as const;
 		}
 		if (upper.indexOf("deposit") >= 0) {
-			return "deposit";
+			return "deposit" as const;
 		}
 		if (upper.indexOf("reward") >= 0) {
-			return "reward";
+			return "reward" as const;
 		}
 		console.warn("Unsupported type:", type);
-		return "other";
+		return "other" as const;
 	};
 
 	result.data.forEach((row, index) => {

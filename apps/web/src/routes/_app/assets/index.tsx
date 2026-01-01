@@ -103,7 +103,7 @@ function RouteComponent() {
 					value="all"
 					className="relative flex flex-col gap-4 overflow-auto px-4 lg:px-6"
 				>
-					<TransactionTable type="all" dateRange={dateRange} />
+					<TransactionTable dateRange={dateRange} />
 				</TabsContent>
 				<TabsContent
 					value="buy"

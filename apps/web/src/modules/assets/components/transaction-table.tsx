@@ -4,6 +4,7 @@ import {
 	getCoreRowModel,
 	useReactTable,
 } from "@tanstack/react-table";
+import type { InvestmentTransactionType } from "@vibenance/db/schema/asset";
 import type { InvestmentTransactionRow } from "@vibenance/parser";
 import { useState } from "react";
 import { DataTable, DataTablePagination } from "@/components/ui/data-table";
@@ -57,7 +58,7 @@ export function TransactionTable({
 	type,
 	dateRange,
 }: {
-	type: string;
+	type?: InvestmentTransactionType;
 	dateRange?: DateRange;
 }) {
 	const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: 10 });

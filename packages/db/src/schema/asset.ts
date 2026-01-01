@@ -1,4 +1,3 @@
-import { relations } from "drizzle-orm";
 import {
 	json,
 	numeric,
@@ -8,6 +7,7 @@ import {
 	timestamp,
 	uuid,
 } from "drizzle-orm/pg-core";
+import z from "zod";
 import { fileImport } from "./file";
 import { bankAccount } from "./transaction";
 
@@ -21,6 +21,9 @@ export const investmentTransactionTypeEnum = pgEnum("transaction_type", [
 	"fee",
 	"other",
 ]);
+export const investmentTransactionTypeSchema = z.enum(
+	investmentTransactionTypeEnum.enumValues,
+);
 
 export const investmentTransaction = pgTable("investment_transaction", {
 	id: uuid("id").defaultRandom().primaryKey(),
@@ -48,15 +51,9 @@ export const investmentTransaction = pgTable("investment_transaction", {
 		.notNull(),
 });
 
-export const investmentTransactionRelations = relations(
-	investmentTransaction,
-	({ one }) => ({
-		account: one(bankAccount, {
-			fields: [investmentTransaction.accountId],
-			references: [bankAccount.id],
-		}),
-	}),
-);
-
 export type InvestmentTransactionInsert =
 	typeof investmentTransaction.$inferInsert;
+
+export type InvestmentTransactionType = z.infer<
+	typeof investmentTransactionTypeSchema
+>;

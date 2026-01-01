@@ -4,7 +4,11 @@ import {
 	getCoreRowModel,
 	useReactTable,
 } from "@tanstack/react-table";
-import type { TransactionSelect } from "@vibenance/db/schema/transaction";
+import type {
+	BankAccountSelect,
+	CategorySelect,
+	TransactionSelect,
+} from "@vibenance/db/schema/transaction";
 import { useState } from "react";
 import type { DateRange } from "react-day-picker";
 import { toast } from "sonner";
@@ -25,8 +29,8 @@ import { formatCurrency } from "@/utils/formatting";
 import { orpc } from "@/utils/orpc";
 
 type TransactionRow = TransactionSelect & {
-	category: { name: string } | null;
-	account: { name: string };
+	category: CategorySelect;
+	bankAccount: BankAccountSelect;
 };
 
 const columns: ColumnDef<TransactionRow>[] = [
@@ -144,7 +148,7 @@ const columns: ColumnDef<TransactionRow>[] = [
 	{
 		accessorKey: "accountId",
 		header: "Account",
-		accessorFn: (row) => row.account.name,
+		accessorFn: (row) => row.bankAccount.name,
 	},
 	{
 		accessorKey: "reference",

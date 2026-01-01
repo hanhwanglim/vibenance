@@ -17,7 +17,7 @@ async function getFinancialSummary() {
 			{ pageIndex: 1, pageSize: 10 },
 		);
 	const { transactions: assetTransactions } = await AssetService.getAll(
-		"all",
+		undefined,
 		{},
 		{ pageIndex: 1, pageSize: 10 },
 	);

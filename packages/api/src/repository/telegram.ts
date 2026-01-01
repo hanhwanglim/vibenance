@@ -9,8 +9,9 @@ export const TelegramCredentialRepository = {
 	findByUserId: async (userId: string) => {
 		return (
 			(await db.query.telegramCredential.findFirst({
-				where: (telegramCredential, { eq }) =>
-					eq(telegramCredential.userId, userId),
+				where: {
+					userId: userId,
+				},
 			})) || null
 		);
 	},
@@ -24,7 +25,6 @@ export const TelegramCredentialRepository = {
 	},
 
 	delete: async (id: string) => {
-		// @ts-expect-error - drizzle-orm version mismatch between packages
 		await db.delete(telegramCredential).where(eq(telegramCredential.id, id));
 	},
 };

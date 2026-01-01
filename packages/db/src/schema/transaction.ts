@@ -1,4 +1,3 @@
-import { relations } from "drizzle-orm";
 import {
 	json,
 	numeric,
@@ -66,23 +65,10 @@ export const transaction = pgTable("transaction", {
 		.notNull(),
 });
 
-export const transactionRelations = relations(transaction, ({ one }) => ({
-	account: one(bankAccount, {
-		fields: [transaction.accountId],
-		references: [bankAccount.id],
-	}),
-	category: one(category, {
-		fields: [transaction.categoryId],
-		references: [category.id],
-	}),
-}));
-
-export const categoryRelations = relations(category, ({ many }) => ({
-	transactions: many(transaction),
-}));
-
 export type BankAccountInsert = typeof bankAccount.$inferInsert;
 export type BankAccountSelect = typeof bankAccount.$inferSelect;
 
 export type TransactionInsert = typeof transaction.$inferInsert;
 export type TransactionSelect = typeof transaction.$inferSelect;
+
+export type CategorySelect = typeof category.$inferSelect;

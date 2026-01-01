@@ -3,13 +3,14 @@ import {
 	type BankAccountInsert,
 	bankAccount,
 } from "@vibenance/db/schema/transaction";
-import { asc, eq } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 
 export const BankAccountRepository = {
 	listAccounts: async () => {
 		return await db.query.bankAccount.findMany({
-			// @ts-expect-error - drizzle-orm version mismatch between packages
-			orderBy: [asc(bankAccount.name)],
+			orderBy: {
+				name: "asc",
+			},
 		});
 	},
 
@@ -18,7 +19,6 @@ export const BankAccountRepository = {
 	},
 
 	deleteAccount: async (id: string) => {
-		// @ts-expect-error - drizzle-orm version mismatch between packages
 		await db.delete(bankAccount).where(eq(bankAccount.id, id));
 	},
 };

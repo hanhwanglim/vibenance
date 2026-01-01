@@ -47,22 +47,22 @@ async function parseInvestmentActivity(
 	const remapType = (type: string) => {
 		const upper = type.toLowerCase();
 		if (upper.indexOf("purchase") >= 0) {
-			return "buy";
+			return "buy" as const;
 		}
 		if (upper.indexOf("sale") >= 0) {
-			return "sell";
+			return "sell" as const;
 		}
 		if (upper.indexOf("dividend") >= 0) {
-			return "dividend";
+			return "dividend" as const;
 		}
 		if (upper.indexOf("interest") >= 0) {
-			return "interest";
+			return "interest" as const;
 		}
 		if (upper.indexOf("fee") >= 0) {
-			return "fee";
+			return "fee" as const;
 		}
 		console.warn("Unsupported type:", type);
-		return "other";
+		return "other" as const;
 	};
 
 	const seenTransactions = new Map();
@@ -115,7 +115,7 @@ async function parseTransactionHistory(
 			transactionId: generateHash(JSON.stringify(row)),
 			timestamp: new Date(row.Date),
 			name: `${row.Description} - ${row.Pot}`,
-			type: "deposit",
+			type: "deposit" as const,
 			asset: "GBP",
 			quantity: row["Amount (£)"],
 			currency: "GBP",
