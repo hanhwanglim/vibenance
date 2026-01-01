@@ -8,7 +8,7 @@ export const Route = createFileRoute("/_app/transactions/imports")({
 function RouteComponent() {
 	const location = useLocation();
 
-	if (location.pathname !== "/transactions/import") {
+	if (location.pathname !== "/transactions/imports") {
 		return <Outlet />;
 	}
 

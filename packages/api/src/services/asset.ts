@@ -61,7 +61,7 @@ export const AssetService = {
 	},
 
 	createImport: async (fileId: string) => {
-		const fileImport = await FileImportService.create();
+		const fileImport = await FileImportService.create("assets");
 		if (!fileImport) {
 			throw new Error("INTERNAL SERVER ERROR");
 		}

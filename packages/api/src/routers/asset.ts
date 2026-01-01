@@ -76,6 +76,7 @@ export const assetRouter = {
 		.input(z.object({ pagination }))
 		.handler(async ({ input }) => {
 			const { count, fileImports } = await FileImportService.getAll(
+				"assets",
 				input.pagination,
 			);
 			return {

@@ -2,4 +2,4 @@ import { drizzle } from "drizzle-orm/node-postgres";
 import { config } from "./config";
 import { relations } from "./relations";
 
-export const db = drizzle(config.databaseUrl, { relations });
+export const db = drizzle(config.databaseUrl, { relations, logger: true });

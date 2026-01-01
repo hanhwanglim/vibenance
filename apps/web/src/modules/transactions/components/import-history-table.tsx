@@ -1,4 +1,5 @@
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
+import { Link } from "@tanstack/react-router";
 import {
 	type ColumnDef,
 	getCoreRowModel,
@@ -18,6 +19,11 @@ const columns: ColumnDef<FileImportRow>[] = [
 	{
 		accessorFn: (row) => `${row.files[0].fileName}`,
 		header: "Name",
+		cell: ({ row }) => (
+			<Link to="/transactions/imports/$id" params={{ id: row.original.id }}>
+				{row.original.files[0].fileName}
+			</Link>
+		),
 	},
 	{
 		accessorKey: "status",
@@ -26,6 +32,10 @@ const columns: ColumnDef<FileImportRow>[] = [
 	{
 		accessorKey: "createdAt",
 		header: "Uploaded At",
+	},
+	{
+		accessorKey: "transactionCount",
+		header: "Transactions",
 	},
 	{
 		accessorKey: "file",

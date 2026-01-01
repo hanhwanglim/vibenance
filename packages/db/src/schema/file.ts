@@ -19,6 +19,8 @@ export const importStatusEnum = pgEnum("import_status", [
 	"failed",
 ]);
 
+export const importTypeEnum = pgEnum("import_type", ["transactions", "assets"]);
+
 export const file = pgTable("file", {
 	id: uuid("id").defaultRandom().primaryKey(),
 	fileName: text("file_name").notNull(),
@@ -37,6 +39,7 @@ export const file = pgTable("file", {
 
 export const fileImport = pgTable("file_import", {
 	id: uuid("id").defaultRandom().primaryKey(),
+	type: importTypeEnum("type"),
 	status: importStatusEnum("status").notNull().default("pending"),
 
 	createdAt: timestamp("created_at").defaultNow().notNull(),

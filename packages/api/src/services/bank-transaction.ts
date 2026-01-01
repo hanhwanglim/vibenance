@@ -40,7 +40,7 @@ export const BankTransactionService = {
 	},
 
 	createImport: async (fileId: string) => {
-		const fileImport = await FileImportService.create();
+		const fileImport = await FileImportService.create("transactions");
 		if (!fileImport) {
 			throw new Error("INTERNAL SERVER ERROR");
 		}

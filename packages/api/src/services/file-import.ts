@@ -7,18 +7,31 @@ export const FileImportService = {
 		return await FileImportRepository.findById(id);
 	},
 
-	create: async () => {
-		return await FileImportRepository.create();
+	create: async (type: "transactions" | "assets") => {
+		return await FileImportRepository.create(type);
 	},
 
 	update: async (id: string, update: FileImportUpdate) => {
 		return await FileImportRepository.update(id, update);
 	},
 
-	getAll: async (pagination: Pagination) => {
+	getAll: async (type: "transactions" | "assets", pagination: Pagination) => {
+		const [fileImports, transactionCount] = await Promise.all([
+			FileImportRepository.getAll(type, pagination),
+			FileImportRepository.getTransactionCount(type, pagination),
+		]);
+
+		const transactionCountMap = new Map(
+			transactionCount.map((obj) => [obj.id, obj]),
+		);
+		const result = fileImports.map((obj) => ({
+			...obj,
+			...(transactionCountMap.get(obj.id) || { transactionCount: 0 }),
+		}));
+
 		return {
-			count: await FileImportRepository.count(),
-			fileImports: await FileImportRepository.getAll(pagination),
+			count: await FileImportRepository.count(type),
+			fileImports: result,
 		};
 	},
 };

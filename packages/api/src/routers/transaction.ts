@@ -108,6 +108,7 @@ export const transactionRouter = {
 		.input(z.object({ pagination }))
 		.handler(async ({ input }) => {
 			const { count, fileImports } = await FileImportService.getAll(
+				"transactions",
 				input.pagination,
 			);
 			return {
