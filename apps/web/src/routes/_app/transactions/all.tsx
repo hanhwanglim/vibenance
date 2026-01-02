@@ -34,6 +34,7 @@ function RouteComponent() {
 	const [dateRange, setDateRange] = useState<DateRange | undefined>({
 		from: new DateTime().subtract({ months: 3 }),
 		to: new Date(),
+		period: "3m",
 	});
 
 	if (location.pathname !== "/transactions/all") {

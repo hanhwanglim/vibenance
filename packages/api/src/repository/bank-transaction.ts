@@ -12,7 +12,7 @@ export const BankTransactionRepository = {
 		const filters = [];
 
 		if (type === "income") {
-			filters.push(gt(transaction.amount, "0"));
+			filters.push(gte(transaction.amount, "0"));
 		}
 
 		if (type === "expenses") {
@@ -35,20 +35,10 @@ export const BankTransactionRepository = {
 	},
 
 	totalExpenses: async (dateRange: DateRange | undefined) => {
-		const filters = [];
-
-		if (dateRange?.from) {
-			filters.push(gte(transaction.timestamp, dateRange.from));
-		}
-
-		if (dateRange?.to) {
-			filters.push(lt(transaction.timestamp, dateRange.to));
-		}
-
 		const [result] = await db
 			.select({ expenses: sum(transaction.amount) })
 			.from(transaction)
-			.where(and(lt(transaction.amount, "0"), ...filters));
+			.where(and(lt(transaction.amount, "0"), ...dateRangeFilters(dateRange)));
 
 		return (result?.expenses as string) || "0";
 	},
@@ -61,7 +51,7 @@ export const BankTransactionRepository = {
 		const filters = [];
 
 		if (type === "income") {
-			filters.push({ amount: { gt: "0" } });
+			filters.push({ amount: { gte: "0" } });
 		}
 
 		if (type === "expenses") {
@@ -73,7 +63,7 @@ export const BankTransactionRepository = {
 		}
 
 		if (dateRange?.to) {
-			filters.push({ timestamp: { lt: dateRange.from } });
+			filters.push({ timestamp: { lt: dateRange.to } });
 		}
 
 		return await db.query.transaction.findMany({
