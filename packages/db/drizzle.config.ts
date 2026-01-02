@@ -8,7 +8,7 @@ dotenv.config({
 const databaseUrl = process.env.DATABASE_URL || "";
 
 export default defineConfig({
-	schema: "./src/schema",
+	schema: "./src/schema/index.ts",
 	out: "./src/migrations",
 	dialect: "postgresql",
 	dbCredentials: {

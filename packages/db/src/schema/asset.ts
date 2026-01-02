@@ -7,7 +7,7 @@ import {
 	timestamp,
 	uuid,
 } from "drizzle-orm/pg-core";
-import z from "zod";
+import { z } from "zod";
 import { fileImport } from "./file";
 import { bankAccount } from "./transaction";
 
