@@ -45,7 +45,7 @@ export function SpendingTrendChart({
 
 	if (spendingTrend?.data.length === 0 || isLoading) {
 		return (
-			<Card>
+			<Card className={cn("h-full", className)}>
 				<CardHeader>
 					<CardTitle>Spending Trend</CardTitle>
 					<CardDescription>No expense data available</CardDescription>
