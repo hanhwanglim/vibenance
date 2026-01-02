@@ -1,5 +1,5 @@
+import { auth } from "@vibenance/api/auth";
 import { createContext } from "@vibenance/api/context";
-import { auth } from "@vibenance/auth";
 import type { Hono } from "hono";
 import type { createApiHandler, createRpcHandler } from "./handlers";
 

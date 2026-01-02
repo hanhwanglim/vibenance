@@ -16,7 +16,6 @@
 		"@orpc/server": "catalog:",
 		"@orpc/zod": "catalog:",
 		"@vibenance/api": "workspace:*",
-		"@vibenance/auth": "workspace:*",
 		"@vibenance/db": "workspace:*",
 		"@vibenance/parser": "workspace:*",
 		"better-auth": "catalog:",
@@ -28,7 +27,6 @@
 	"devDependencies": {
 		"typescript": "^5.9.3",
 		"@types/bun": "^1.3.5",
-		"tsdown": "^0.16.8",
-		"@vibenance/config": "workspace:*"
+		"tsdown": "^0.16.8"
 	}
 }

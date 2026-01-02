@@ -27,7 +27,6 @@
 	},
 	"devDependencies": {
 		"@types/papaparse": "^5.5.2",
-		"@vibenance/config": "workspace:*",
 		"@vibenance/db": "workspace:*"
 	}
 }

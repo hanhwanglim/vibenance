@@ -22,7 +22,6 @@
         "@orpc/server": "catalog:",
         "@orpc/zod": "catalog:",
         "@vibenance/api": "workspace:*",
-        "@vibenance/auth": "workspace:*",
         "@vibenance/db": "workspace:*",
         "@vibenance/parser": "workspace:*",
         "better-auth": "catalog:",
@@ -33,7 +32,6 @@
       },
       "devDependencies": {
         "@types/bun": "^1.3.5",
-        "@vibenance/config": "workspace:*",
         "tsdown": "^0.16.8",
         "typescript": "^5.9.3",
       },
@@ -62,7 +60,6 @@
         "@tanstack/react-router": "^1.144.0",
         "@tanstack/react-table": "^8.21.3",
         "@vibenance/api": "workspace:*",
-        "@vibenance/auth": "workspace:*",
         "@vibenance/db": "workspace:*",
         "ai": "^6.0.5",
         "better-auth": "catalog:",
@@ -88,7 +85,6 @@
         "@types/node": "^22.19.3",
         "@types/react": "~19.1.17",
         "@types/react-dom": "^19.2.3",
-        "@vibenance/config": "workspace:*",
         "@vibenance/parser": "workspace:*",
         "@vitejs/plugin-react": "^4.7.0",
         "postcss": "^8.5.6",
@@ -105,10 +101,10 @@
         "@orpc/openapi": "catalog:",
         "@orpc/server": "catalog:",
         "@orpc/zod": "catalog:",
-        "@vibenance/auth": "workspace:*",
         "@vibenance/db": "workspace:*",
         "@vibenance/parser": "workspace:*",
         "ai": "^6.0.5",
+        "better-auth": "catalog:",
         "dotenv": "catalog:",
         "drizzle-orm": "catalog:",
         "hono": "catalog:",
@@ -116,30 +112,10 @@
       },
       "devDependencies": {
         "@types/papaparse": "^5.5.2",
-        "@vibenance/config": "workspace:*",
       },
       "peerDependencies": {
         "typescript": "^5.9.3",
       },
-    },
-    "packages/auth": {
-      "name": "@vibenance/auth",
-      "dependencies": {
-        "@vibenance/db": "workspace:*",
-        "better-auth": "catalog:",
-        "dotenv": "catalog:",
-        "zod": "catalog:",
-      },
-      "devDependencies": {
-        "@vibenance/config": "workspace:*",
-      },
-      "peerDependencies": {
-        "typescript": "^5",
-      },
-    },
-    "packages/config": {
-      "name": "@vibenance/config",
-      "version": "0.0.0",
     },
     "packages/db": {
       "name": "@vibenance/db",
@@ -152,7 +128,6 @@
       },
       "devDependencies": {
         "@types/pg": "^8.16.0",
-        "@vibenance/config": "workspace:*",
         "drizzle-kit": "^1.0.0-beta.8-734e789",
         "drizzle-seed": "^0.3.1",
         "tsx": "^4.21.0",
@@ -173,7 +148,6 @@
       },
       "devDependencies": {
         "@types/papaparse": "^5.5.2",
-        "@vibenance/config": "workspace:*",
         "@vibenance/db": "workspace:*",
       },
       "peerDependencies": {
@@ -828,10 +802,6 @@
     "@vercel/oidc": ["@vercel/oidc@3.0.5", "", {}, "sha512-fnYhv671l+eTTp48gB4zEsTW/YtRgRPnkI2nT7x6qw5rkI1Lq2hTmQIpHPgyThI0znLK+vX2n9XxKdXZ7BUbbw=="],
 
     "@vibenance/api": ["@vibenance/api@workspace:packages/api"],
-
-    "@vibenance/auth": ["@vibenance/auth@workspace:packages/auth"],
-
-    "@vibenance/config": ["@vibenance/config@workspace:packages/config"],
 
     "@vibenance/db": ["@vibenance/db@workspace:packages/db"],
 

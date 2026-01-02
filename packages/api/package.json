@@ -4,6 +4,9 @@
 		".": {
 			"default": "./src/index.ts"
 		},
+		"./auth": {
+			"default": "./src/auth/index.ts"
+		},
 		"./*": {
 			"default": "./src/*.ts"
 		}
@@ -13,8 +16,7 @@
 		"check-types": "tsc -b"
 	},
 	"devDependencies": {
-		"@types/papaparse": "^5.5.2",
-		"@vibenance/config": "workspace:*"
+		"@types/papaparse": "^5.5.2"
 	},
 	"peerDependencies": {
 		"typescript": "^5.9.3"
@@ -25,10 +27,10 @@
 		"@orpc/openapi": "catalog:",
 		"@orpc/server": "catalog:",
 		"@orpc/zod": "catalog:",
-		"@vibenance/auth": "workspace:*",
 		"@vibenance/db": "workspace:*",
 		"@vibenance/parser": "workspace:*",
 		"ai": "^6.0.5",
+		"better-auth": "catalog:",
 		"dotenv": "catalog:",
 		"drizzle-orm": "catalog:",
 		"hono": "catalog:",

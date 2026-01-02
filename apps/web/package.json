@@ -31,7 +31,6 @@
 		"@tanstack/react-router": "^1.144.0",
 		"@tanstack/react-table": "^8.21.3",
 		"@vibenance/api": "workspace:*",
-		"@vibenance/auth": "workspace:*",
 		"@vibenance/db": "workspace:*",
 		"ai": "^6.0.5",
 		"better-auth": "catalog:",
@@ -62,7 +61,6 @@
 		"tailwindcss": "^4.1.18",
 		"vite": "^6.4.1",
 		"@tanstack/react-query-devtools": "^5.91.2",
-		"@vibenance/config": "workspace:*",
 		"@vibenance/parser": "workspace:*"
 	}
 }
