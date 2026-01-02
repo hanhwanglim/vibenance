@@ -1,7 +1,7 @@
 import type { TransactionInsert } from "@vibenance/db/schema/transaction";
 import { detectParser, parseFile } from "@vibenance/parser/core/parse";
+import { DateTime, parsePeriod } from "@vibenance/utils/date";
 import { BankTransactionRepository } from "../repository/bank-transaction";
-import { DateTime } from "../utils/date";
 import type { DateRange, Pagination } from "../utils/filter";
 import { FileService } from "./file";
 import { FileImportService } from "./file-import";
@@ -75,20 +75,22 @@ export const BankTransactionService = {
 		let previousRange = dateRange;
 
 		if (range?.from) {
-			range.from = new DateTime(range.from).truncateTime();
+			range.from = new DateTime(range.from).startOfDay();
 		}
 		if (range?.to) {
-			range.to = new DateTime(range.to).truncateTime().addPeriod("1d");
+			range.to = new DateTime(range.to).startOfDay().add({ days: 1 });
 		}
 
 		if (range?.period) {
 			range = {
-				from: new DateTime().truncateTime().subtractPeriod(range.period),
+				from: new DateTime().startOfDay().subtract(parsePeriod(range.period)),
 				to: range.to,
 				period: range.period,
 			};
 			previousRange = {
-				from: (range.from as DateTime).subtractPeriod(range.period as string),
+				from: (range.from as DateTime).subtract(
+					parsePeriod(range.period as string),
+				),
 				to: range.from,
 				period: range.period,
 			};
@@ -97,7 +99,7 @@ export const BankTransactionService = {
 				(range.to.getTime() - range.from.getTime()) / (1000 * 60 * 60 * 24);
 			const from = new DateTime(range.from);
 			previousRange = {
-				from: from.subtract(diffInDays, "d"),
+				from: from.subtract({ days: diffInDays }),
 				to: range.from,
 			};
 		}

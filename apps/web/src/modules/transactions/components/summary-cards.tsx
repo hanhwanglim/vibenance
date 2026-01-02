@@ -1,4 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
+import { DateTime } from "@vibenance/utils/date";
 import { TrendingDown, TrendingUp } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -12,7 +13,6 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 import type { DateRange } from "@/types";
-import { DateTime } from "@/utils/date";
 import { formatCurrency } from "@/utils/formatting";
 import { orpc } from "@/utils/orpc";
 
@@ -117,7 +117,7 @@ export function SummaryCards({
 			),
 			negativeIsGood: false,
 			footer: `Compared to last ${getPeriod(dateRange)}`,
-			subfooter: `Average ${Math.abs((summary?.count || 0) / daysBetween(dateRange?.from || new Date(), dateRange?.to || new DateTime().add(1, "d"))).toLocaleString()} per day`,
+			subfooter: `Average ${Math.abs((summary?.count || 0) / daysBetween(dateRange?.from || new Date(), dateRange?.to || new DateTime().add({ days: 1 }))).toLocaleString()} per day`,
 		},
 	];
 

@@ -1,4 +1,5 @@
 import { createFileRoute, Outlet, useLocation } from "@tanstack/react-router";
+import { DateTime } from "@vibenance/utils/date";
 import { ListFilter } from "lucide-react";
 import { useState } from "react";
 import type { DateRange } from "react-day-picker";
@@ -21,7 +22,6 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ImportDialog } from "@/modules/assets/components/import-dialog";
 import { TransactionTable } from "@/modules/assets/components/transaction-table";
-import { DateTime } from "@/utils/date";
 
 export const Route = createFileRoute("/_app/assets/")({
 	component: RouteComponent,
@@ -31,7 +31,7 @@ function RouteComponent() {
 	const location = useLocation();
 
 	const [dateRange, setDateRange] = useState<DateRange | undefined>({
-		from: new DateTime().subtract(3, "m"),
+		from: new DateTime().subtract({ months: 3 }),
 		to: new Date(),
 	});
 

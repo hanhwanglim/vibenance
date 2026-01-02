@@ -32,6 +32,7 @@
 		"@tanstack/react-table": "^8.21.3",
 		"@vibenance/api": "workspace:*",
 		"@vibenance/db": "workspace:*",
+		"@vibenance/utils": "workspace:*",
 		"ai": "^6.0.5",
 		"better-auth": "catalog:",
 		"class-variance-authority": "^0.7.1",

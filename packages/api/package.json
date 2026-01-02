@@ -29,6 +29,7 @@
 		"@orpc/zod": "catalog:",
 		"@vibenance/db": "workspace:*",
 		"@vibenance/parser": "workspace:*",
+		"@vibenance/utils": "workspace:*",
 		"ai": "^6.0.5",
 		"better-auth": "catalog:",
 		"dotenv": "catalog:",

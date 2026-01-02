@@ -61,6 +61,7 @@
         "@tanstack/react-table": "^8.21.3",
         "@vibenance/api": "workspace:*",
         "@vibenance/db": "workspace:*",
+        "@vibenance/utils": "workspace:*",
         "ai": "^6.0.5",
         "better-auth": "catalog:",
         "class-variance-authority": "^0.7.1",
@@ -103,6 +104,7 @@
         "@orpc/zod": "catalog:",
         "@vibenance/db": "workspace:*",
         "@vibenance/parser": "workspace:*",
+        "@vibenance/utils": "workspace:*",
         "ai": "^6.0.5",
         "better-auth": "catalog:",
         "dotenv": "catalog:",
@@ -150,6 +152,13 @@
         "@types/papaparse": "^5.5.2",
         "@vibenance/db": "workspace:*",
       },
+      "peerDependencies": {
+        "typescript": "^5.9.3",
+      },
+    },
+    "packages/utils": {
+      "name": "@vibenance/utils",
+      "version": "0.0.0",
       "peerDependencies": {
         "typescript": "^5.9.3",
       },
@@ -806,6 +815,8 @@
     "@vibenance/db": ["@vibenance/db@workspace:packages/db"],
 
     "@vibenance/parser": ["@vibenance/parser@workspace:packages/parser"],
+
+    "@vibenance/utils": ["@vibenance/utils@workspace:packages/utils"],
 
     "@vitejs/plugin-react": ["@vitejs/plugin-react@4.7.0", "", { "dependencies": { "@babel/core": "^7.28.0", "@babel/plugin-transform-react-jsx-self": "^7.27.1", "@babel/plugin-transform-react-jsx-source": "^7.27.1", "@rolldown/pluginutils": "1.0.0-beta.27", "@types/babel__core": "^7.20.5", "react-refresh": "^0.17.0" }, "peerDependencies": { "vite": "^4.2.0 || ^5.0.0 || ^6.0.0 || ^7.0.0" } }, "sha512-gUu9hwfWvvEDBBmgtAowQCojwZmJ5mcLn3aufeCsitijs3+f2NsrPtlAWIR6OPiqljl96GVCUbLe0HyqIpVaoA=="],
 

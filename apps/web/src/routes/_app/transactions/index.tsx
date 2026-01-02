@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { DateTime } from "@vibenance/utils/date";
 import { useState } from "react";
 import { DatePeriodPicker } from "@/components/date-period-picker";
 import { Button } from "@/components/ui/button";
@@ -9,7 +10,6 @@ import { RecentTransactionsTable } from "@/modules/transactions/components/recen
 import { SpendingTrendChart } from "@/modules/transactions/components/spending-trend-chart";
 import { SummaryCards } from "@/modules/transactions/components/summary-cards";
 import type { DateRange } from "@/types";
-import { DateTime } from "@/utils/date";
 
 export const Route = createFileRoute("/_app/transactions/")({
 	component: RouteComponent,
@@ -17,7 +17,7 @@ export const Route = createFileRoute("/_app/transactions/")({
 
 function RouteComponent() {
 	const [dateRange, setDateRange] = useState<DateRange | undefined>({
-		from: new DateTime().subtract(3, "m"),
+		from: new DateTime().subtract({ months: 3 }),
 		to: new Date(),
 	});
 

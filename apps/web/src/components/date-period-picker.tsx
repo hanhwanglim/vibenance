@@ -1,5 +1,6 @@
 "use client";
 
+import { DateTime, parsePeriod } from "@vibenance/utils/date";
 import { CalendarDaysIcon, ChevronDownIcon } from "lucide-react";
 import * as React from "react";
 import { Button } from "@/components/ui/button";
@@ -18,7 +19,6 @@ import {
 	SelectValue,
 } from "@/components/ui/select";
 import type { DateRange } from "@/types";
-import { DateTime } from "@/utils/date";
 
 type DatePeriodPickerProps = {
 	dateRange: DateRange | undefined;
@@ -73,8 +73,8 @@ export function DatePeriodPicker({
 				value={value}
 				onValueChange={(value) => {
 					setDateRange({
-						from: new DateTime().subtractPeriod(value).truncateTime(),
-						to: new DateTime().truncateTime(),
+						from: new DateTime().subtract(parsePeriod(value)).startOfDay(),
+						to: new DateTime().startOfDay(),
 						period: value,
 					});
 					setValue(value);
