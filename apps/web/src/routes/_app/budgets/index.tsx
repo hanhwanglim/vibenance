@@ -1,0 +1,46 @@
+import { createFileRoute } from "@tanstack/react-router";
+import { DateTime } from "@vibenance/utils/date";
+import { Plus } from "lucide-react";
+import { useState } from "react";
+import { DatePeriodPicker } from "@/components/date-period-picker";
+import { Button } from "@/components/ui/button";
+import { Dialog } from "@/components/ui/dialog";
+import { BudgetAllocationChart } from "@/modules/budgets/components/budget-allocation-chart";
+import { BudgetList } from "@/modules/budgets/components/budget-list";
+import { BudgetProgressChart } from "@/modules/budgets/components/budget-progress-chart";
+import { BudgetSummaryCards } from "@/modules/budgets/components/budget-summary-cards";
+import { CreateBudgetDialog } from "@/modules/budgets/components/create-budget-dialog";
+import type { DateRange } from "@/types";
+
+export const Route = createFileRoute("/_app/budgets/")({
+	component: RouteComponent,
+});
+
+function RouteComponent() {
+	const [dateRange, setDateRange] = useState<DateRange | undefined>({
+		from: new DateTime().subtract({ months: 3 }),
+		to: new Date(),
+	});
+	const [dialogOpen, setDialogOpen] = useState(false);
+
+	return (
+		<div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6">
+			<div className="flex items-center justify-between px-4 lg:px-6">
+				<DatePeriodPicker dateRange={dateRange} setDateRange={setDateRange} />
+				<Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+					<Button onClick={() => setDialogOpen(true)} className="gap-2">
+						<Plus className="h-4 w-4" />
+						Create Budget
+					</Button>
+					<CreateBudgetDialog onOpenChange={setDialogOpen} />
+				</Dialog>
+			</div>
+			<BudgetSummaryCards dateRange={dateRange} />
+			<div className="grid @5xl/main:grid-cols-3 grid-cols-1 gap-4 px-4 lg:px-6">
+				<BudgetProgressChart className="col-span-2" dateRange={dateRange} />
+				<BudgetAllocationChart className="col-span-1" dateRange={dateRange} />
+			</div>
+			<BudgetList dateRange={dateRange} />
+		</div>
+	);
+}

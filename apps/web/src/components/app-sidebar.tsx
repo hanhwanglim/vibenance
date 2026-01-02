@@ -66,7 +66,7 @@ const data = {
 		},
 		{
 			title: "Budget",
-			url: "/" as const,
+			url: "/budgets" as const,
 			icon: PiggyBank,
 		},
 		{
