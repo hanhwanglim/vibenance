@@ -11,6 +11,10 @@ bun x -y drizzle-kit migrate || {
 
 bun run db:init
 
+echo "Creating uploads directory if it doesn't exist..."
+UPLOADS_PATH="${UPLOADS_PATH:-/app/uploads}"
+mkdir -p "$UPLOADS_PATH"
+
 echo "Starting server..."
 cd /app
 exec "$@"

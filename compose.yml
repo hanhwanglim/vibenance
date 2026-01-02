@@ -33,8 +33,11 @@ services:
       DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD:-password}@db:5432/vibenance
       CORS_ORIGIN: ${CORS_ORIGIN:-http://localhost:3000}
       STATIC_PATH: /app/apps/web/dist
+      UPLOADS_PATH: /app/uploads
       TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN:-}
       BETTER_AUTH_SECRET: ${BETTER_AUTH_SECRET:-}
+    volumes:
+      - ./uploads-data:/app/uploads
     depends_on:
       db:
         condition: service_healthy

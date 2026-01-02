@@ -7,6 +7,7 @@ const configSchema = z.object({
 	staticPath: z.string().default("../web/dist"),
 	viteDevUrl: z.url().default("http://localhost:3001"),
 	telegramBotToken: z.string().optional(),
+	uploadsPath: z.string().default("/app/uploads"),
 });
 
 const rawConfig = {
@@ -15,6 +16,7 @@ const rawConfig = {
 	staticPath: process.env.STATIC_PATH,
 	viteDevUrl: process.env.VITE_DEV_URL,
 	telegramBotToken: process.env.TELEGRAM_BOT_TOKEN,
+	uploadsPath: process.env.UPLOADS_PATH,
 };
 
 export const config = configSchema.parse(rawConfig);

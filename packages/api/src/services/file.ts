@@ -1,6 +1,7 @@
 import path from "node:path";
 import type { FileUpdate } from "@vibenance/db/schema/file";
 import type z from "zod";
+import { config } from "../config";
 import { FileRepository } from "../repository/file";
 
 export const FileService = {
@@ -13,20 +14,18 @@ export const FileService = {
 	},
 
 	uploadFile: async (f: z.core.File) => {
-		const uploadDir = path.join(
-			"/tmp",
-			`${crypto.randomUUID()}${path.extname(f.name)}`,
-		);
+		const fileName = `${crypto.randomUUID()}${path.extname(f.name)}`;
+		const uploadPath = path.join(config.uploadsPath, fileName);
 
 		const arrayBuffer = await f.arrayBuffer();
-		Bun.write(uploadDir, Buffer.from(arrayBuffer));
+		await Bun.write(uploadPath, Buffer.from(arrayBuffer));
 
 		const hasher = new Bun.CryptoHasher("md5");
 		hasher.update(arrayBuffer);
 
 		const uploadedFile = await FileRepository.create({
 			fileName: f.name,
-			filePath: uploadDir,
+			filePath: uploadPath,
 			fileHash: hasher.digest("hex"),
 			fileSize: f.size,
 		});
