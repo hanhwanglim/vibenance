@@ -32,7 +32,7 @@ const chartConfig = {
 } satisfies ChartConfig;
 
 // Fake data generator
-function getFakeBudgetProgress(dateRange: DateRange | undefined) {
+function getFakeBudgetProgress(_dateRange: DateRange | undefined) {
 	return [
 		{ category: "Groceries", budgeted: 500, spent: 420 },
 		{ category: "Eating Out", budgeted: 200, spent: 185 },

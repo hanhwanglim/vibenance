@@ -13,6 +13,12 @@ export const relations = defineRelations(schema, (r) => ({
 		sessions: r.many.session(),
 		telegramCredentials: r.many.telegramCredential(),
 	},
+	budget: {
+		category: r.one.category({
+			from: r.budget.categoryId,
+			to: r.category.id,
+		}),
+	},
 	file: {
 		fileImport: r.one.fileImport({
 			from: r.file.fileImportId,

@@ -3,6 +3,7 @@ import { protectedProcedure, publicProcedure } from "../index";
 import { agentRouter } from "./agent";
 import { assetRouter } from "./asset";
 import { bankAccountRouter } from "./bank-account";
+import { budgetRouter } from "./budget";
 import { fileRouter } from "./file";
 import { settingsRouter } from "./settings";
 import { transactionRouter } from "./transaction";
@@ -19,6 +20,7 @@ export const appRouter = {
 	}),
 	transaction: transactionRouter,
 	bankAccount: bankAccountRouter,
+	budget: budgetRouter,
 	asset: assetRouter,
 	file: fileRouter,
 	settings: settingsRouter,
