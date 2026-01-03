@@ -1,3 +1,5 @@
+import type { BudgetSelect } from "@vibenance/db/schema/budget";
+import type { CategorySelect } from "@vibenance/db/schema/transaction";
 import { Pencil, Trash2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -11,15 +13,7 @@ import {
 import { cn } from "@/lib/utils";
 import { formatCurrency } from "@/utils/formatting";
 
-export type Budget = {
-	id: string;
-	name: string;
-	category: string;
-	budgeted: number;
-	spent: number;
-	period: "weekly" | "monthly" | "yearly";
-	currency: string;
-};
+type Budget = BudgetSelect & { category: CategorySelect | null; spent: number };
 
 type BudgetCardProps = {
 	budget: Budget;
@@ -65,8 +59,8 @@ function getPeriodLabel(period: Budget["period"]): string {
 }
 
 export function BudgetCard({ budget, onEdit, onDelete }: BudgetCardProps) {
-	const percentage = (budget.spent / budget.budgeted) * 100;
-	const remaining = budget.budgeted - budget.spent;
+	const percentage = (Number(budget.spent) / Number(budget.amount)) * 100;
+	const remaining = Number(budget.amount) - Number(budget.spent);
 	const status = getStatus(percentage);
 
 	return (
@@ -77,7 +71,7 @@ export function BudgetCard({ budget, onEdit, onDelete }: BudgetCardProps) {
 						<div className="mb-1 flex items-center gap-2">
 							<CardTitle className="text-lg">{budget.name}</CardTitle>
 							<Badge variant="outline" className="text-xs">
-								{budget.category}
+								{budget.category?.name}
 							</Badge>
 						</div>
 						<CardDescription className="text-xs">
@@ -125,13 +119,13 @@ export function BudgetCard({ budget, onEdit, onDelete }: BudgetCardProps) {
 					<div className="flex flex-col gap-1">
 						<span className="text-muted-foreground text-xs">Spent</span>
 						<span className="font-semibold text-lg">
-							{formatCurrency(budget.spent, budget.currency)}
+							{formatCurrency(Number(budget.spent), budget.currency)}
 						</span>
 					</div>
 					<div className="flex flex-col items-end gap-1">
 						<span className="text-muted-foreground text-xs">Budgeted</span>
 						<span className="font-semibold text-lg">
-							{formatCurrency(budget.budgeted, budget.currency)}
+							{formatCurrency(Number(budget.amount), budget.currency)}
 						</span>
 					</div>
 				</div>

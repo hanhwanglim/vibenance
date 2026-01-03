@@ -111,13 +111,14 @@ export const BankTransactionRepository = {
 	categoriesWithTransactions: async (dateRange?: DateRange) => {
 		return await db
 			.select({
+				id: category.id,
 				name: category.name,
 				sum: sum(transaction.amount),
 			})
 			.from(transaction)
 			.leftJoin(category, eq(transaction.categoryId, category.id))
 			.where(and(lt(transaction.amount, "0"), ...dateRangeFilters(dateRange)))
-			.groupBy(category.name)
+			.groupBy(category.id)
 			.orderBy(({ sum }) => sum); // expenses are negative
 	},
 

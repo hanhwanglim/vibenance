@@ -1,10 +1,11 @@
 import z from "zod";
 import { protectedProcedure } from "../index";
 import { BudgetService } from "../services/budget";
+import { dateRange } from "../utils/filter";
 
 export const budgetRouter = {
-	getAll: protectedProcedure.handler(async () => {
-		return await BudgetService.getAll();
+	getAll: protectedProcedure.input(dateRange).handler(async ({ input }) => {
+		return await BudgetService.getAll(input);
 	}),
 
 	create: protectedProcedure

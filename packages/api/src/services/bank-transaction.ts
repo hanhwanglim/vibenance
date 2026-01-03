@@ -146,6 +146,12 @@ export const BankTransactionService = {
 		);
 	},
 
+	categoriesWithTransactions: async (dateRange?: DateRange) => {
+		return await BankTransactionRepository.categoriesWithTransactions(
+			dateRange,
+		);
+	},
+
 	categoryBreakdown: async (dateRange?: DateRange) => {
 		const [categories, totalExpenses] = await Promise.all([
 			BankTransactionRepository.categoriesWithTransactions(dateRange),

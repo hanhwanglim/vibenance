@@ -29,3 +29,4 @@ export const budget = pgTable("budget", {
 });
 
 export type BudgetInsert = typeof budget.$inferInsert;
+export type BudgetSelect = typeof budget.$inferSelect;
