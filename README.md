@@ -3,7 +3,7 @@
 A modern personal finance management application built with a focus on transaction tracking, asset management, and intelligent financial insights. Vibenance helps you take control of your finances by providing comprehensive tools for managing bank accounts, tracking transactions, monitoring assets, and getting AI-powered financial advice.
 
 > [!WARNING]
-> This is my pet project and there are no guarantees that the functionality will work for you. I am building it for myself. Breaking changes will probably happen often.
+> This is a personal project under active development. While I strive to maintain stability, breaking changes may occur as the project evolves. Please use at your own discretion.
 
 ## Tech Stack
 
@@ -32,7 +32,7 @@ A modern personal finance management application built with a focus on transacti
 - [x] Transaction management
 - [x] Asset management
 - [x] Finance assistant
-- [ ] Budget Management
+- [x] Budget Management
 - [ ] Financial Goals
 - [ ] Reports and Analytics
 - [ ] Tax Management
