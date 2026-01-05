@@ -1,5 +1,6 @@
 "use client";
 
+import { useQuery } from "@tanstack/react-query";
 import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from "recharts";
 import {
 	Card,
@@ -16,6 +17,7 @@ import {
 import { cn } from "@/lib/utils";
 import type { DateRange } from "@/types";
 import { formatCurrency } from "@/utils/formatting";
+import { orpc } from "@/utils/orpc";
 
 const chartConfig = {
 	category: {
@@ -23,35 +25,46 @@ const chartConfig = {
 	},
 	budgeted: {
 		label: "Budgeted",
-		color: "hsl(var(--chart-2))",
 	},
 	spent: {
 		label: "Spent",
-		color: "hsl(var(--chart-1))",
 	},
 } satisfies ChartConfig;
-
-// Fake data generator
-function getFakeBudgetProgress(_dateRange: DateRange | undefined) {
-	return [
-		{ category: "Groceries", budgeted: 500, spent: 420 },
-		{ category: "Eating Out", budgeted: 200, spent: 185 },
-		{ category: "Transport", budgeted: 300, spent: 320 },
-		{ category: "Entertainment", budgeted: 150, spent: 95 },
-		{ category: "Bills", budgeted: 800, spent: 780 },
-		{ category: "Shopping", budgeted: 400, spent: 450 },
-		{ category: "Savings", budgeted: 1150, spent: 600 },
-	];
-}
 
 export function BudgetProgressChart({
 	className,
 	dateRange,
 }: {
 	className?: string;
-	dateRange?: DateRange;
+	dateRange: DateRange;
 }) {
-	const data = getFakeBudgetProgress(dateRange);
+	const { data, isLoading } = useQuery(
+		orpc.budget.budgetProcess.queryOptions({ input: { dateRange: dateRange } }),
+	);
+
+	if (isLoading) {
+		return (
+			<Card className={cn("h-full", className)}>
+				<CardHeader>
+					<CardTitle>Budget vs Actual</CardTitle>
+					<CardDescription>Loading budget data...</CardDescription>
+				</CardHeader>
+			</Card>
+		);
+	}
+
+	if (data?.length === 0) {
+		return (
+			<Card className={cn("h-full", className)}>
+				<CardHeader>
+					<CardTitle>Budget vs Actual</CardTitle>
+					<CardDescription>
+						No budget data available for the selected period
+					</CardDescription>
+				</CardHeader>
+			</Card>
+		);
+	}
 
 	return (
 		<Card className={cn("h-full", className)}>
@@ -111,14 +124,10 @@ export function BudgetProgressChart({
 								return null;
 							}}
 						/>
+						<Bar dataKey="spent" fill="var(--chart-1)" radius={[4, 4, 0, 0]} />
 						<Bar
 							dataKey="budgeted"
-							fill="var(--color-budgeted)"
-							radius={[4, 4, 0, 0]}
-						/>
-						<Bar
-							dataKey="spent"
-							fill="var(--color-spent)"
+							fill="var(--chart-2)"
 							radius={[4, 4, 0, 0]}
 						/>
 					</BarChart>

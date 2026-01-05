@@ -83,6 +83,19 @@ export const BudgetService = {
 		};
 	},
 
+	budgetProcess: async (dateRange: DateRange) => {
+		const budgets = await BudgetService.getAll(dateRange);
+		return (
+			budgets
+				?.filter((budget) => budget.category !== null)
+				.map((budget) => ({
+					category: budget.category?.name ?? "",
+					budgeted: Number(budget.amount),
+					spent: budget.spent,
+				})) ?? []
+		);
+	},
+
 	create: async (values: BudgetInsert) => {
 		return await BudgetRepository.create(values);
 	},

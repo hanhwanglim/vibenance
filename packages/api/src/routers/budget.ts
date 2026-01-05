@@ -43,4 +43,10 @@ export const budgetRouter = {
 		.handler(async ({ input }) => {
 			return await BudgetService.getSummary(input.dateRange);
 		}),
+
+	budgetProcess: protectedProcedure
+		.input(z.object({ dateRange: dateRange }))
+		.handler(async ({ input }) => {
+			return await BudgetService.budgetProcess(input.dateRange);
+		}),
 };
