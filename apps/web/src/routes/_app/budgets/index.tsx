@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { DateTime } from "@vibenance/utils/date";
 import { Plus } from "lucide-react";
 import { useState } from "react";
-import { DatePeriodPicker } from "@/components/date-period-picker";
+import { MonthlyDatePicker } from "@/components/monthly-date-picker";
 import { Button } from "@/components/ui/button";
 import { Dialog } from "@/components/ui/dialog";
 import { BudgetAllocationChart } from "@/modules/budgets/components/budget-allocation-chart";
@@ -17,16 +17,17 @@ export const Route = createFileRoute("/_app/budgets/")({
 });
 
 function RouteComponent() {
+	const now = new DateTime();
 	const [dateRange, setDateRange] = useState<DateRange | undefined>({
-		from: new DateTime().subtract({ months: 3 }),
-		to: new Date(),
+		from: new DateTime(now).startOfMonth(),
+		to: new DateTime(now).endOfMonth(),
 	});
 	const [dialogOpen, setDialogOpen] = useState(false);
 
 	return (
 		<div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6">
 			<div className="flex items-center justify-between px-4 lg:px-6">
-				<DatePeriodPicker dateRange={dateRange} setDateRange={setDateRange} />
+				<MonthlyDatePicker dateRange={dateRange} setDateRange={setDateRange} />
 				<Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
 					<Button onClick={() => setDialogOpen(true)} className="gap-2">
 						<Plus className="h-4 w-4" />

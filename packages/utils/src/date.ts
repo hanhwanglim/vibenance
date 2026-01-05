@@ -41,10 +41,24 @@ export class DateTime extends Date {
 		super(value ?? new Date());
 	}
 
+	startOfMonth(): DateTime {
+		const d = new DateTime(this);
+		d.setDate(1);
+		d.setHours(0, 0, 0, 0);
+		return d;
+	}
+
 	startOfDay(): DateTime {
 		const d = new DateTime(this);
 		d.setHours(0, 0, 0, 0);
 		return d;
+	}
+
+	endOfMonth(): DateTime {
+		const nextMonth = new DateTime(
+			new Date(this.getFullYear(), this.getMonth() + 1, 1),
+		);
+		return nextMonth.subtract({ days: 1 }).startOfDay();
 	}
 
 	subtract(period: Period): DateTime {
