@@ -1,4 +1,5 @@
 import type { BudgetInsert } from "@vibenance/db/schema/budget";
+import { DateTime } from "@vibenance/utils/date";
 import { BudgetRepository } from "../repository/budget";
 import type { DateRange } from "../utils/filter";
 import { BankTransactionService } from "./bank-transaction";
@@ -18,6 +19,68 @@ export const BudgetService = {
 		});
 
 		return result;
+	},
+
+	getSummary: async (dateRange: DateRange) => {
+		const prevMonth = new DateTime(dateRange.from)
+			.subtract({ months: 1 })
+			.startOfMonth();
+		const prevRange = { from: prevMonth, to: prevMonth.endOfMonth() };
+
+		const budgets = await BudgetRepository.getAll();
+		const activeBudgetsCount = await BudgetRepository.count();
+
+		const totalBudgeted = budgets.reduce(
+			(sum, budget) => sum + Number(budget.amount),
+			0,
+		);
+
+		const [currentCategories, previousCategories] = await Promise.all([
+			BankTransactionService.categoriesWithTransactions(dateRange),
+			BankTransactionService.categoriesWithTransactions(prevRange),
+		]);
+
+		const currentCategoriesMap = new Map(
+			currentCategories.map((cat) => [cat.id, cat]),
+		);
+		const previousCategoriesMap = new Map(
+			previousCategories.map((cat) => [cat.id, cat]),
+		);
+
+		const totalSpent = budgets.reduce((sum, budget) => {
+			const categorySpending = currentCategoriesMap.get(budget.categoryId);
+			if (categorySpending) {
+				return sum + Math.abs(Number(categorySpending.sum));
+			}
+			return sum;
+		}, 0);
+
+		const prevTotalSpent = budgets.reduce((sum, budget) => {
+			const categorySpending = previousCategoriesMap.get(budget.categoryId);
+			if (categorySpending) {
+				return sum + Math.abs(Number(categorySpending.sum));
+			}
+			return sum;
+		}, 0);
+
+		const remaining = totalBudgeted - totalSpent;
+		const prevRemaining = totalBudgeted - prevTotalSpent;
+		const utilization =
+			totalBudgeted > 0 ? (totalSpent / totalBudgeted) * 100 : 0;
+		const prevUtilization =
+			totalBudgeted > 0 ? (prevTotalSpent / totalBudgeted) * 100 : 0;
+
+		return {
+			totalBudgeted,
+			totalSpent,
+			remaining,
+			utilization,
+			activeBudgetsCount,
+			prevTotalBudgeted: totalBudgeted,
+			prevTotalSpent,
+			prevRemaining,
+			prevUtilization,
+		};
 	},
 
 	create: async (values: BudgetInsert) => {

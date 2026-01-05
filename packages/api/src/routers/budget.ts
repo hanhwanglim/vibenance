@@ -37,4 +37,10 @@ export const budgetRouter = {
 	delete: protectedProcedure.input(z.string()).handler(async ({ input }) => {
 		return await BudgetService.delete(input);
 	}),
+
+	summary: protectedProcedure
+		.input(z.object({ dateRange: dateRange }))
+		.handler(async ({ input }) => {
+			return await BudgetService.getSummary(input.dateRange);
+		}),
 };

@@ -18,7 +18,7 @@ export const Route = createFileRoute("/_app/budgets/")({
 
 function RouteComponent() {
 	const now = new DateTime();
-	const [dateRange, setDateRange] = useState<DateRange | undefined>({
+	const [dateRange, setDateRange] = useState<DateRange>({
 		from: new DateTime(now).startOfMonth(),
 		to: new DateTime(now).endOfMonth(),
 	});

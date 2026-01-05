@@ -7,8 +7,8 @@ import { Button } from "@/components/ui/button";
 import type { DateRange } from "@/types";
 
 type MonthlyDatePickerProps = {
-	dateRange: DateRange | undefined;
-	setDateRange: React.Dispatch<React.SetStateAction<DateRange | undefined>>;
+	dateRange: DateRange;
+	setDateRange: React.Dispatch<React.SetStateAction<DateRange>>;
 };
 
 export function MonthlyDatePicker({

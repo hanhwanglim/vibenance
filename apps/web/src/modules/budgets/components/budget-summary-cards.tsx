@@ -1,3 +1,4 @@
+import { useQuery } from "@tanstack/react-query";
 import { TrendingDown, TrendingUp } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -8,9 +9,11 @@ import {
 	CardHeader,
 	CardTitle,
 } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 import type { DateRange } from "@/types";
 import { formatCurrency } from "@/utils/formatting";
+import { orpc } from "@/utils/orpc";
 
 type StatCardData = {
 	label: string;
@@ -26,59 +29,31 @@ function calculateRelativeChange(before: number, after: number) {
 	return ((after - before) / Math.max(Math.abs(before), 1)) * 100;
 }
 
-// Fake data generator
-function getFakeBudgetSummary(_dateRange: DateRange | undefined) {
-	// Simulate some realistic budget data
-	const totalBudgeted = 3500;
-	const totalSpent = 2850;
-	const remaining = totalBudgeted - totalSpent;
-	const utilization = (totalSpent / totalBudgeted) * 100;
-
-	// Previous period values for comparison
-	const prevTotalBudgeted = 3200;
-	const prevTotalSpent = 3100;
-	const prevRemaining = prevTotalBudgeted - prevTotalSpent;
-	const prevUtilization = (prevTotalSpent / prevTotalBudgeted) * 100;
-
-	return {
-		totalBudgeted,
-		totalSpent,
-		remaining,
-		utilization,
-		prevTotalBudgeted,
-		prevTotalSpent,
-		prevRemaining,
-		prevUtilization,
-	};
-}
-
-export function BudgetSummaryCards({
-	dateRange,
-}: {
-	dateRange: DateRange | undefined;
-}) {
-	const summary = getFakeBudgetSummary(dateRange);
+export function BudgetSummaryCards({ dateRange }: { dateRange: DateRange }) {
+	const { data: summary, isLoading } = useQuery(
+		orpc.budget.summary.queryOptions({ input: { dateRange } }),
+	);
 
 	const cardsData: StatCardData[] = [
 		{
 			label: "Total Budgeted",
-			value: summary.totalBudgeted,
+			value: summary?.totalBudgeted || 0,
 			currency: "GBP",
 			relativeChange: calculateRelativeChange(
-				summary.prevTotalBudgeted,
-				summary.totalBudgeted,
+				summary?.prevTotalBudgeted || 0,
+				summary?.totalBudgeted || 0,
 			),
 			negativeIsGood: false,
 			footer: "Compared to last period",
-			subfooter: "7 active budgets",
+			subfooter: `${summary?.activeBudgetsCount || 0} active ${(summary?.activeBudgetsCount || 0) === 1 ? "budget" : "budgets"}`,
 		},
 		{
 			label: "Total Spent",
-			value: summary.totalSpent,
+			value: summary?.totalSpent || 0,
 			currency: "GBP",
 			relativeChange: calculateRelativeChange(
-				summary.prevTotalSpent,
-				summary.totalSpent,
+				summary?.prevTotalSpent || 0,
+				summary?.totalSpent || 0,
 			),
 			negativeIsGood: true,
 			footer: "Compared to last period",
@@ -86,29 +61,39 @@ export function BudgetSummaryCards({
 		},
 		{
 			label: "Remaining",
-			value: summary.remaining,
+			value: summary?.remaining || 0,
 			currency: "GBP",
 			relativeChange: calculateRelativeChange(
-				summary.prevRemaining,
-				summary.remaining,
+				summary?.prevRemaining || 0,
+				summary?.remaining || 0,
 			),
 			negativeIsGood: true,
 			footer: "Available to spend",
 			subfooter:
-				summary.remaining >= 0 ? "On track with budget" : "Over budget",
+				(summary?.remaining || 0) >= 0 ? "On track with budget" : "Over budget",
 		},
 		{
 			label: "Utilization",
-			value: summary.utilization,
+			value: summary?.utilization || 0,
 			relativeChange: calculateRelativeChange(
-				summary.prevUtilization,
-				summary.utilization,
+				summary?.prevUtilization || 0,
+				summary?.utilization || 0,
 			),
 			negativeIsGood: true,
 			footer: "Budget usage",
-			subfooter: `${summary.utilization.toFixed(1)}% of budget used`,
+			subfooter: `${(summary?.utilization || 0).toFixed(1)}% of budget used`,
 		},
 	];
+
+	if (isLoading) {
+		return (
+			<div className="grid @5xl/main:grid-cols-4 @xl/main:grid-cols-2 grid-cols-1 gap-4 px-4 lg:px-6">
+				{cardsData.map((data) => (
+					<StatCardSkeleton key={`stat-card-skeleton-${data.label}`} />
+				))}
+			</div>
+		);
+	}
 
 	return (
 		<div className="grid @5xl/main:grid-cols-4 @xl/main:grid-cols-2 grid-cols-1 gap-4 px-4 *:data-[slot=card]:bg-gradient-to-t *:data-[slot=card]:from-primary/5 *:data-[slot=card]:to-card *:data-[slot=card]:shadow-xs lg:px-6 dark:*:data-[slot=card]:bg-card">
@@ -116,6 +101,17 @@ export function BudgetSummaryCards({
 				return <StatCard key={`summary-${cardData.label}`} stats={cardData} />;
 			})}
 		</div>
+	);
+}
+
+function StatCardSkeleton() {
+	return (
+		<Card className="@container/card">
+			<CardHeader>
+				<Skeleton className="h-4 w-24" />
+				<Skeleton className="mt-2 h-8 w-32" />
+			</CardHeader>
+		</Card>
 	);
 }
 

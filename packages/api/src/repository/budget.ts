@@ -3,6 +3,10 @@ import { type BudgetInsert, budget } from "@vibenance/db/schema/budget";
 import { eq } from "drizzle-orm";
 
 export const BudgetRepository = {
+	count: async () => {
+		return await db.$count(budget);
+	},
+
 	getAll: async () => {
 		return await db.query.budget.findMany({
 			with: {
