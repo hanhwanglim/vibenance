@@ -34,7 +34,7 @@ export function BudgetList({ dateRange }: { dateRange?: DateRange }) {
 	const handleDelete = (budget: Budget) => {
 		if (
 			!confirm(
-				`Are you sure you want to delete "${budget.name}"? This action cannot be undone.`,
+				`Are you sure you want to delete "${budget.category?.name}"? This action cannot be undone.`,
 			)
 		) {
 			return;

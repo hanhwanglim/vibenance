@@ -33,14 +33,7 @@ import {
 import { formatCurrency } from "@/utils/formatting";
 import { orpc } from "@/utils/orpc";
 
-const BUDGET_PERIODS = [
-	{ value: "weekly", label: "Weekly" },
-	{ value: "monthly", label: "Monthly" },
-	{ value: "yearly", label: "Yearly" },
-] as const;
-
 const formSchema = z.object({
-	name: z.string().min(1, "Name must be more than one character"),
 	categoryId: z.string().min(1, "Please select a category"),
 	currency: z.string("Please set a currency"),
 	amount: z
@@ -50,9 +43,6 @@ const formSchema = z.object({
 				!Number.isNaN(Number.parseFloat(val)) && Number.parseFloat(val) > 0,
 			"Amount must be a positive number",
 		),
-	period: z
-		.union([z.literal(""), z.enum(["weekly", "monthly", "yearly"])])
-		.refine((val) => val !== "", "Please select a period"),
 	startDate: z.union([z.string(), z.undefined()]),
 });
 
@@ -107,37 +97,22 @@ export function BudgetDialog({
 		defaultValues:
 			isEditMode && budget
 				? {
-						name: budget.name,
 						categoryId: budget.categoryId,
 						currency: budget.currency,
 						amount: formatCurrency(Number(budget.amount)),
-						period: budget.period as "" | "weekly" | "monthly" | "yearly",
-						startDate: budget.startDate?.toLocaleDateString() || undefined,
 					}
 				: {
-						name: "",
 						categoryId: "",
 						currency: "",
 						amount: "",
-						period: "" as "" | "weekly" | "monthly" | "yearly",
-						startDate: undefined as string | undefined,
 					},
 		validators: {
 			onSubmit: formSchema,
 		},
 		onSubmit: ({ value }) => {
-			const baseValue = {
-				...value,
-				period: value.period as "weekly" | "monthly" | "yearly",
-				startDate: value.startDate ? new Date(value.startDate) : undefined,
-			};
-
 			if (isEditMode && budget) {
 				updateBudget(
-					{
-						id: budget.id,
-						...baseValue,
-					},
+					{ id: budget.id, ...value },
 					{
 						onSuccess: () => {
 							toast.success(uiText.success);
@@ -148,7 +123,7 @@ export function BudgetDialog({
 					},
 				);
 			} else {
-				createBudget(baseValue, {
+				createBudget(value, {
 					onSuccess: () => {
 						toast.success(uiText.success);
 						form.reset();
@@ -174,32 +149,6 @@ export function BudgetDialog({
 				className="flex flex-col gap-4"
 			>
 				<FieldGroup>
-					<form.Field name="name">
-						{(field) => {
-							const isInvalid =
-								field.state.meta.isTouched && !field.state.meta.isValid;
-
-							return (
-								<Field data-invalid={isInvalid}>
-									<FieldLabel htmlFor={field.name}>Budget Name</FieldLabel>
-									<Input
-										id={field.name}
-										name={field.name}
-										value={field.state.value}
-										onBlur={field.handleBlur}
-										onChange={(e) => field.handleChange(e.target.value)}
-										aria-invalid={isInvalid}
-										placeholder="e.g., Groceries, Eating Out, Transport"
-										autoComplete="off"
-									/>
-									{isInvalid && <FieldError errors={field.state.meta.errors} />}
-								</Field>
-							);
-						}}
-					</form.Field>
-				</FieldGroup>
-
-				<FieldGroup>
 					<form.Field name="categoryId">
 						{(field) => {
 							const isInvalid =
@@ -221,7 +170,7 @@ export function BudgetDialog({
 										<SelectTrigger
 											id={field.name}
 											aria-invalid={isInvalid}
-											className="min-w-[120px]"
+											className="min-w-30"
 										>
 											<SelectValue placeholder="Select a category" />
 										</SelectTrigger>
@@ -283,78 +232,6 @@ export function BudgetDialog({
 										min="0"
 										step="0.01"
 										disabled={isPending}
-									/>
-									{isInvalid && <FieldError errors={field.state.meta.errors} />}
-								</Field>
-							);
-						}}
-					</form.Field>
-				</FieldGroup>
-
-				<FieldGroup>
-					<form.Field name="period">
-						{(field) => {
-							const isInvalid =
-								field.state.meta.isTouched && !field.state.meta.isValid;
-							return (
-								<Field data-invalid={isInvalid}>
-									<FieldContent>
-										<FieldLabel htmlFor={field.name}>Period</FieldLabel>
-										{isInvalid && (
-											<FieldError errors={field.state.meta.errors} />
-										)}
-									</FieldContent>
-									<Select
-										name={field.name}
-										value={field.state.value}
-										onValueChange={(value: "weekly" | "monthly" | "yearly") =>
-											field.handleChange(value)
-										}
-									>
-										<SelectTrigger
-											id={field.name}
-											aria-invalid={isInvalid}
-											className="min-w-[120px]"
-										>
-											<SelectValue placeholder="Select period" />
-										</SelectTrigger>
-										<SelectContent position="item-aligned">
-											{BUDGET_PERIODS.map((periodOption) => (
-												<SelectItem
-													key={periodOption.value}
-													value={periodOption.value}
-												>
-													{periodOption.label}
-												</SelectItem>
-											))}
-										</SelectContent>
-									</Select>
-								</Field>
-							);
-						}}
-					</form.Field>
-				</FieldGroup>
-
-				<FieldGroup>
-					<form.Field name="startDate">
-						{(field) => {
-							const isInvalid =
-								field.state.meta.isTouched && !field.state.meta.isValid;
-							return (
-								<Field data-invalid={isInvalid}>
-									<FieldLabel htmlFor={field.name}>
-										Start Date (Optional)
-									</FieldLabel>
-									<Input
-										id={field.name}
-										name={field.name}
-										type="date"
-										value={field.state.value ?? ""}
-										onBlur={field.handleBlur}
-										onChange={(e) =>
-											field.handleChange(e.target.value || undefined)
-										}
-										aria-invalid={isInvalid}
 									/>
 									{isInvalid && <FieldError errors={field.state.meta.errors} />}
 								</Field>

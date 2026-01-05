@@ -3,13 +3,7 @@ import type { CategorySelect } from "@vibenance/db/schema/transaction";
 import { Pencil, Trash2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import {
-	Card,
-	CardDescription,
-	CardFooter,
-	CardHeader,
-	CardTitle,
-} from "@/components/ui/card";
+import { Card, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import { formatCurrency } from "@/utils/formatting";
 
@@ -47,17 +41,6 @@ function getStatus(percentage: number): {
 	};
 }
 
-function getPeriodLabel(period: Budget["period"]): string {
-	switch (period) {
-		case "weekly":
-			return "Weekly";
-		case "monthly":
-			return "Monthly";
-		case "yearly":
-			return "Yearly";
-	}
-}
-
 export function BudgetCard({ budget, onEdit, onDelete }: BudgetCardProps) {
 	const percentage = (Number(budget.spent) / Number(budget.amount)) * 100;
 	const remaining = Number(budget.amount) - Number(budget.spent);
@@ -69,14 +52,8 @@ export function BudgetCard({ budget, onEdit, onDelete }: BudgetCardProps) {
 				<div className="flex items-start justify-between">
 					<div className="flex-1">
 						<div className="mb-1 flex items-center gap-2">
-							<CardTitle className="text-lg">{budget.name}</CardTitle>
-							<Badge variant="outline" className="text-xs">
-								{budget.category?.name}
-							</Badge>
+							<CardTitle className="text-lg">{budget.category?.name}</CardTitle>
 						</div>
-						<CardDescription className="text-xs">
-							{getPeriodLabel(budget.period)} Budget
-						</CardDescription>
 					</div>
 					<div className="flex gap-1">
 						{onEdit && (

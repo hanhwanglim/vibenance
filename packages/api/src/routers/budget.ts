@@ -11,12 +11,9 @@ export const budgetRouter = {
 	create: protectedProcedure
 		.input(
 			z.object({
-				name: z.string(),
 				categoryId: z.string(),
 				currency: z.string(),
 				amount: z.string(),
-				period: z.enum(["weekly", "monthly", "yearly"]),
-				startDate: z.date().optional(),
 			}),
 		)
 		.handler(async ({ input }) => {
@@ -27,12 +24,9 @@ export const budgetRouter = {
 		.input(
 			z.object({
 				id: z.string(),
-				name: z.string(),
 				categoryId: z.string(),
 				currency: z.string(),
 				amount: z.string(),
-				period: z.enum(["weekly", "monthly", "yearly"]),
-				startDate: z.date().optional(),
 			}),
 		)
 		.handler(async ({ input }) => {
