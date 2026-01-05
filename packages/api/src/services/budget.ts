@@ -96,6 +96,16 @@ export const BudgetService = {
 		);
 	},
 
+	budgetAllocation: async () => {
+		const budgets = await BudgetRepository.getAll();
+		return budgets
+			.filter((budget) => budget.category !== null)
+			.map((budget) => ({
+				category: budget.category?.name ?? "",
+				amount: Number(budget.amount),
+			}));
+	},
+
 	create: async (values: BudgetInsert) => {
 		return await BudgetRepository.create(values);
 	},

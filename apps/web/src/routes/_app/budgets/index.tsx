@@ -39,7 +39,7 @@ function RouteComponent() {
 			<BudgetSummaryCards dateRange={dateRange} />
 			<div className="grid @5xl/main:grid-cols-3 grid-cols-1 gap-4 px-4 lg:px-6">
 				<BudgetProgressChart className="col-span-2" dateRange={dateRange} />
-				<BudgetAllocationChart className="col-span-1" dateRange={dateRange} />
+				<BudgetAllocationChart className="col-span-1" />
 			</div>
 			<BudgetList dateRange={dateRange} />
 		</div>

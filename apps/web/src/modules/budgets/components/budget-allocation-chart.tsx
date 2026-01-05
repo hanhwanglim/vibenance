@@ -1,5 +1,6 @@
 "use client";
 
+import { useQuery } from "@tanstack/react-query";
 import { Label, Pie, PieChart } from "recharts";
 import {
 	Card,
@@ -15,8 +16,8 @@ import {
 	ChartTooltipContent,
 } from "@/components/ui/chart";
 import { cn } from "@/lib/utils";
-import type { DateRange } from "@/types";
 import { formatCurrency } from "@/utils/formatting";
+import { orpc } from "@/utils/orpc";
 
 const chartConfig = {
 	category: {
@@ -24,33 +25,42 @@ const chartConfig = {
 	},
 } satisfies ChartConfig;
 
-// Fake data generator
-function getFakeBudgetAllocation(_dateRange: DateRange | undefined) {
-	return [
-		{ category: "Groceries", amount: 500 },
-		{ category: "Eating Out", amount: 200 },
-		{ category: "Transport", amount: 300 },
-		{ category: "Entertainment", amount: 150 },
-		{ category: "Bills", amount: 800 },
-		{ category: "Shopping", amount: 400 },
-		{ category: "Savings", amount: 1150 },
-	];
-}
+export function BudgetAllocationChart({ className }: { className?: string }) {
+	const { data, isLoading } = useQuery(
+		orpc.budget.budgetAllocation.queryOptions(),
+	);
 
-export function BudgetAllocationChart({
-	className,
-	dateRange,
-}: {
-	className?: string;
-	dateRange?: DateRange;
-}) {
-	const data = getFakeBudgetAllocation(dateRange);
-	const total = data.reduce((sum, item) => sum + item.amount, 0);
+	if (isLoading) {
+		return (
+			<Card className={cn("h-full", className)}>
+				<CardHeader className="items-center pb-0">
+					<CardTitle>Budget Allocation</CardTitle>
+					<CardDescription>Loading budget data...</CardDescription>
+				</CardHeader>
+			</Card>
+		);
+	}
 
-	const chartData = data.map((item, index) => ({
-		...item,
-		fill: `var(--chart-${(index % 7) + 1})`,
-	}));
+	if (data?.length === 0) {
+		return (
+			<Card className={cn("h-full", className)}>
+				<CardHeader className="items-center pb-0">
+					<CardTitle>Budget Allocation</CardTitle>
+					<CardDescription>
+						No budget data available for the selected period
+					</CardDescription>
+				</CardHeader>
+			</Card>
+		);
+	}
+
+	const total = data?.reduce((sum, item) => sum + item.amount, 0) ?? 0;
+
+	const chartData =
+		data?.map((item, index) => ({
+			...item,
+			fill: `var(--chart-${(index % 7) + 1})`,
+		})) ?? [];
 
 	return (
 		<Card className={cn("h-full", className)}>
