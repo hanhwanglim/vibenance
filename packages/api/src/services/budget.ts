@@ -23,4 +23,12 @@ export const BudgetService = {
 	create: async (values: BudgetInsert) => {
 		return await BudgetRepository.create(values);
 	},
+
+	update: async (id: string, values: Partial<BudgetInsert>) => {
+		return await BudgetRepository.update(id, values);
+	},
+
+	delete: async (id: string) => {
+		return await BudgetRepository.delete(id);
+	},
 };

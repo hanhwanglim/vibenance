@@ -1,7 +1,9 @@
 "use client";
 
 import { useForm } from "@tanstack/react-form";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import type { BudgetSelect } from "@vibenance/db/schema/budget";
+import type { CategorySelect } from "@vibenance/db/schema/transaction";
 import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import z from "zod";
@@ -28,6 +30,7 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "@/components/ui/select";
+import { formatCurrency } from "@/utils/formatting";
 import { orpc } from "@/utils/orpc";
 
 const BUDGET_PERIODS = [
@@ -53,54 +56,115 @@ const formSchema = z.object({
 	startDate: z.union([z.string(), z.undefined()]),
 });
 
-type CreateBudgetDialogProps = {
+type Budget = BudgetSelect & { category: CategorySelect | null; spent: number };
+
+type BudgetDialogProps = {
+	mode: "create" | "edit";
+	budget?: Budget;
 	onOpenChange: (open: boolean) => void;
 };
 
-export function CreateBudgetDialog({ onOpenChange }: CreateBudgetDialogProps) {
+const UI_TEXT = {
+	create: {
+		title: "Create New Budget",
+		description: "Set up a new budget to track your spending",
+		button: "Create Budget",
+		buttonLoading: "Creating...",
+		success: "Budget created successfully",
+		error: "Unable to create budget",
+	},
+	edit: {
+		title: "Edit Budget",
+		description: "Update your budget details below",
+		button: "Update Budget",
+		buttonLoading: "Updating...",
+		success: "Budget updated successfully",
+		error: "Unable to update budget",
+	},
+} as const;
+
+export function BudgetDialog({
+	mode,
+	budget,
+	onOpenChange,
+}: BudgetDialogProps) {
+	const isEditMode = mode === "edit";
+	const queryClient = useQueryClient();
 	const { data: categories } = useQuery(
 		orpc.transaction.listCategories.queryOptions({}),
 	);
-	const { mutate, isPending } = useMutation(
+	const { mutate: createBudget, isPending: isCreating } = useMutation(
 		orpc.budget.create.mutationOptions({}),
 	);
+	const { mutate: updateBudget, isPending: isUpdating } = useMutation(
+		orpc.budget.update.mutationOptions({}),
+	);
+	const isPending = isCreating || isUpdating;
+
+	const uiText = UI_TEXT[mode];
 
 	const form = useForm({
-		defaultValues: {
-			name: "",
-			categoryId: "",
-			currency: "",
-			amount: "",
-			period: "" as "" | "weekly" | "monthly" | "yearly",
-			startDate: undefined as string | undefined,
-		},
+		defaultValues:
+			isEditMode && budget
+				? {
+						name: budget.name,
+						categoryId: budget.categoryId,
+						currency: budget.currency,
+						amount: formatCurrency(Number(budget.amount)),
+						period: budget.period as "" | "weekly" | "monthly" | "yearly",
+						startDate: budget.startDate?.toLocaleDateString() || undefined,
+					}
+				: {
+						name: "",
+						categoryId: "",
+						currency: "",
+						amount: "",
+						period: "" as "" | "weekly" | "monthly" | "yearly",
+						startDate: undefined as string | undefined,
+					},
 		validators: {
 			onSubmit: formSchema,
 		},
 		onSubmit: ({ value }) => {
-			const transformedValue = {
+			const baseValue = {
 				...value,
 				period: value.period as "weekly" | "monthly" | "yearly",
 				startDate: value.startDate ? new Date(value.startDate) : undefined,
 			};
-			mutate(transformedValue, {
-				onSuccess: () => {
-					toast.success("Budget created successfully");
-					onOpenChange(false);
-					form.reset();
-				},
-				onError: (error) => toast.error(`Unable to create budget: ${error}`),
-			});
+
+			if (isEditMode && budget) {
+				updateBudget(
+					{
+						id: budget.id,
+						...baseValue,
+					},
+					{
+						onSuccess: () => {
+							toast.success(uiText.success);
+							queryClient.invalidateQueries({ queryKey: ["budget"] });
+							onOpenChange(false);
+						},
+						onError: (error) => toast.error(`${uiText.error}: ${error}`),
+					},
+				);
+			} else {
+				createBudget(baseValue, {
+					onSuccess: () => {
+						toast.success(uiText.success);
+						form.reset();
+						onOpenChange(false);
+					},
+					onError: (error) => toast.error(`${uiText.error}: ${error}`),
+				});
+			}
 		},
 	});
 
 	return (
 		<DialogContent>
 			<DialogHeader>
-				<DialogTitle>Create New Budget</DialogTitle>
-				<DialogDescription>
-					Set up a new budget to track your spending
-				</DialogDescription>
+				<DialogTitle>{uiText.title}</DialogTitle>
+				<DialogDescription>{uiText.description}</DialogDescription>
 			</DialogHeader>
 			<form
 				onSubmit={(e) => {
@@ -300,17 +364,22 @@ export function CreateBudgetDialog({ onOpenChange }: CreateBudgetDialogProps) {
 				</FieldGroup>
 
 				<DialogFooter>
-					<Button type="button" variant="outline" disabled={isPending}>
+					<Button
+						type="button"
+						variant="outline"
+						disabled={isPending}
+						onClick={() => onOpenChange(false)}
+					>
 						Cancel
 					</Button>
 					<Button type="submit" disabled={isPending}>
 						{isPending ? (
 							<>
 								<Loader2 className="mr-2 h-4 w-4 animate-spin" />
-								Creating...
+								{uiText.buttonLoading}
 							</>
 						) : (
-							"Create Budget"
+							uiText.button
 						)}
 					</Button>
 				</DialogFooter>

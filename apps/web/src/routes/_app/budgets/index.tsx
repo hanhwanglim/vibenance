@@ -6,10 +6,10 @@ import { DatePeriodPicker } from "@/components/date-period-picker";
 import { Button } from "@/components/ui/button";
 import { Dialog } from "@/components/ui/dialog";
 import { BudgetAllocationChart } from "@/modules/budgets/components/budget-allocation-chart";
+import { BudgetDialog } from "@/modules/budgets/components/budget-dialog";
 import { BudgetList } from "@/modules/budgets/components/budget-list";
 import { BudgetProgressChart } from "@/modules/budgets/components/budget-progress-chart";
 import { BudgetSummaryCards } from "@/modules/budgets/components/budget-summary-cards";
-import { CreateBudgetDialog } from "@/modules/budgets/components/create-budget-dialog";
 import type { DateRange } from "@/types";
 
 export const Route = createFileRoute("/_app/budgets/")({
@@ -32,7 +32,7 @@ function RouteComponent() {
 						<Plus className="h-4 w-4" />
 						Create Budget
 					</Button>
-					<CreateBudgetDialog onOpenChange={setDialogOpen} />
+					<BudgetDialog mode="create" onOpenChange={setDialogOpen} />
 				</Dialog>
 			</div>
 			<BudgetSummaryCards dateRange={dateRange} />
