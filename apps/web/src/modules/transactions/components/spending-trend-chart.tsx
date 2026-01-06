@@ -18,6 +18,9 @@ const chartConfig = {
 	sum: {
 		label: "Expenses",
 	},
+	movingAverage: {
+		label: "90-Day Average",
+	},
 } satisfies ChartConfig;
 
 export function SpendingTrendChart({
@@ -40,6 +43,7 @@ export function SpendingTrendChart({
 		return {
 			bin: new Date(point.bin as string),
 			sum: -Number(point.sum),
+			movingAverage: point.movingAverage ? -Number(point.movingAverage) : null,
 		};
 	});
 
@@ -72,6 +76,14 @@ export function SpendingTrendChart({
 					type="linear"
 					stroke="var(--chart-1)"
 					strokeWidth={2}
+					dot={false}
+				/>
+				<Line
+					dataKey="movingAverage"
+					type="linear"
+					stroke="var(--chart-2)"
+					strokeWidth={2}
+					strokeDasharray="5 5"
 					dot={false}
 				/>
 			</LineChart>

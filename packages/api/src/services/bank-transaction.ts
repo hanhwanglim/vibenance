@@ -199,10 +199,20 @@ export const BankTransactionService = {
 		}
 
 		const { interval, format } = getChartInterval(window.from, window.to);
-		const data = await BankTransactionRepository.spendingTrend(
-			window,
-			interval,
+
+		const [spendingTrend, spendingTrendAvg] = await Promise.all([
+			BankTransactionRepository.spendingTrend(window, interval),
+			BankTransactionRepository.spendingTrendAvg(window, interval),
+		]);
+
+		const spendingTrendAvgMap = new Map(
+			spendingTrendAvg.map((obj) => [obj.bin, obj]),
 		);
+
+		const data = spendingTrend.map((obj) => {
+			const avg = spendingTrendAvgMap.get(obj.bin)?.avg || "0";
+			return { ...obj, movingAverage: avg };
+		});
 
 		return {
 			data: data,

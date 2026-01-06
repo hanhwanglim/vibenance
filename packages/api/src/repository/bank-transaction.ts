@@ -4,6 +4,7 @@ import {
 	type TransactionInsert,
 	transaction,
 } from "@vibenance/db/schema/transaction";
+import { DateTime } from "@vibenance/utils/date";
 import { and, eq, gt, gte, lt, max, min, sql, sum } from "drizzle-orm";
 import type { DateRange, Pagination } from "../utils/filter";
 
@@ -146,6 +147,36 @@ export const BankTransactionRepository = {
 			.from(transaction)
 			.where(and(lt(transaction.amount, "0"), ...dateRangeFilters(dateRange)))
 			.groupBy(({ bin }) => bin)
+			.orderBy(({ bin }) => bin);
+	},
+
+	spendingTrendAvg: async (dateRange?: DateRange, interval?: string) => {
+		const range = {
+			...dateRange,
+			from: new DateTime(dateRange?.from).subtract({ days: 90 }),
+		};
+
+		const sq = db
+			.select({
+				bin: sql<string>`date_trunc(${sql.raw(`'${interval || "month"}'`)}, ${transaction.timestamp})`.as(
+					"bin",
+				),
+				sum: sum(transaction.amount).as("sum"),
+			})
+			.from(transaction)
+			.where(and(lt(transaction.amount, "0"), ...dateRangeFilters(range)))
+			.groupBy(({ bin }) => bin)
+			.orderBy(({ bin }) => bin)
+			.as("sq");
+
+		return await db
+			.select({
+				bin: sq.bin,
+				avg: sql<string>`avg(${sql.raw(`"${sq.sum.fieldAlias}"`)}) over(
+				order by "bin"
+				range between interval '90 days' preceding and current row)`,
+			})
+			.from(sq)
 			.orderBy(({ bin }) => bin);
 	},
 
