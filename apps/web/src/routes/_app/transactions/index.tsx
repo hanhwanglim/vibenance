@@ -4,11 +4,10 @@ import { useState } from "react";
 import { DatePeriodPicker } from "@/components/date-period-picker";
 import { Button } from "@/components/ui/button";
 import { CategoryChart } from "@/modules/transactions/components/category-chart";
-import { CategoryTrendChart } from "@/modules/transactions/components/category-trend-chart";
 import { ImportDialog } from "@/modules/transactions/components/import-dialog";
 import { RecentTransactionsTable } from "@/modules/transactions/components/recent-transactions";
-import { SpendingTrendChart } from "@/modules/transactions/components/spending-trend-chart";
 import { SummaryCards } from "@/modules/transactions/components/summary-cards";
+import { TrendCharts } from "@/modules/transactions/components/trend-charts";
 import type { DateRange } from "@/types";
 
 export const Route = createFileRoute("/_app/transactions/")({
@@ -34,12 +33,11 @@ function RouteComponent() {
 			</div>
 			<SummaryCards dateRange={dateRange} />
 			<div className="grid @5xl/main:grid-cols-5 grid-cols-1 gap-4 px-4 lg:px-6">
-				<SpendingTrendChart className="col-span-3" dateRange={dateRange} />
+				<TrendCharts dateRange={dateRange} />
 				<RecentTransactionsTable className="col-span-2" />
 			</div>
 			<div className="grid @5xl/main:grid-cols-3 grid-cols-1 gap-4 px-4 lg:px-6">
 				<CategoryChart className="col-span-1" dateRange={dateRange} />
-				<CategoryTrendChart className="col-span-2" dateRange={dateRange} />
 			</div>
 		</div>
 	);
