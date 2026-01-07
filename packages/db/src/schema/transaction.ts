@@ -7,31 +7,19 @@ import {
 	timestamp,
 	uuid,
 } from "drizzle-orm/pg-core";
+import z from "zod";
+import { bankAccount } from "./account";
 import { fileImport } from "./file";
 
-export const accountTypeEnum = pgEnum("account_type", [
-	"savings",
-	"current",
-	"checking",
-	"credit_card",
-	"investment",
-	"loan",
-	"other",
+export const transactionTypeEnum = pgEnum("transaction_type", [
+	"income",
+	"expense",
+	"transfer",
+	"interest",
 ]);
 
-export const bankAccount = pgTable("bank_account", {
-	id: uuid("id").defaultRandom().primaryKey(),
-	name: text("name").notNull().unique(),
-	type: accountTypeEnum("type").notNull().default("other"),
-	accountNumber: text("account_number"),
-	bankName: text("bank_name"),
-	color: text("color"),
-	createdAt: timestamp("created_at").defaultNow().notNull(),
-	updatedAt: timestamp("updated_at")
-		.defaultNow()
-		.$onUpdate(() => /* @__PURE__ */ new Date())
-		.notNull(),
-});
+export const transactionTypeEnumSchema = z.enum(transactionTypeEnum.enumValues);
+export type TransactionType = z.infer<typeof transactionTypeEnumSchema>;
 
 export const category = pgTable("category", {
 	id: uuid("id").defaultRandom().primaryKey(),
@@ -51,6 +39,7 @@ export const transaction = pgTable("transaction", {
 		.notNull()
 		.references(() => bankAccount.id),
 	name: text("name").notNull(),
+	type: transactionTypeEnum("type").notNull(),
 	currency: text("currency").notNull(),
 	amount: numeric("amount", { precision: 50, scale: 18 }).notNull(),
 	categoryId: uuid("category_id").references(() => category.id),
@@ -64,9 +53,6 @@ export const transaction = pgTable("transaction", {
 		.$onUpdate(() => /* @__PURE__ */ new Date())
 		.notNull(),
 });
-
-export type BankAccountInsert = typeof bankAccount.$inferInsert;
-export type BankAccountSelect = typeof bankAccount.$inferSelect;
 
 export type TransactionInsert = typeof transaction.$inferInsert;
 export type TransactionSelect = typeof transaction.$inferSelect;

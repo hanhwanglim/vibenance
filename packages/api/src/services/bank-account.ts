@@ -1,4 +1,4 @@
-import type { BankAccountInsert } from "@vibenance/db/schema/transaction";
+import type { BankAccountInsert } from "@vibenance/db/schema/account";
 import { BankAccountRepository } from "../repository/bank-account";
 
 export const BankAccountService = {

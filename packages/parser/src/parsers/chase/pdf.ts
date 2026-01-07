@@ -53,6 +53,8 @@ function extractTable(text: string): TransactionRow[] {
 		transactionId: generateHash(JSON.stringify(row)),
 		timestamp: row.Date,
 		name: row["Transaction details"],
+		type:
+			row.Amount.charAt(0) === "-" ? ("expense" as const) : ("income" as const),
 		currency: "GBP",
 		amount: formatCurrency(row.Amount) || "0",
 		categoryId: null,
@@ -131,5 +133,9 @@ function parseDate(dateStr: string): Date {
 
 function formatCurrency(amount: string | undefined) {
 	if (!amount) return undefined;
-	return amount.replace(",", "").replace("£", "").replace("+", "");
+	return amount
+		.replace(",", "")
+		.replace("£", "")
+		.replace("+", "")
+		.replace("-", "");
 }

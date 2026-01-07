@@ -1,3 +1,4 @@
+import type { TransactionType } from "@vibenance/db/schema/transaction";
 import type { BunFile } from "bun";
 import type { TransactionRow } from "../../core/transaction";
 import { ChipPdfHeaders, type ChipTransactionRow } from "./config";
@@ -33,9 +34,10 @@ function extractTable(text: string): TransactionRow[] {
 		.map((extractedTransaction) => ({
 			transactionId: generateHash(JSON.stringify(extractedTransaction)),
 			timestamp: extractedTransaction.Date,
+			type: getTransactionType(extractedTransaction),
 			name: extractedTransaction.Description,
 			currency: "GBP",
-			amount: extractedTransaction["Amount (GBP)"],
+			amount: extractedTransaction["Amount (GBP)"].replace("-", ""),
 			categoryId: null,
 			category: null,
 			metadata: extractedTransaction,
@@ -78,4 +80,19 @@ function generateHash(content: string): string {
 function formatCurrency(amount: string | undefined) {
 	if (!amount) return undefined;
 	return amount.replace(",", "").replace("£", "");
+}
+
+function getTransactionType(row: ChipTransactionRow): TransactionType {
+	if (row.Description === "Manual save") {
+		return "transfer";
+	}
+	if (row.Description === "Interest") {
+		return "interest";
+	}
+	if (row.Description === "Withdraw") {
+		return "transfer";
+	}
+
+	console.error("Unsupported type", row.Description);
+	throw new Error("Unsupported type");
 }

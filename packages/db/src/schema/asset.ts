@@ -8,8 +8,8 @@ import {
 	uuid,
 } from "drizzle-orm/pg-core";
 import { z } from "zod";
+import { bankAccount } from "./account";
 import { fileImport } from "./file";
-import { bankAccount } from "./transaction";
 
 export const investmentTransactionTypeEnum = pgEnum("transaction_type", [
 	"buy",

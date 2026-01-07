@@ -2,7 +2,7 @@ import { db } from "@vibenance/db";
 import {
 	type BankAccountInsert,
 	bankAccount,
-} from "@vibenance/db/schema/transaction";
+} from "@vibenance/db/schema/account";
 import { eq } from "drizzle-orm";
 
 export const BankAccountRepository = {

@@ -1,3 +1,4 @@
+import { transactionTypeEnumSchema } from "@vibenance/db/schema/transaction";
 import z from "zod";
 import { protectedProcedure } from "../index";
 import { BankTransactionService } from "../services/bank-transaction";
@@ -34,6 +35,7 @@ export const transactionRouter = {
 						transactionId: z.string(),
 						timestamp: z.date(),
 						name: z.string(),
+						type: transactionTypeEnumSchema,
 						currency: z.string(),
 						amount: z.string(),
 						categoryId: z.string().nullable().optional(),

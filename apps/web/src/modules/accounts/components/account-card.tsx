@@ -1,7 +1,7 @@
 "use client";
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import type { BankAccountSelect } from "@vibenance/db/schema/transaction";
+import type { BankAccountSelect } from "@vibenance/db/schema/account";
 import { Pencil, Trash2, Wallet } from "lucide-react";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";

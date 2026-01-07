@@ -36,14 +36,14 @@ export async function parse(file: BunFile) {
 	data.data.forEach((row, index) => {
 		const [day, month, year] = row.Date.split("/").map(Number);
 		const category = remapCategory(row.Category);
-		const isCredit = Number(row.Amount) > 0;
 
 		const transaction: TransactionRow = {
 			transactionId: row.Reference.replaceAll("'", ""), // Amex wraps with "'"
 			timestamp: new Date(year as number, (month as number) - 1, day),
 			name: row["Appears On Your Statement As"],
+			type: Number(row.Amount) <= 0 ? "transfer" : "expense",
 			currency: "GBP",
-			amount: isCredit ? `-${row.Amount}` : row.Amount,
+			amount: row.Amount.replace("-", ""),
 			categoryId: category?.id || null,
 			category: category || null,
 			errors: errorRows.get(index),

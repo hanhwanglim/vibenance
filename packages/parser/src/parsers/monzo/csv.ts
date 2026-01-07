@@ -46,8 +46,9 @@ export async function parse(file: BunFile) {
 			transactionId: row["Transaction ID"],
 			timestamp: new Date(year, month - 1, day, hours, mins, secs),
 			name: row.Name,
+			type: Number(row.Amount) < 0 ? "expense" : "income",
 			currency: row.Currency,
-			amount: row.Amount,
+			amount: row.Amount.replace("-", ""),
 			categoryId: category?.id || null,
 			category: category || null,
 			reference:

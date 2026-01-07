@@ -43,8 +43,12 @@ function extractTable(text: string): TransactionRow[] {
 			transactionId: generateHash(JSON.stringify(extractedTransaction)),
 			timestamp: extractedTransaction["Transaction Date"],
 			name: extractedTransaction.Details,
+			type:
+				Number(extractedTransaction.Amount) < 0
+					? ("expense" as const)
+					: ("transfer" as const),
 			currency: "GBP",
-			amount: extractedTransaction.Amount,
+			amount: extractedTransaction.Amount.replace("-", ""),
 			categoryId: null,
 			category: null,
 			metadata: extractedTransaction,

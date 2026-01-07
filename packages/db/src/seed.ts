@@ -1,7 +1,8 @@
 import "dotenv/config";
 import { faker } from "@faker-js/faker";
 import { db } from "./index";
-import { bankAccount, category, transaction } from "./schema/transaction";
+import { bankAccount } from "./schema";
+import { category, transaction } from "./schema/transaction";
 import { sample } from "./utils";
 
 type CategoryInsert = typeof category.$inferInsert;
@@ -109,6 +110,7 @@ function generateTransaction(
 		timestamp: faker.date.past(),
 		accountId,
 		transactionId: faker.string.uuid(),
+		type: sample(["expense", "income", "transfer", "interest"]) || "expense",
 		name: faker.string.alphanumeric(),
 		currency: faker.finance.currencyCode(),
 		amount: faker.finance.amount(),

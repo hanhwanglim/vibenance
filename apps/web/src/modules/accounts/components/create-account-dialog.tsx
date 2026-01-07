@@ -1,7 +1,7 @@
 "use client";
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import type { BankAccountSelect } from "@vibenance/db/schema/transaction";
+import type { BankAccountSelect } from "@vibenance/db/schema/account";
 import { Loader2 } from "lucide-react";
 import { type FormEvent, useState } from "react";
 import { toast } from "sonner";
