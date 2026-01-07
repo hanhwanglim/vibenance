@@ -3,6 +3,7 @@ import { detectParser, parseFile } from "@vibenance/parser/core/parse";
 import { DateTime, parsePeriod } from "@vibenance/utils/date";
 import { BankTransactionRepository } from "../repository/bank-transaction";
 import type { DateRange, Pagination } from "../utils/filter";
+import { generateSeries } from "../utils/query";
 import { FileService } from "./file";
 import { FileImportService } from "./file-import";
 
@@ -198,20 +199,33 @@ export const BankTransactionService = {
 			window = { from: range.min, to: range.max };
 		}
 
+		if (!window.from || !window.to) {
+			return {
+				data: [],
+				interval: undefined,
+				format: undefined,
+			};
+		}
+
 		const { interval, format } = getChartInterval(window.from, window.to);
 
-		const [spendingTrend, spendingTrendAvg] = await Promise.all([
+		const [bins, spendingTrend, spendingTrendAvg] = await Promise.all([
+			generateSeries(window.from, window.to, interval || "month"),
 			BankTransactionRepository.spendingTrend(window, interval),
 			BankTransactionRepository.spendingTrendAvg(window, interval),
 		]);
 
+		const spendingTrendMap = new Map(
+			spendingTrend.map((obj) => [obj.bin, obj]),
+		);
 		const spendingTrendAvgMap = new Map(
 			spendingTrendAvg.map((obj) => [obj.bin, obj]),
 		);
 
-		const data = spendingTrend.map((obj) => {
+		const data = bins.map((obj) => {
+			const sum = spendingTrendMap.get(obj.bin)?.sum || "0";
 			const avg = spendingTrendAvgMap.get(obj.bin)?.avg || "0";
-			return { ...obj, movingAverage: avg };
+			return { ...obj, sum: sum, movingAverage: avg };
 		});
 
 		return {

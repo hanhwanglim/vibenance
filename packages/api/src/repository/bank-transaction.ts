@@ -152,32 +152,44 @@ export const BankTransactionRepository = {
 
 	spendingTrendAvg: async (dateRange?: DateRange, interval?: string) => {
 		const range = {
-			...dateRange,
 			from: new DateTime(dateRange?.from).subtract({ days: 90 }),
+			to: new DateTime(dateRange?.to).add({ days: 90 }),
 		};
 
-		const sq = db
-			.select({
-				bin: sql<string>`date_trunc(${sql.raw(`'${interval || "month"}'`)}, ${transaction.timestamp})`.as(
-					"bin",
-				),
-				sum: sum(transaction.amount).as("sum"),
-			})
-			.from(transaction)
-			.where(and(lt(transaction.amount, "0"), ...dateRangeFilters(range)))
-			.groupBy(({ bin }) => bin)
-			.orderBy(({ bin }) => bin)
-			.as("sq");
+		const intervalStr = interval || "month";
+		const fromDate = range.from.toISOString();
+		const toDate = range.to.toISOString();
 
-		return await db
-			.select({
-				bin: sq.bin,
-				avg: sql<string>`avg(${sql.raw(`"${sq.sum.fieldAlias}"`)}) over(
-				order by "bin"
-				range between interval '90 days' preceding and current row)`,
-			})
-			.from(sq)
-			.orderBy(({ bin }) => bin);
+		const result = await db.execute(sql`
+			WITH bins AS (
+				SELECT generate_series(
+					date_trunc(${sql.raw(`'${intervalStr}'`)}, ${sql.raw(`'${fromDate}'`)}::timestamp),
+					date_trunc(${sql.raw(`'${intervalStr}'`)}, ${sql.raw(`'${toDate}'`)}::timestamp),
+					${sql.raw(`'1 ${intervalStr}'`)}::interval
+				) AS bin
+			),
+			transaction_sums AS (
+				SELECT
+					date_trunc(${sql.raw(`'${intervalStr}'`)}, ${transaction.timestamp}) AS bin,
+					SUM(${transaction.amount}) AS sum
+				FROM ${transaction}
+				WHERE ${transaction.amount} < 0
+					${range.from ? sql`AND ${transaction.timestamp} >= ${new Date(range.from)}` : sql``}
+					${range.to ? sql`AND ${transaction.timestamp} < ${new Date(range.to)}` : sql``}
+				GROUP BY bin
+			)
+			SELECT
+				b.bin,
+				AVG(COALESCE(ts.sum, 0)) OVER (
+					ORDER BY b.bin
+					RANGE BETWEEN INTERVAL '90 days' PRECEDING AND CURRENT ROW
+				) AS avg
+			FROM bins b
+			LEFT JOIN transaction_sums ts ON b.bin = ts.bin
+			ORDER BY b.bin
+		`);
+
+		return result.rows as { bin: string; avg: string }[];
 	},
 
 	spendingTrendByCategory: async (dateRange?: DateRange, interval?: string) => {
