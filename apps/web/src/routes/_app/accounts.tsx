@@ -3,8 +3,8 @@ import { Plus } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Dialog } from "@/components/ui/dialog";
-import { AccountCards } from "@/modules/accounts/components/account-card";
-import { AccountDialog } from "@/modules/accounts/components/create-account-dialog";
+import { AccountDialog } from "@/modules/accounts/components/account-dialog";
+import { AccountList } from "@/modules/accounts/components/account-list";
 
 export const Route = createFileRoute("/_app/accounts")({
 	component: RouteComponent,
@@ -12,39 +12,20 @@ export const Route = createFileRoute("/_app/accounts")({
 
 function RouteComponent() {
 	const [dialogOpen, setDialogOpen] = useState(false);
-	const [editingAccount, setEditingAccount] = useState<boolean>(false);
 
 	return (
 		<div>
-			<div className="px-4 lg:px-6">
-				<div className="flex items-center justify-between">
-					<Dialog
-						open={dialogOpen}
-						onOpenChange={(open) => {
-							setDialogOpen(open);
-							if (!open) setEditingAccount(false);
-						}}
-					>
-						<Button
-							onClick={() => {
-								setEditingAccount(false);
-								setDialogOpen(true);
-							}}
-							className="gap-2"
-						>
+			<div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6">
+				<div className="flex items-center justify-between px-4 lg:px-6">
+					<Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+						<Button onClick={() => setDialogOpen(true)} className="gap-2">
 							<Plus className="h-4 w-4" />
 							Add Account
 						</Button>
-						<AccountDialog
-							account={editingAccount}
-							onOpenChange={(open) => {
-								setDialogOpen(open);
-								if (!open) setEditingAccount(false);
-							}}
-						/>
+						<AccountDialog mode="create" onOpenChange={setDialogOpen} />
 					</Dialog>
 				</div>
-				<AccountCards />
+				<AccountList />
 			</div>
 		</div>
 	);

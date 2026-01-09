@@ -18,6 +18,14 @@ export const BankAccountRepository = {
 		return await db.insert(bankAccount).values(data).returning();
 	},
 
+	updateAccount: async (id: string, values: Partial<BankAccountInsert>) => {
+		return await db
+			.update(bankAccount)
+			.set(values)
+			.where(eq(bankAccount.id, id))
+			.returning();
+	},
+
 	deleteAccount: async (id: string) => {
 		await db.delete(bankAccount).where(eq(bankAccount.id, id));
 	},

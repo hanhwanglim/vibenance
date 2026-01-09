@@ -10,6 +10,10 @@ export const BankAccountService = {
 		return await BankAccountRepository.createAccount(data);
 	},
 
+	updateAccount: async (id: string, values: Partial<BankAccountInsert>) => {
+		return await BankAccountRepository.updateAccount(id, values);
+	},
+
 	deleteAccount: async (id: string) => {
 		return await BankAccountRepository.deleteAccount(id);
 	},
