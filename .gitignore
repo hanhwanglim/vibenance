@@ -50,8 +50,5 @@ coverage
 tmp
 temp
 
-# Database
-postgres-data
-
-# Uploads
-uploads-data
+# Data
+app-data
