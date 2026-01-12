@@ -1,5 +1,6 @@
 import type { TransactionInsert } from "@vibenance/db/schema/transaction";
 import { detectParser, parseFile } from "@vibenance/parser/core/parse";
+import type { TransactionRow } from "@vibenance/parser/core/transaction";
 import { DateTime, parsePeriod } from "@vibenance/utils/date";
 import { BankTransactionRepository } from "../repository/bank-transaction";
 import type { DateRange, Pagination } from "../utils/filter";
@@ -37,7 +38,8 @@ export const BankTransactionService = {
 		const file = Bun.file(fileImport.files[0].filePath);
 
 		const parseType = await detectParser(file);
-		return await parseFile(file, parseType);
+		const transactions = await parseFile(file, parseType);
+		return transactions as TransactionRow[];
 	},
 
 	createImport: async (fileId: string) => {

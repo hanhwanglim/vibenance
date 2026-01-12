@@ -1,7 +1,6 @@
 import { BankAccountService } from "@vibenance/api/services/bank-account";
 import { BankTransactionService } from "@vibenance/api/services/bank-transaction";
 import { FileService } from "@vibenance/api/services/file";
-import type { TransactionRow } from "@vibenance/parser";
 import { type CommandContext, type Context, InlineKeyboard } from "grammy";
 import { botState } from "./state";
 import { sendError } from "./utils";
@@ -52,11 +51,28 @@ export async function handleDocuments(ctx: Context) {
 			throw new Error("No bank accounts found. Please create account first.");
 		}
 
+		const transactionData = preview.map((transaction) => {
+			const timestamp = new Date(
+				transaction.date.getFullYear(),
+				transaction.date.getMonth(),
+				transaction.date.getDate(),
+				transaction.time?.getHours() || 0,
+				transaction.time?.getMinutes() || 0,
+				transaction.time?.getSeconds() || 0,
+				transaction.time?.getMilliseconds() || 0,
+			);
+
+			return {
+				...transaction,
+				timestamp: timestamp,
+			};
+		});
+
 		botState.createSession(
 			ctx.chatId,
 			uploadedFile.id,
 			fileImport.id,
-			preview as TransactionRow[],
+			transactionData,
 			accounts.map((account) => ({ id: account.id, name: account.name })),
 		);
 

@@ -44,13 +44,13 @@ export async function parse(file: BunFile) {
 
 		const transaction: TransactionRow = {
 			transactionId: row["Transaction ID"],
-			timestamp: new Date(year, month - 1, day, hours, mins, secs),
+			date: new Date(year, month - 1, day, hours, mins, secs),
+			time: new Date(year, month - 1, day, hours, mins, secs),
 			name: row.Name,
-			type: Number(row.Amount) < 0 ? "expense" : "income",
+			type: Number(row.Amount) <= 0 ? "expense" : "income",
 			currency: row.Currency,
 			amount: row.Amount.replace("-", ""),
 			categoryId: category?.id || null,
-			category: category || null,
 			reference:
 				row["Notes and #tags"].length > 0 ? row["Notes and #tags"] : undefined,
 			errors: errorRows.get(index),

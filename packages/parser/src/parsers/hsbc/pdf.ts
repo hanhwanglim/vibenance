@@ -41,16 +41,16 @@ function extractTable(text: string): TransactionRow[] {
 		.filter((line) => line !== null)
 		.map((extractedTransaction) => ({
 			transactionId: generateHash(JSON.stringify(extractedTransaction)),
-			timestamp: extractedTransaction["Transaction Date"],
+			date: extractedTransaction["Transaction Date"],
+			time: null,
 			name: extractedTransaction.Details,
 			type:
-				Number(extractedTransaction.Amount) < 0
+				Number(extractedTransaction.Amount) <= 0
 					? ("expense" as const)
 					: ("transfer" as const),
 			currency: "GBP",
 			amount: extractedTransaction.Amount.replace("-", ""),
 			categoryId: null,
-			category: null,
 			metadata: extractedTransaction,
 		}));
 

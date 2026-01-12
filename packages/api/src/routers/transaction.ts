@@ -97,7 +97,7 @@ export const transactionRouter = {
 	previewImport: protectedProcedure
 		.input(z.string())
 		.handler(async ({ input }) => {
-			return BankTransactionService.previewImport(input);
+			return await BankTransactionService.previewImport(input);
 		}),
 
 	createImport: protectedProcedure

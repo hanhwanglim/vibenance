@@ -51,14 +51,14 @@ function extractTable(text: string): TransactionRow[] {
 
 	const transactions = transactionLines.map((row) => ({
 		transactionId: generateHash(JSON.stringify(row)),
-		timestamp: row.Date,
+		date: row.Date,
+		time: null,
 		name: row["Transaction details"],
 		type:
 			row.Amount.charAt(0) === "-" ? ("expense" as const) : ("income" as const),
 		currency: "GBP",
 		amount: formatCurrency(row.Amount) || "0",
 		categoryId: null,
-		category: null,
 		metadata: row,
 	}));
 

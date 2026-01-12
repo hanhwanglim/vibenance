@@ -11,7 +11,7 @@ import z from "zod";
 import { bankAccount } from "./account";
 import { fileImport } from "./file";
 
-export const transactionTypeEnum = pgEnum("transaction_type", [
+export const transactionTypeEnum = pgEnum("bank_transaction_type", [
 	"income",
 	"expense",
 	"transfer",

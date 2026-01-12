@@ -159,10 +159,11 @@ export function AccountDialog({
 					{
 						onSuccess: () => {
 							toast.success(uiText.success);
-							queryClient.invalidateQueries({ queryKey: ["account"] });
 							onOpenChange(false);
 						},
 						onError: (error) => toast.error(`${uiText.error}: ${error}`),
+						onSettled: () =>
+							queryClient.invalidateQueries({ queryKey: ["account"] }),
 					},
 				);
 			} else {
@@ -173,6 +174,8 @@ export function AccountDialog({
 						onOpenChange(false);
 					},
 					onError: (error) => toast.error(`${uiText.error}: ${error}`),
+					onSettled: () =>
+						queryClient.invalidateQueries({ queryKey: ["account"] }),
 				});
 			}
 		},

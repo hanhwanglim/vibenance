@@ -6,7 +6,7 @@ import {
 } from "@tanstack/react-table";
 import type { BankAccountSelect } from "@vibenance/db/schema/account";
 import type {
-	CategorySelect,
+	CategorySelect as CategorySelectType,
 	TransactionSelect,
 } from "@vibenance/db/schema/transaction";
 import { useState } from "react";
@@ -14,22 +14,12 @@ import type { DateRange } from "react-day-picker";
 import { toast } from "sonner";
 import { Checkbox } from "@/components/ui/checkbox";
 import { DataTable, DataTablePagination } from "@/components/ui/data-table";
-import { Label } from "@/components/ui/label";
-import {
-	Select,
-	SelectContent,
-	SelectGroup,
-	SelectItem,
-	SelectLabel,
-	SelectTrigger,
-	SelectValue,
-} from "@/components/ui/select";
-import { Separator } from "@/components/ui/separator";
 import { formatCurrency } from "@/utils/formatting";
 import { orpc } from "@/utils/orpc";
+import { CategorySelect } from "./category-select";
 
 type TransactionRow = TransactionSelect & {
-	category: CategorySelect;
+	category: CategorySelectType;
 	bankAccount: BankAccountSelect;
 };
 
@@ -79,19 +69,13 @@ const columns: ColumnDef<TransactionRow>[] = [
 		cell: ({ row }) => formatCurrency(Number(row.original.amount)),
 	},
 	{
-		accessorKey: "category",
+		accessorKey: "categoryId",
 		header: "Category",
-		cell: ({ row, table }) => {
-			const pageIndex = table.getState().pagination.pageIndex;
-			const defaultValue = row.original.categoryId?.toString() || "null";
-			const selectKey = `select-${row.original.id}-${pageIndex}`;
+		cell: ({ row, getValue }) => {
+			const defaultValue = (getValue() || "null") as string;
 
 			const { mutate } = useMutation(
 				orpc.transaction.updateCategory.mutationOptions(),
-			);
-
-			const { data: categories } = useQuery(
-				orpc.transaction.listCategories.queryOptions(),
 			);
 
 			const handleChange = (value: string) => {
@@ -111,37 +95,7 @@ const columns: ColumnDef<TransactionRow>[] = [
 			};
 
 			return (
-				<>
-					<Label htmlFor={`${row.original.id}-target`} className="sr-only">
-						Category
-					</Label>
-					<Select
-						key={selectKey}
-						onValueChange={handleChange}
-						defaultValue={defaultValue}
-					>
-						<SelectTrigger className="w-[180px]">
-							<SelectValue />
-						</SelectTrigger>
-						<SelectContent>
-							<SelectGroup>
-								<SelectLabel>Category</SelectLabel>
-								{categories?.map((category) => {
-									return (
-										<SelectItem
-											key={`table-category-${row.original.id}-${category.id}`}
-											value={category.id.toString()}
-										>
-											{category.name}
-										</SelectItem>
-									);
-								})}
-								<Separator />
-								<SelectItem value="null">-</SelectItem>
-							</SelectGroup>
-						</SelectContent>
-					</Select>
-				</>
+				<CategorySelect value={defaultValue} onValueChange={handleChange} />
 			);
 		},
 	},

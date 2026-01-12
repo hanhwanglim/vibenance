@@ -1,6 +1,9 @@
+import { db } from "@vibenance/db";
 import type { TransactionRow } from "../core/transaction";
 
-export function formatTable(transactions: TransactionRow[]): string {
+export async function formatTable(
+	transactions: TransactionRow[],
+): Promise<string> {
 	if (transactions.length === 0) {
 		return "No transactions found.";
 	}
@@ -39,12 +42,19 @@ export function formatTable(transactions: TransactionRow[]): string {
 	lines.push(header);
 	lines.push("-".repeat(header.length));
 
+	const categories = await db.query.category.findMany();
+	const categoryMap = new Map(
+		categories.map((category) => [category.id, category.name]),
+	);
+
 	for (const tx of transactions) {
-		const date = formatDate(tx.timestamp);
+		const date = formatDate(tx.date);
 		const name = truncate(tx.name, nameWidth);
 		const amount = tx.amount.padStart(amountWidth);
 		const currency = (tx.currency || "").padEnd(currencyWidth);
-		const category = (tx.category?.name || "").padEnd(categoryWidth);
+		const category = (categoryMap.get(tx.categoryId || "") || "").padEnd(
+			categoryWidth,
+		);
 		const reference = truncate(tx.reference || "", referenceWidth);
 
 		const row = [

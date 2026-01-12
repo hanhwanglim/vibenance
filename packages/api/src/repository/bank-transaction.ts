@@ -90,7 +90,10 @@ export const BankTransactionRepository = {
 			.values(transactions)
 			.onConflictDoUpdate({
 				target: transaction.transactionId,
-				set: { metadata: sql.raw(`excluded.${transaction.metadata.name}`) },
+				set: {
+					metadata: sql.raw(`excluded.${transaction.metadata.name}`),
+					updatedAt: new Date(),
+				},
 			})
 			.returning();
 	},

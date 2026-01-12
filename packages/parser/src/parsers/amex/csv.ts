@@ -39,13 +39,13 @@ export async function parse(file: BunFile) {
 
 		const transaction: TransactionRow = {
 			transactionId: row.Reference.replaceAll("'", ""), // Amex wraps with "'"
-			timestamp: new Date(year as number, (month as number) - 1, day),
+			date: new Date(year as number, (month as number) - 1, day),
+			time: null,
 			name: row["Appears On Your Statement As"],
 			type: Number(row.Amount) <= 0 ? "transfer" : "expense",
 			currency: "GBP",
 			amount: row.Amount.replace("-", ""),
 			categoryId: category?.id || null,
-			category: category || null,
 			errors: errorRows.get(index),
 			metadata: row,
 		};
