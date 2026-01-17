@@ -84,6 +84,100 @@ export const BankTransactionRepository = {
 		});
 	},
 
+	findByTransactionIds: async (transactionIds: string[]) => {
+		return await db.query.transaction.findMany({
+			where: {
+				transactionId: {
+					in: transactionIds,
+				},
+			},
+		});
+	},
+
+	findSimilar: async (
+		values: { timestamp: Date; name: string; amount: string }[],
+	) => {
+		if (values.length === 0) {
+			return [];
+		}
+
+		const valuesFragment = sql.join(
+			values.map(
+				(value) =>
+					sql`(${value.timestamp.toISOString()}::timestamp, ${value.name}, ${value.amount}::numeric)`,
+			),
+			sql`, `,
+		);
+
+		const result = await db.execute(
+			sql`
+				SELECT t.id
+				FROM ${transaction} t
+				JOIN (
+					VALUES
+						${valuesFragment}
+				) AS v(timestamp, name, amount)
+				ON t.timestamp = v.timestamp AND t.name = v.name AND t.amount = v.amount
+			`,
+		);
+
+		const rows = result.rows as { id: string }[];
+		const ids = rows.map((row) => row.id);
+
+		if (ids.length === 0) {
+			return [];
+		}
+
+		return await db.query.transaction.findMany({
+			where: {
+				id: {
+					in: ids,
+				},
+			},
+		});
+	},
+
+	// findSimilar: async (
+	// 	values: { timestamp: Date; name: string; amount: string }[],
+	// ) => {
+	// 	if (values.length === 0) {
+	// 		return [];
+	// 	}
+
+	// 	const valuesFragment = sql.join(
+	// 		values
+	// 			.slice(0, 10)
+	// 			.map(
+	// 				(value) =>
+	// 					sql`((${value.timestamp} AT TIME ZONE 'UTC'), ${value.name}, ${value.amount}::numeric)`,
+	// 			),
+	// 		sql`, `,
+	// 	);
+
+	// 	const result = await db.execute(
+	// 		sql`
+	// 			SELECT t.id
+	// 			FROM ${transaction} t
+	// 			JOIN (
+	// 				VALUES
+	// 					${valuesFragment}
+	// 			) AS v(timestamp, name, amount)
+	// 			ON t.timestamp = v.timestamp AND t.name = v.name AND t.amount = v.amount
+	// 		`,
+	// 	);
+
+	// 	const rows = result.rows as { id: string }[];
+	// 	const ids = rows.map((row) => row.id);
+
+	// 	return await db.query.transaction.findMany({
+	// 		where: {
+	// 			id: {
+	// 				in: ids,
+	// 			},
+	// 		},
+	// 	});
+	// },
+
 	bulkCreate: async (transactions: TransactionInsert[]) => {
 		return await db
 			.insert(transaction)

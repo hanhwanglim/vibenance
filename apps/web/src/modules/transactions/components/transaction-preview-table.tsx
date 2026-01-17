@@ -4,14 +4,16 @@ import {
 	getCoreRowModel,
 	getPaginationRowModel,
 	type Row,
+	type RowSelectionState,
 	useReactTable,
 } from "@tanstack/react-table";
 import { transactionTypeEnumSchema } from "@vibenance/db/schema/transaction";
 import type { TransactionRow } from "@vibenance/parser";
 import { ChevronDownIcon } from "lucide-react";
-import React, { useMemo } from "react";
+import React, { useEffect, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
+import { Checkbox } from "@/components/ui/checkbox";
 import { DataTable, DataTablePagination } from "@/components/ui/data-table";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -246,9 +248,16 @@ const EditableCell = React.memo(
 );
 EditableCell.displayName = "EditableCell";
 
-export function TransactionPreviewTable({ data }: { data: TransactionRow[] }) {
+export function TransactionPreviewTable({
+	data,
+	onSelectionChange,
+}: {
+	data: TransactionRow[];
+	onSelectionChange?: (selectedRows: TransactionRow[]) => void;
+}) {
 	const queryClient = useQueryClient();
 	const [autoResetPageIndex, skipAutoResetPageIndex] = useSkipper();
+	const [rowSelection, setRowSelection] = React.useState<RowSelectionState>({});
 
 	useQuery(orpc.transaction.listCategories.queryOptions());
 
@@ -271,6 +280,34 @@ export function TransactionPreviewTable({ data }: { data: TransactionRow[] }) {
 
 	const columns = useMemo<ColumnDef<TransactionRow>[]>(
 		() => [
+			{
+				id: "select",
+				header: ({ table }) => (
+					<div className="flex items-center justify-center">
+						<Checkbox
+							checked={
+								table.getIsAllPageRowsSelected() ||
+								(table.getIsSomePageRowsSelected() && "indeterminate")
+							}
+							onCheckedChange={(value) =>
+								table.toggleAllPageRowsSelected(!!value)
+							}
+							aria-label="Select all"
+						/>
+					</div>
+				),
+				cell: ({ row }) => (
+					<div className="flex items-center justify-center">
+						<Checkbox
+							checked={row.getIsSelected()}
+							onCheckedChange={(value) => row.toggleSelected(!!value)}
+							aria-label="Select row"
+						/>
+					</div>
+				),
+				enableSorting: false,
+				enableHiding: false,
+			},
 			{
 				accessorKey: "date",
 				header: "Date",
@@ -401,10 +438,26 @@ export function TransactionPreviewTable({ data }: { data: TransactionRow[] }) {
 		getCoreRowModel: getCoreRowModel(),
 		getPaginationRowModel: getPaginationRowModel(),
 		autoResetPageIndex,
+		enableRowSelection: true,
+		getRowId: (row) => row.transactionId,
+		onRowSelectionChange: setRowSelection,
+		state: {
+			rowSelection,
+		},
 	});
 
+	// biome-ignore lint/correctness/useExhaustiveDependencies: updates row on select
+	useEffect(() => {
+		if (onSelectionChange) {
+			const selectedRows = table
+				.getSelectedRowModel()
+				.rows.map((row) => row.original);
+			onSelectionChange(selectedRows);
+		}
+	}, [rowSelection, table, onSelectionChange]);
+
 	return (
-		<div className="flex flex-col gap-2 px-4">
+		<div className="flex flex-col gap-2">
 			<DataTable table={table} />
 			<DataTablePagination table={table} />
 		</div>

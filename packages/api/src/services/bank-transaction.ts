@@ -38,8 +38,56 @@ export const BankTransactionService = {
 		const file = Bun.file(fileImport.files[0].filePath);
 
 		const parseType = await detectParser(file);
-		const transactions = await parseFile(file, parseType);
-		return transactions as TransactionRow[];
+		const transactions = (await parseFile(file, parseType)) as TransactionRow[];
+
+		const transactionIds = transactions.map((tx) => tx.transactionId);
+		const existingTransactions =
+			await BankTransactionRepository.findByTransactionIds(transactionIds);
+		const existingTransactionIdsSet = new Set(
+			existingTransactions.map((tx) => tx.transactionId),
+		);
+
+		const similarTransactions = await BankTransactionRepository.findSimilar(
+			transactions.map((tx) => {
+				const timestamp = new Date(
+					tx.date.getFullYear(),
+					tx.date.getMonth(),
+					tx.date.getDate(),
+					tx.time?.getHours() || 0,
+					tx.time?.getMinutes() || 0,
+					tx.time?.getSeconds() || 0,
+					tx.time?.getMilliseconds() || 0,
+				);
+
+				return {
+					timestamp: timestamp,
+					name: tx.name,
+					amount: tx.amount,
+				};
+			}),
+		);
+
+		const newTx = transactions.filter(
+			(tx) => !existingTransactionIdsSet.has(tx.transactionId),
+		);
+
+		const similarTx = transactions.filter((tx) =>
+			similarTransactions.some(
+				(similarTx) =>
+					similarTx.transactionId === tx.transactionId &&
+					!existingTransactionIdsSet.has(similarTx.transactionId),
+			),
+		);
+
+		const existingTx = transactions.filter((tx) =>
+			existingTransactionIdsSet.has(tx.transactionId),
+		);
+
+		return {
+			new: newTx,
+			similar: similarTx,
+			existing: existingTx,
+		};
 	},
 
 	createImport: async (fileId: string) => {

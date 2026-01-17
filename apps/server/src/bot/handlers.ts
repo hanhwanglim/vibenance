@@ -51,7 +51,7 @@ export async function handleDocuments(ctx: Context) {
 			throw new Error("No bank accounts found. Please create account first.");
 		}
 
-		const transactionData = preview.map((transaction) => {
+		const transactionData = preview.new.map((transaction) => {
 			const timestamp = new Date(
 				transaction.date.getFullYear(),
 				transaction.date.getMonth(),
@@ -78,7 +78,7 @@ export async function handleDocuments(ctx: Context) {
 
 		const previewMessage =
 			"File processed successfully!\n\n" +
-			`Total transactions: ${preview.length}\n\n` +
+			`Total transactions: ${preview.new.length}\n\n` +
 			"Please select a bank account to import these transactions:";
 
 		const keyboard = new InlineKeyboard();
