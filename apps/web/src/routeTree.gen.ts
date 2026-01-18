@@ -18,11 +18,11 @@ import { Route as AppAccountsRouteImport } from './routes/_app/accounts'
 import { Route as AppTransactionsIndexRouteImport } from './routes/_app/transactions/index'
 import { Route as AppBudgetsIndexRouteImport } from './routes/_app/budgets/index'
 import { Route as AppAssetsIndexRouteImport } from './routes/_app/assets/index'
-import { Route as AppTransactionsImportsRouteImport } from './routes/_app/transactions/imports'
 import { Route as AppTransactionsAllRouteImport } from './routes/_app/transactions/all'
 import { Route as AppSettingsAccountRouteImport } from './routes/_app/settings/account'
 import { Route as AppAssetsImportsRouteImport } from './routes/_app/assets/imports'
-import { Route as AppTransactionsImportsIdRouteImport } from './routes/_app/transactions/imports.$id'
+import { Route as AppTransactionsImportsIndexRouteImport } from './routes/_app/transactions/imports/index'
+import { Route as AppTransactionsImportsIdRouteImport } from './routes/_app/transactions/imports/$id'
 import { Route as AppAssetsImportsIdRouteImport } from './routes/_app/assets/imports.$id'
 
 const LoginRoute = LoginRouteImport.update({
@@ -69,11 +69,6 @@ const AppAssetsIndexRoute = AppAssetsIndexRouteImport.update({
   path: '/assets/',
   getParentRoute: () => AppRoute,
 } as any)
-const AppTransactionsImportsRoute = AppTransactionsImportsRouteImport.update({
-  id: '/transactions/imports',
-  path: '/transactions/imports',
-  getParentRoute: () => AppRoute,
-} as any)
 const AppTransactionsAllRoute = AppTransactionsAllRouteImport.update({
   id: '/transactions/all',
   path: '/transactions/all',
@@ -89,11 +84,17 @@ const AppAssetsImportsRoute = AppAssetsImportsRouteImport.update({
   path: '/assets/imports',
   getParentRoute: () => AppRoute,
 } as any)
+const AppTransactionsImportsIndexRoute =
+  AppTransactionsImportsIndexRouteImport.update({
+    id: '/transactions/imports/',
+    path: '/transactions/imports/',
+    getParentRoute: () => AppRoute,
+  } as any)
 const AppTransactionsImportsIdRoute =
   AppTransactionsImportsIdRouteImport.update({
-    id: '/$id',
-    path: '/$id',
-    getParentRoute: () => AppTransactionsImportsRoute,
+    id: '/transactions/imports/$id',
+    path: '/transactions/imports/$id',
+    getParentRoute: () => AppRoute,
   } as any)
 const AppAssetsImportsIdRoute = AppAssetsImportsIdRouteImport.update({
   id: '/$id',
@@ -110,12 +111,12 @@ export interface FileRoutesByFullPath {
   '/assets/imports': typeof AppAssetsImportsRouteWithChildren
   '/settings/account': typeof AppSettingsAccountRoute
   '/transactions/all': typeof AppTransactionsAllRoute
-  '/transactions/imports': typeof AppTransactionsImportsRouteWithChildren
   '/assets': typeof AppAssetsIndexRoute
   '/budgets': typeof AppBudgetsIndexRoute
   '/transactions': typeof AppTransactionsIndexRoute
   '/assets/imports/$id': typeof AppAssetsImportsIdRoute
   '/transactions/imports/$id': typeof AppTransactionsImportsIdRoute
+  '/transactions/imports': typeof AppTransactionsImportsIndexRoute
 }
 export interface FileRoutesByTo {
   '/login': typeof LoginRoute
@@ -126,12 +127,12 @@ export interface FileRoutesByTo {
   '/assets/imports': typeof AppAssetsImportsRouteWithChildren
   '/settings/account': typeof AppSettingsAccountRoute
   '/transactions/all': typeof AppTransactionsAllRoute
-  '/transactions/imports': typeof AppTransactionsImportsRouteWithChildren
   '/assets': typeof AppAssetsIndexRoute
   '/budgets': typeof AppBudgetsIndexRoute
   '/transactions': typeof AppTransactionsIndexRoute
   '/assets/imports/$id': typeof AppAssetsImportsIdRoute
   '/transactions/imports/$id': typeof AppTransactionsImportsIdRoute
+  '/transactions/imports': typeof AppTransactionsImportsIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -144,12 +145,12 @@ export interface FileRoutesById {
   '/_app/assets/imports': typeof AppAssetsImportsRouteWithChildren
   '/_app/settings/account': typeof AppSettingsAccountRoute
   '/_app/transactions/all': typeof AppTransactionsAllRoute
-  '/_app/transactions/imports': typeof AppTransactionsImportsRouteWithChildren
   '/_app/assets/': typeof AppAssetsIndexRoute
   '/_app/budgets/': typeof AppBudgetsIndexRoute
   '/_app/transactions/': typeof AppTransactionsIndexRoute
   '/_app/assets/imports/$id': typeof AppAssetsImportsIdRoute
   '/_app/transactions/imports/$id': typeof AppTransactionsImportsIdRoute
+  '/_app/transactions/imports/': typeof AppTransactionsImportsIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -162,12 +163,12 @@ export interface FileRouteTypes {
     | '/assets/imports'
     | '/settings/account'
     | '/transactions/all'
-    | '/transactions/imports'
     | '/assets'
     | '/budgets'
     | '/transactions'
     | '/assets/imports/$id'
     | '/transactions/imports/$id'
+    | '/transactions/imports'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/login'
@@ -178,12 +179,12 @@ export interface FileRouteTypes {
     | '/assets/imports'
     | '/settings/account'
     | '/transactions/all'
-    | '/transactions/imports'
     | '/assets'
     | '/budgets'
     | '/transactions'
     | '/assets/imports/$id'
     | '/transactions/imports/$id'
+    | '/transactions/imports'
   id:
     | '__root__'
     | '/_app'
@@ -195,12 +196,12 @@ export interface FileRouteTypes {
     | '/_app/assets/imports'
     | '/_app/settings/account'
     | '/_app/transactions/all'
-    | '/_app/transactions/imports'
     | '/_app/assets/'
     | '/_app/budgets/'
     | '/_app/transactions/'
     | '/_app/assets/imports/$id'
     | '/_app/transactions/imports/$id'
+    | '/_app/transactions/imports/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -273,13 +274,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppAssetsIndexRouteImport
       parentRoute: typeof AppRoute
     }
-    '/_app/transactions/imports': {
-      id: '/_app/transactions/imports'
-      path: '/transactions/imports'
-      fullPath: '/transactions/imports'
-      preLoaderRoute: typeof AppTransactionsImportsRouteImport
-      parentRoute: typeof AppRoute
-    }
     '/_app/transactions/all': {
       id: '/_app/transactions/all'
       path: '/transactions/all'
@@ -301,12 +295,19 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppAssetsImportsRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/transactions/imports/': {
+      id: '/_app/transactions/imports/'
+      path: '/transactions/imports'
+      fullPath: '/transactions/imports'
+      preLoaderRoute: typeof AppTransactionsImportsIndexRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/_app/transactions/imports/$id': {
       id: '/_app/transactions/imports/$id'
-      path: '/$id'
+      path: '/transactions/imports/$id'
       fullPath: '/transactions/imports/$id'
       preLoaderRoute: typeof AppTransactionsImportsIdRouteImport
-      parentRoute: typeof AppTransactionsImportsRoute
+      parentRoute: typeof AppRoute
     }
     '/_app/assets/imports/$id': {
       id: '/_app/assets/imports/$id'
@@ -329,20 +330,6 @@ const AppAssetsImportsRouteChildren: AppAssetsImportsRouteChildren = {
 const AppAssetsImportsRouteWithChildren =
   AppAssetsImportsRoute._addFileChildren(AppAssetsImportsRouteChildren)
 
-interface AppTransactionsImportsRouteChildren {
-  AppTransactionsImportsIdRoute: typeof AppTransactionsImportsIdRoute
-}
-
-const AppTransactionsImportsRouteChildren: AppTransactionsImportsRouteChildren =
-  {
-    AppTransactionsImportsIdRoute: AppTransactionsImportsIdRoute,
-  }
-
-const AppTransactionsImportsRouteWithChildren =
-  AppTransactionsImportsRoute._addFileChildren(
-    AppTransactionsImportsRouteChildren,
-  )
-
 interface AppRouteChildren {
   AppAccountsRoute: typeof AppAccountsRoute
   AppAgentRoute: typeof AppAgentRoute
@@ -351,10 +338,11 @@ interface AppRouteChildren {
   AppAssetsImportsRoute: typeof AppAssetsImportsRouteWithChildren
   AppSettingsAccountRoute: typeof AppSettingsAccountRoute
   AppTransactionsAllRoute: typeof AppTransactionsAllRoute
-  AppTransactionsImportsRoute: typeof AppTransactionsImportsRouteWithChildren
   AppAssetsIndexRoute: typeof AppAssetsIndexRoute
   AppBudgetsIndexRoute: typeof AppBudgetsIndexRoute
   AppTransactionsIndexRoute: typeof AppTransactionsIndexRoute
+  AppTransactionsImportsIdRoute: typeof AppTransactionsImportsIdRoute
+  AppTransactionsImportsIndexRoute: typeof AppTransactionsImportsIndexRoute
 }
 
 const AppRouteChildren: AppRouteChildren = {
@@ -365,10 +353,11 @@ const AppRouteChildren: AppRouteChildren = {
   AppAssetsImportsRoute: AppAssetsImportsRouteWithChildren,
   AppSettingsAccountRoute: AppSettingsAccountRoute,
   AppTransactionsAllRoute: AppTransactionsAllRoute,
-  AppTransactionsImportsRoute: AppTransactionsImportsRouteWithChildren,
   AppAssetsIndexRoute: AppAssetsIndexRoute,
   AppBudgetsIndexRoute: AppBudgetsIndexRoute,
   AppTransactionsIndexRoute: AppTransactionsIndexRoute,
+  AppTransactionsImportsIdRoute: AppTransactionsImportsIdRoute,
+  AppTransactionsImportsIndexRoute: AppTransactionsImportsIndexRoute,
 }
 
 const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)

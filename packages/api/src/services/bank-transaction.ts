@@ -90,6 +90,85 @@ export const BankTransactionService = {
 		};
 	},
 
+	getPreviewCounts: async (id: string) => {
+		try {
+			const fileImport = await FileImportService.findById(id);
+			if (!fileImport || !fileImport.files[0]) {
+				return {
+					newCount: 0,
+					similarCount: 0,
+					existingCount: 0,
+				};
+			}
+
+			const file = Bun.file(fileImport.files[0].filePath);
+
+			const parseType = await detectParser(file);
+			const transactions = (await parseFile(
+				file,
+				parseType,
+			)) as TransactionRow[];
+
+			const transactionIds = transactions.map((tx) => tx.transactionId);
+			const existingTransactions =
+				await BankTransactionRepository.findByTransactionIds(transactionIds);
+			const existingTransactionIdsSet = new Set(
+				existingTransactions.map((tx) => tx.transactionId),
+			);
+
+			const similarTransactions = await BankTransactionRepository.findSimilar(
+				transactions.map((tx) => {
+					const timestamp = new Date(
+						tx.date.getFullYear(),
+						tx.date.getMonth(),
+						tx.date.getDate(),
+						tx.time?.getHours() || 0,
+						tx.time?.getMinutes() || 0,
+						tx.time?.getSeconds() || 0,
+						tx.time?.getMilliseconds() || 0,
+					);
+
+					return {
+						timestamp: timestamp,
+						name: tx.name,
+						amount: tx.amount,
+					};
+				}),
+			);
+
+			const similarTransactionIdsSet = new Set(
+				similarTransactions.map((tx) => tx.transactionId),
+			);
+
+			let newCount = 0;
+			let similarCount = 0;
+			let existingCount = 0;
+
+			for (const tx of transactions) {
+				if (existingTransactionIdsSet.has(tx.transactionId)) {
+					existingCount++;
+				} else if (similarTransactionIdsSet.has(tx.transactionId)) {
+					similarCount++;
+				} else {
+					newCount++;
+				}
+			}
+
+			return {
+				newCount,
+				similarCount,
+				existingCount,
+			};
+		} catch (error) {
+			console.error(error);
+			return {
+				newCount: 0,
+				similarCount: 0,
+				existingCount: 0,
+			};
+		}
+	},
+
 	createImport: async (fileId: string) => {
 		const fileImport = await FileImportService.create("transactions");
 		if (!fileImport) {

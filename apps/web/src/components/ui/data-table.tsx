@@ -30,10 +30,10 @@ interface DataTableProps<TData> extends React.ComponentProps<"div"> {
 
 export function DataTable<TData>({ table }: DataTableProps<TData>) {
 	return (
-		<div className="overflow-hidden rounded-md border">
-			<div>
+		<div className="flex h-full flex-col overflow-hidden rounded-md border">
+			<div className="relative flex-1 overflow-auto">
 				<Table>
-					<TableHeader>
+					<TableHeader className="sticky top-0 z-10 bg-background">
 						{table.getHeaderGroups().map((headerGroup) => (
 							<TableRow key={headerGroup.id}>
 								{headerGroup.headers.map((header) => {
@@ -51,7 +51,7 @@ export function DataTable<TData>({ table }: DataTableProps<TData>) {
 							</TableRow>
 						))}
 					</TableHeader>
-					<TableBody>
+					<TableBody className="[&_tr:last-child]:!border-b">
 						{table.getRowModel().rows?.length ? (
 							table.getRowModel().rows.map((row) => (
 								<TableRow
@@ -96,10 +96,14 @@ export function DataTablePagination<TData>({
 }: DataTablePaginationProps<TData>) {
 	return (
 		<div className="flex items-center justify-between px-4">
-			<div className="hidden flex-1 text-muted-foreground text-sm lg:flex">
-				{table.getFilteredSelectedRowModel().rows.length} of&nbsp;
-				{table.getFilteredRowModel().rows.length} row(s) selected.
-			</div>
+			{table.getFilteredSelectedRowModel().rows.length > 0 ? (
+				<div className="hidden flex-1 text-muted-foreground text-sm lg:flex">
+					{table.getFilteredSelectedRowModel().rows.length} of&nbsp;
+					{table.getFilteredRowModel().rows.length} row(s) selected.
+				</div>
+			) : (
+				<div />
+			)}
 			<div className="flex w-full items-center gap-8 lg:w-fit">
 				<div className="hidden items-center gap-2 lg:flex">
 					<Label htmlFor="rows-per-page" className="font-medium text-sm">
