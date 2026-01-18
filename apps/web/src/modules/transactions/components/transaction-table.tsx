@@ -138,8 +138,10 @@ export function TransactionTable({ type, dateRange }: TransactionTableProps) {
 	});
 
 	return (
-		<div className="flex flex-col gap-2">
-			<DataTable table={table} />
+		<div className="flex flex-1 flex-col gap-2 overflow-hidden">
+			<div className="flex-1 overflow-auto">
+				<DataTable table={table} />
+			</div>
 			<DataTablePagination table={table} />
 		</div>
 	);

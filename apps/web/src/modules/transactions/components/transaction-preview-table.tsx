@@ -444,6 +444,12 @@ export function TransactionPreviewTable({
 		state: {
 			rowSelection,
 		},
+		initialState: {
+			pagination: {
+				pageIndex: 0,
+				pageSize: 20,
+			},
+		},
 	});
 
 	// biome-ignore lint/correctness/useExhaustiveDependencies: updates row on select
@@ -457,8 +463,10 @@ export function TransactionPreviewTable({
 	}, [rowSelection, table, onSelectionChange]);
 
 	return (
-		<div className="flex flex-col gap-2">
-			<DataTable table={table} />
+		<div className="flex h-full min-h-0 flex-1 flex-col gap-2 overflow-hidden">
+			<div className="min-h-0 flex-1 overflow-auto">
+				<DataTable table={table} />
+			</div>
 			<DataTablePagination table={table} />
 		</div>
 	);

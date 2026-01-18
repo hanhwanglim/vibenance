@@ -29,10 +29,14 @@ interface DataTableProps<TData> extends React.ComponentProps<"div"> {
 }
 
 export function DataTable<TData>({ table }: DataTableProps<TData>) {
+	const hasRows = table.getRowModel().rows?.length > 0;
+
 	return (
 		<div className="flex h-full flex-col overflow-hidden rounded-md border">
-			<div className="relative flex-1 overflow-auto">
-				<Table>
+			<div
+				className={`relative flex-1 overflow-auto ${!hasRows ? "[&_[data-slot=table-container]]:h-full [&_[data-slot=table]]:h-full" : ""}`}
+			>
+				<Table className={!hasRows ? "h-full" : ""}>
 					<TableHeader className="sticky top-0 z-10 bg-background">
 						{table.getHeaderGroups().map((headerGroup) => (
 							<TableRow key={headerGroup.id}>
@@ -51,8 +55,16 @@ export function DataTable<TData>({ table }: DataTableProps<TData>) {
 							</TableRow>
 						))}
 					</TableHeader>
-					<TableBody className="[&_tr:last-child]:!border-b">
-						{table.getRowModel().rows?.length ? (
+					<TableBody
+						className={
+							table.getRowModel().rows.length > 1
+								? "[&_tr:last-child]:border-b!"
+								: !hasRows
+									? "h-full"
+									: ""
+						}
+					>
+						{hasRows ? (
 							table.getRowModel().rows.map((row) => (
 								<TableRow
 									key={row.id}
@@ -69,12 +81,14 @@ export function DataTable<TData>({ table }: DataTableProps<TData>) {
 								</TableRow>
 							))
 						) : (
-							<TableRow>
+							<TableRow className="h-full">
 								<TableCell
 									colSpan={table.getAllColumns().length}
-									className="h-24 text-center"
+									className="h-full text-center"
 								>
-									No results.
+									<div className="flex h-full items-center justify-center">
+										No results.
+									</div>
 								</TableCell>
 							</TableRow>
 						)}

@@ -130,7 +130,7 @@ export function ImportTransactions({ fileId }: { fileId: string }) {
 			value={activeTab}
 			onValueChange={handleTabChange}
 			defaultValue="new"
-			className="w-full flex-col justify-start gap-6"
+			className="flex h-full min-h-0 w-full flex-1 flex-col justify-start gap-6"
 		>
 			<div className="flex items-center justify-between px-4 lg:px-6">
 				<div className="flex gap-2">
@@ -182,7 +182,7 @@ export function ImportTransactions({ fileId }: { fileId: string }) {
 			</div>
 			<TabsContent
 				value="new"
-				className="relative flex flex-col gap-4 overflow-auto px-4 lg:px-6"
+				className="relative flex h-full min-h-0 flex-1 flex-col gap-4 overflow-hidden px-4 lg:px-6"
 			>
 				<TransactionPreviewTable
 					data={(previewData?.new || []) as TransactionRow[]}
@@ -191,7 +191,7 @@ export function ImportTransactions({ fileId }: { fileId: string }) {
 			</TabsContent>
 			<TabsContent
 				value="similar"
-				className="relative flex flex-col gap-4 overflow-auto px-4 lg:px-6"
+				className="relative flex h-full min-h-0 flex-1 flex-col gap-4 overflow-hidden px-4 lg:px-6"
 			>
 				{!warningDismissed && (
 					<Card className="border-yellow-500/50 bg-yellow-500/10">
@@ -220,7 +220,7 @@ export function ImportTransactions({ fileId }: { fileId: string }) {
 			</TabsContent>
 			<TabsContent
 				value="duplicate"
-				className="relative flex flex-col gap-4 overflow-auto px-4 lg:px-6"
+				className="relative flex h-full min-h-0 flex-1 flex-col gap-4 overflow-hidden px-4 lg:px-6"
 			>
 				<TransactionPreviewTable
 					data={(previewData?.existing || []) as TransactionRow[]}

@@ -42,10 +42,13 @@ function RouteComponent() {
 	}
 
 	return (
-		<div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6">
+		<div className="flex flex-1 flex-col gap-4 py-4 md:gap-6 md:py-6">
 			<SummaryCards dateRange={dateRange} />
 
-			<Tabs defaultValue="all" className="w-full flex-col justify-start gap-6">
+			<Tabs
+				defaultValue="all"
+				className="flex w-full flex-1 flex-col justify-start gap-6"
+			>
 				<div className="flex items-center justify-between px-4 lg:px-6">
 					<div className="flex gap-2">
 						<Label htmlFor="view-selector" className="sr-only">
@@ -105,19 +108,19 @@ function RouteComponent() {
 				</div>
 				<TabsContent
 					value="all"
-					className="relative flex flex-col gap-4 overflow-auto px-4 lg:px-6"
+					className="relative flex flex-1 flex-col gap-4 overflow-hidden px-4 lg:px-6"
 				>
 					<TransactionTable type="all" dateRange={dateRange} />
 				</TabsContent>
 				<TabsContent
 					value="income"
-					className="relative flex flex-col gap-4 overflow-auto px-4 lg:px-6"
+					className="relative flex flex-1 flex-col gap-4 overflow-hidden px-4 lg:px-6"
 				>
 					<TransactionTable type="income" dateRange={dateRange} />
 				</TabsContent>
 				<TabsContent
 					value="expenses"
-					className="relative flex flex-col gap-4 overflow-auto px-4 lg:px-6"
+					className="relative flex flex-1 flex-col gap-4 overflow-hidden px-4 lg:px-6"
 				>
 					<TransactionTable type="expenses" dateRange={dateRange} />
 				</TabsContent>
