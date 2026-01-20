@@ -44,25 +44,12 @@ class BotStateManager {
 			return undefined;
 		}
 
-		// Check if session expired
 		if (new Date() > session.expiresAt) {
 			this.sessions.delete(userId);
 			return undefined;
 		}
 
 		return session;
-	}
-
-	updateSessionAccount(userId: number, _accountId: string): boolean {
-		const session = this.getSession(userId);
-		if (!session) {
-			return false;
-		}
-
-		// Store accountId in session (we'll use it when creating transactions)
-		// Since we need to modify the session, we'll store it separately
-		// For now, we'll just return true and pass accountId when needed
-		return true;
 	}
 
 	deleteSession(userId: number): void {
@@ -81,7 +68,6 @@ class BotStateManager {
 
 export const botState = new BotStateManager();
 
-// Cleanup expired sessions every 5 minutes
 if (typeof setInterval !== "undefined") {
 	setInterval(
 		() => {

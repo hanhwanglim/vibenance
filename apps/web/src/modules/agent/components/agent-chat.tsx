@@ -20,8 +20,8 @@ export function AgentChat() {
 					),
 				);
 			},
-			reconnectToStream(_options) {
-				throw new Error("Unsupported");
+			reconnectToStream(options) {
+				throw new Error(`Unsupported ${options.chatId}`);
 			},
 		},
 	});

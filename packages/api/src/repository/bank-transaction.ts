@@ -6,7 +6,7 @@ import {
 	transaction,
 } from "@vibenance/db/schema/transaction";
 import { DateTime } from "@vibenance/utils/date";
-import { and, eq, gte, lt, max, min, sql, sum } from "drizzle-orm";
+import { and, desc, eq, gte, lt, max, min, sql, sum } from "drizzle-orm";
 import type { DateRange, Pagination } from "../utils/filter";
 
 export const BankTransactionRepository = {
@@ -193,7 +193,7 @@ export const BankTransactionRepository = {
 				and(eq(transaction.type, "expense"), ...dateRangeFilters(dateRange)),
 			)
 			.groupBy(category.id)
-			.orderBy(({ sum }) => sum); // expenses are negative
+			.orderBy(({ sum }) => desc(sum));
 	},
 
 	spendingPeriod: async () => {

@@ -11,5 +11,4 @@ export async function generateSeries(from: Date, to: Date, interval: string) {
 		`);
 
 	return result.rows as { bin: string }[];
-	// return rows.map((row) => ({ bin: new Date(row.bin) }))
 }
