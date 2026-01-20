@@ -1,15 +1,7 @@
-import { createFileRoute, Outlet, useLocation } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import { DateTime } from "@vibenance/utils/date";
-import { ListFilter } from "lucide-react";
 import { useState } from "react";
 import { DatePeriodPicker } from "@/components/date-period-picker";
-import { Button } from "@/components/ui/button";
-import {
-	DropdownMenu,
-	DropdownMenuCheckboxItem,
-	DropdownMenuContent,
-	DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { Label } from "@/components/ui/label";
 import {
 	Select,
@@ -21,32 +13,49 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ImportDialog } from "@/modules/transactions/components/import-dialog";
 import { SummaryCards } from "@/modules/transactions/components/summary-cards";
-import { TransactionTable } from "@/modules/transactions/components/transaction-table";
+import { ColumnVisibilityControl } from "@/modules/transactions/components/transaction-table/column-visibility-control";
+import { TransactionTable } from "@/modules/transactions/components/transaction-table/table";
+import { useTransactionTable } from "@/modules/transactions/hooks/use-transaction-table";
 import type { DateRange } from "@/types";
 
 export const Route = createFileRoute("/_app/transactions/all")({
 	component: RouteComponent,
 });
 
-function RouteComponent() {
-	const location = useLocation();
+const tabs = [
+	{
+		label: "All",
+		value: "all",
+	},
+	{
+		label: "Income",
+		value: "income",
+	},
+	{
+		label: "Expense",
+		value: "expenses",
+	},
+];
 
+function RouteComponent() {
 	const [dateRange, setDateRange] = useState<DateRange | undefined>({
 		from: new DateTime().subtract({ months: 3 }),
 		to: new Date(),
 		period: "3m",
 	});
 
-	if (location.pathname !== "/transactions/all") {
-		return <Outlet />;
-	}
+	const [type, setType] = useState<"all" | "income" | "expenses">("all");
+	const table = useTransactionTable(dateRange, type);
 
 	return (
 		<div className="flex flex-1 flex-col gap-4 py-4 md:gap-6 md:py-6">
 			<SummaryCards dateRange={dateRange} />
 
 			<Tabs
-				defaultValue="all"
+				value={type}
+				onValueChange={(value) => {
+					setType(value as "all" | "income" | "expenses");
+				}}
 				className="flex w-full flex-1 flex-col justify-start gap-6"
 			>
 				<div className="flex items-center justify-between px-4 lg:px-6">
@@ -54,7 +63,12 @@ function RouteComponent() {
 						<Label htmlFor="view-selector" className="sr-only">
 							View
 						</Label>
-						<Select defaultValue="all">
+						<Select
+							value={type}
+							onValueChange={(value) => {
+								setType(value as "all" | "income" | "expenses");
+							}}
+						>
 							<SelectTrigger
 								className="flex @4xl/main:hidden w-fit"
 								size="sm"
@@ -63,15 +77,19 @@ function RouteComponent() {
 								<SelectValue placeholder="Select a view" />
 							</SelectTrigger>
 							<SelectContent>
-								<SelectItem value="all">All</SelectItem>
-								<SelectItem value="income">Income</SelectItem>
-								<SelectItem value="expenses">Expenses</SelectItem>
+								{tabs.map((tab) => (
+									<SelectItem key={tab.value} value={tab.value}>
+										{tab.label}
+									</SelectItem>
+								))}
 							</SelectContent>
 						</Select>
 						<TabsList className="@4xl/main:flex hidden **:data-[slot=badge]:size-5 **:data-[slot=badge]:rounded-full **:data-[slot=badge]:bg-muted-foreground/30 **:data-[slot=badge]:px-1">
-							<TabsTrigger value="all">All</TabsTrigger>
-							<TabsTrigger value="income">Income</TabsTrigger>
-							<TabsTrigger value="expenses">Expenses</TabsTrigger>
+							{tabs.map((tab) => (
+								<TabsTrigger key={tab.value} value={tab.value}>
+									{tab.label}
+								</TabsTrigger>
+							))}
 						</TabsList>
 						<DatePeriodPicker
 							dateRange={dateRange}
@@ -79,51 +97,19 @@ function RouteComponent() {
 						/>
 					</div>
 					<div className="flex items-center gap-2">
-						<DropdownMenu>
-							<DropdownMenuTrigger asChild>
-								<Button variant="outline" size="sm">
-									<ListFilter />
-									<span className="hidden lg:inline">Customize Columns</span>
-									<span className="lg:hidden">Columns</span>
-									<ListFilter />
-								</Button>
-							</DropdownMenuTrigger>
-							<DropdownMenuContent align="end" className="w-56">
-								<DropdownMenuCheckboxItem className="capitalize" checked={true}>
-									Date
-								</DropdownMenuCheckboxItem>
-								<DropdownMenuCheckboxItem className="capitalize" checked={true}>
-									Amount
-								</DropdownMenuCheckboxItem>
-								<DropdownMenuCheckboxItem className="capitalize" checked={true}>
-									Reference
-								</DropdownMenuCheckboxItem>
-								<DropdownMenuCheckboxItem className="capitalize" checked={true}>
-									Account
-								</DropdownMenuCheckboxItem>
-							</DropdownMenuContent>
-						</DropdownMenu>
+						<ColumnVisibilityControl table={table} />
 						<ImportDialog />
 					</div>
 				</div>
-				<TabsContent
-					value="all"
-					className="relative flex flex-1 flex-col gap-4 overflow-hidden px-4 lg:px-6"
-				>
-					<TransactionTable type="all" dateRange={dateRange} />
-				</TabsContent>
-				<TabsContent
-					value="income"
-					className="relative flex flex-1 flex-col gap-4 overflow-hidden px-4 lg:px-6"
-				>
-					<TransactionTable type="income" dateRange={dateRange} />
-				</TabsContent>
-				<TabsContent
-					value="expenses"
-					className="relative flex flex-1 flex-col gap-4 overflow-hidden px-4 lg:px-6"
-				>
-					<TransactionTable type="expenses" dateRange={dateRange} />
-				</TabsContent>
+				{tabs.map((tab) => (
+					<TabsContent
+						key={tab.value}
+						value={tab.value}
+						className="relative flex flex-1 flex-col gap-4 overflow-hidden px-4 lg:px-6"
+					>
+						<TransactionTable table={table} />
+					</TabsContent>
+				))}
 			</Tabs>
 		</div>
 	);

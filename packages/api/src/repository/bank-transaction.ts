@@ -6,7 +6,7 @@ import {
 	transaction,
 } from "@vibenance/db/schema/transaction";
 import { DateTime } from "@vibenance/utils/date";
-import { and, eq, gt, gte, lt, max, min, sql, sum } from "drizzle-orm";
+import { and, eq, gte, lt, max, min, sql, sum } from "drizzle-orm";
 import type { DateRange, Pagination } from "../utils/filter";
 
 export const BankTransactionRepository = {
@@ -14,11 +14,11 @@ export const BankTransactionRepository = {
 		const filters = [];
 
 		if (type === "income") {
-			filters.push(gte(transaction.amount, "0"));
+			filters.push(eq(transaction.type, "income"));
 		}
 
 		if (type === "expenses") {
-			filters.push(lt(transaction.amount, "0"));
+			filters.push(eq(transaction.type, "expense"));
 		}
 
 		return await db.$count(
@@ -31,7 +31,9 @@ export const BankTransactionRepository = {
 		const [result] = await db
 			.select({ income: sum(transaction.amount) })
 			.from(transaction)
-			.where(and(gt(transaction.amount, "0"), ...dateRangeFilters(dateRange)));
+			.where(
+				and(eq(transaction.type, "income"), ...dateRangeFilters(dateRange)),
+			);
 
 		return (result?.income as string) || "0";
 	},
@@ -40,7 +42,9 @@ export const BankTransactionRepository = {
 		const [result] = await db
 			.select({ expenses: sum(transaction.amount) })
 			.from(transaction)
-			.where(and(lt(transaction.amount, "0"), ...dateRangeFilters(dateRange)));
+			.where(
+				and(eq(transaction.type, "expense"), ...dateRangeFilters(dateRange)),
+			);
 
 		return (result?.expenses as string) || "0";
 	},
@@ -53,11 +57,11 @@ export const BankTransactionRepository = {
 		const filters = [];
 
 		if (type === "income") {
-			filters.push({ amount: { gte: "0" } });
+			filters.push({ type: "income" as const });
 		}
 
 		if (type === "expenses") {
-			filters.push({ amount: { lt: "0" } });
+			filters.push({ type: "expense" as const });
 		}
 
 		if (dateRange?.from) {
@@ -138,47 +142,6 @@ export const BankTransactionRepository = {
 		});
 	},
 
-	// findSimilar: async (
-	// 	values: { timestamp: Date; name: string; amount: string }[],
-	// ) => {
-	// 	if (values.length === 0) {
-	// 		return [];
-	// 	}
-
-	// 	const valuesFragment = sql.join(
-	// 		values
-	// 			.slice(0, 10)
-	// 			.map(
-	// 				(value) =>
-	// 					sql`((${value.timestamp} AT TIME ZONE 'UTC'), ${value.name}, ${value.amount}::numeric)`,
-	// 			),
-	// 		sql`, `,
-	// 	);
-
-	// 	const result = await db.execute(
-	// 		sql`
-	// 			SELECT t.id
-	// 			FROM ${transaction} t
-	// 			JOIN (
-	// 				VALUES
-	// 					${valuesFragment}
-	// 			) AS v(timestamp, name, amount)
-	// 			ON t.timestamp = v.timestamp AND t.name = v.name AND t.amount = v.amount
-	// 		`,
-	// 	);
-
-	// 	const rows = result.rows as { id: string }[];
-	// 	const ids = rows.map((row) => row.id);
-
-	// 	return await db.query.transaction.findMany({
-	// 		where: {
-	// 			id: {
-	// 				in: ids,
-	// 			},
-	// 		},
-	// 	});
-	// },
-
 	bulkCreate: async (transactions: TransactionInsert[]) => {
 		return await db
 			.insert(transaction)
@@ -226,7 +189,9 @@ export const BankTransactionRepository = {
 			})
 			.from(transaction)
 			.leftJoin(category, eq(transaction.categoryId, category.id))
-			.where(and(lt(transaction.amount, "0"), ...dateRangeFilters(dateRange)))
+			.where(
+				and(eq(transaction.type, "expense"), ...dateRangeFilters(dateRange)),
+			)
 			.groupBy(category.id)
 			.orderBy(({ sum }) => sum); // expenses are negative
 	},
@@ -238,7 +203,7 @@ export const BankTransactionRepository = {
 				max: max(transaction.timestamp),
 			})
 			.from(transaction)
-			.where(lt(transaction.amount, "0"));
+			.where(eq(transaction.type, "expense"));
 
 		return {
 			min: result?.min as Date | undefined,
@@ -253,7 +218,9 @@ export const BankTransactionRepository = {
 				sum: sum(transaction.amount),
 			})
 			.from(transaction)
-			.where(and(lt(transaction.amount, "0"), ...dateRangeFilters(dateRange)))
+			.where(
+				and(eq(transaction.type, "expense"), ...dateRangeFilters(dateRange)),
+			)
 			.groupBy(({ bin }) => bin)
 			.orderBy(({ bin }) => bin);
 	},
@@ -281,7 +248,7 @@ export const BankTransactionRepository = {
 					date_trunc(${sql.raw(`'${intervalStr}'`)}, ${transaction.timestamp}) AS bin,
 					SUM(${transaction.amount}) AS sum
 				FROM ${transaction}
-				WHERE ${transaction.amount} < 0
+				WHERE ${transaction.type} = 'expense'
 					${range.from ? sql`AND ${transaction.timestamp} >= ${new Date(range.from)}` : sql``}
 					${range.to ? sql`AND ${transaction.timestamp} < ${new Date(range.to)}` : sql``}
 				GROUP BY bin
@@ -309,7 +276,9 @@ export const BankTransactionRepository = {
 			})
 			.from(transaction)
 			.leftJoin(category, eq(transaction.categoryId, category.id))
-			.where(and(lt(transaction.amount, "0"), ...dateRangeFilters(dateRange)))
+			.where(
+				and(eq(transaction.type, "expense"), ...dateRangeFilters(dateRange)),
+			)
 			.groupBy(({ bin, category }) => [bin, category])
 			.orderBy(({ bin }) => bin);
 	},

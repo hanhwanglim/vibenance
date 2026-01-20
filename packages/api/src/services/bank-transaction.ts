@@ -258,13 +258,13 @@ export const BankTransactionService = {
 		return {
 			count: count,
 			totalIncome: Number(totalIncome),
-			totalExpenses: -Number(totalExpenses),
-			netAmount: Number(totalIncome) + Number(totalExpenses),
+			totalExpenses: Number(totalExpenses),
+			netAmount: Number(totalIncome) - Number(totalExpenses),
 
 			prevCount: prevCount,
 			prevTotalIncome: Number(prevTotalIncome),
-			prevTotalExpenses: -Number(prevTotalExpenses),
-			prevNetAmount: Number(prevTotalIncome) + Number(prevTotalExpenses),
+			prevTotalExpenses: Number(prevTotalExpenses),
+			prevNetAmount: Number(prevTotalIncome) - Number(prevTotalExpenses),
 		};
 	},
 

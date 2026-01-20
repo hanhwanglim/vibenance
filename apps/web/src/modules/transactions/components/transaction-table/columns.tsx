@@ -1,20 +1,13 @@
-import { keepPreviousData, useMutation, useQuery } from "@tanstack/react-query";
-import {
-	type ColumnDef,
-	getCoreRowModel,
-	useReactTable,
-} from "@tanstack/react-table";
+import { useMutation } from "@tanstack/react-query";
+import type { ColumnDef } from "@tanstack/react-table";
 import type { BankAccountSelect } from "@vibenance/db/schema/account";
 import type {
 	CategorySelect as CategorySelectType,
 	TransactionSelect,
 	TransactionType,
 } from "@vibenance/db/schema/transaction";
-import { useState } from "react";
-import type { DateRange } from "react-day-picker";
 import { toast } from "sonner";
 import { Checkbox } from "@/components/ui/checkbox";
-import { DataTable, DataTablePagination } from "@/components/ui/data-table";
 import { Label } from "@/components/ui/label";
 import {
 	Select,
@@ -27,16 +20,16 @@ import {
 } from "@/components/ui/select";
 import { formatCurrency } from "@/utils/formatting";
 import { orpc } from "@/utils/orpc";
-import { CategorySelect } from "./category-select";
+import { CategorySelect } from "../category-select";
 
-type TransactionRow = TransactionSelect & {
-	category: CategorySelectType;
-	bankAccount: BankAccountSelect;
+export type TransactionRow = TransactionSelect & {
+	category: CategorySelectType | null;
+	bankAccount: BankAccountSelect | null;
 };
 
-const columns: ColumnDef<TransactionRow>[] = [
+export const transactionColumns = (): ColumnDef<TransactionRow>[] => [
 	{
-		id: "select",
+		id: "Select",
 		header: ({ table }) => (
 			<div className="flex items-center justify-center">
 				<Checkbox
@@ -62,24 +55,59 @@ const columns: ColumnDef<TransactionRow>[] = [
 		enableHiding: false,
 	},
 	{
+		id: "Time",
 		accessorKey: "timestamp",
 		header: "Time",
-		cell: ({ row }) => row.original.timestamp.toLocaleString(),
+		cell: ({ row }) => {
+			const date = row.original.timestamp;
+			return new Intl.DateTimeFormat("en-GB", {
+				year: "numeric",
+				month: "short",
+				day: "numeric",
+				hour: "2-digit",
+				minute: "2-digit",
+			}).format(date);
+		},
 	},
 	{
+		id: "Name",
 		accessorKey: "name",
 		header: "Name",
 	},
 	{
+		id: "Currency",
 		accessorKey: "currency",
 		header: "Currency",
 	},
 	{
+		id: "Amount",
 		accessorKey: "amount",
-		header: "Amount",
-		cell: ({ row }) => formatCurrency(Number(row.original.amount)),
+		header: () => <div className="text-right">Amount</div>,
+		cell: ({ row }) => {
+			const amount = formatCurrency(Number(row.original.amount));
+			const type = row.original.type;
+			const isIncome = type === "income";
+			const isExpense = type === "expense";
+
+			return (
+				<div className="text-right">
+					<span
+						className={
+							isIncome
+								? "text-green-600 dark:text-green-400"
+								: isExpense
+									? "text-red-600 dark:text-red-400"
+									: ""
+						}
+					>
+						{amount}
+					</span>
+				</div>
+			);
+		},
 	},
 	{
+		id: "Type",
 		accessorKey: "type",
 		header: "Type",
 		cell: ({ row, getValue }) => {
@@ -130,6 +158,7 @@ const columns: ColumnDef<TransactionRow>[] = [
 		},
 	},
 	{
+		id: "Category",
 		accessorKey: "categoryId",
 		header: "Category",
 		cell: ({ row, getValue }) => {
@@ -161,49 +190,14 @@ const columns: ColumnDef<TransactionRow>[] = [
 		},
 	},
 	{
+		id: "Account",
 		accessorKey: "accountId",
 		header: "Account",
-		accessorFn: (row) => row.bankAccount.name,
+		accessorFn: (row) => row.bankAccount?.name ?? "",
 	},
 	{
+		id: "Reference",
 		accessorKey: "reference",
 		header: "Reference",
 	},
 ];
-
-type TransactionTableProps = {
-	type: "all" | "income" | "expenses";
-	dateRange: DateRange | undefined;
-};
-
-export function TransactionTable({ type, dateRange }: TransactionTableProps) {
-	const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: 10 });
-
-	const { data: transactions } = useQuery(
-		orpc.transaction.getAll.queryOptions({
-			input: { pagination: pagination, type: type, dateRange: dateRange },
-			placeholderData: keepPreviousData,
-		}),
-	);
-
-	const table = useReactTable({
-		data: (transactions?.data || []) as TransactionRow[],
-		columns,
-		getCoreRowModel: getCoreRowModel(),
-		manualPagination: true,
-		onPaginationChange: setPagination,
-		rowCount: transactions?.count || 0,
-		state: {
-			pagination,
-		},
-	});
-
-	return (
-		<div className="flex flex-1 flex-col gap-2 overflow-hidden">
-			<div className="flex-1 overflow-auto">
-				<DataTable table={table} />
-			</div>
-			<DataTablePagination table={table} />
-		</div>
-	);
-}
