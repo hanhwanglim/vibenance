@@ -1,4 +1,7 @@
-import type { TransactionInsert } from "@vibenance/db/schema/transaction";
+import type {
+	TransactionInsert,
+	TransactionType,
+} from "@vibenance/db/schema/transaction";
 import { detectParser, parseFile } from "@vibenance/parser/core/parse";
 import type { TransactionRow } from "@vibenance/parser/core/transaction";
 import { DateTime, parsePeriod } from "@vibenance/utils/date";
@@ -267,6 +270,10 @@ export const BankTransactionService = {
 
 	listCategories: async () => {
 		return await BankTransactionRepository.listCategories();
+	},
+
+	updateType: async (transactionId: string, type: TransactionType) => {
+		return await BankTransactionRepository.updateType(transactionId, type);
 	},
 
 	updateCategory: async (transactionId: string, categoryId: string | null) => {

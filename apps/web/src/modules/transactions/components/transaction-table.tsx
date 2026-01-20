@@ -8,12 +8,23 @@ import type { BankAccountSelect } from "@vibenance/db/schema/account";
 import type {
 	CategorySelect as CategorySelectType,
 	TransactionSelect,
+	TransactionType,
 } from "@vibenance/db/schema/transaction";
 import { useState } from "react";
 import type { DateRange } from "react-day-picker";
 import { toast } from "sonner";
 import { Checkbox } from "@/components/ui/checkbox";
 import { DataTable, DataTablePagination } from "@/components/ui/data-table";
+import { Label } from "@/components/ui/label";
+import {
+	Select,
+	SelectContent,
+	SelectGroup,
+	SelectItem,
+	SelectLabel,
+	SelectTrigger,
+	SelectValue,
+} from "@/components/ui/select";
 import { formatCurrency } from "@/utils/formatting";
 import { orpc } from "@/utils/orpc";
 import { CategorySelect } from "./category-select";
@@ -67,6 +78,56 @@ const columns: ColumnDef<TransactionRow>[] = [
 		accessorKey: "amount",
 		header: "Amount",
 		cell: ({ row }) => formatCurrency(Number(row.original.amount)),
+	},
+	{
+		accessorKey: "type",
+		header: "Type",
+		cell: ({ row, getValue }) => {
+			const defaultValue = getValue() as TransactionType;
+
+			const { mutate } = useMutation(
+				orpc.transaction.updateType.mutationOptions(),
+			);
+
+			const handleChange = (value: string) => {
+				mutate(
+					{ id: row.original.id, type: value as TransactionType },
+					{
+						onSuccess: () => {
+							toast.success("Category updated");
+						},
+					},
+				);
+			};
+
+			return (
+				<>
+					<Label className="sr-only">Type</Label>
+					<Select onValueChange={handleChange} defaultValue={defaultValue}>
+						<SelectTrigger className="w-45">
+							<SelectValue />
+						</SelectTrigger>
+						<SelectContent>
+							<SelectGroup>
+								<SelectLabel>Type</SelectLabel>
+								<SelectItem key="income" value="income">
+									Income
+								</SelectItem>
+								<SelectItem key="expense" value="expense">
+									Expense
+								</SelectItem>
+								<SelectItem key="transfer" value="transfer">
+									Transfer
+								</SelectItem>
+								<SelectItem key="interest" value="interest">
+									Interest
+								</SelectItem>
+							</SelectGroup>
+						</SelectContent>
+					</Select>
+				</>
+			);
+		},
 	},
 	{
 		accessorKey: "categoryId",

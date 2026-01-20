@@ -2,6 +2,7 @@ import { db } from "@vibenance/db";
 import {
 	category,
 	type TransactionInsert,
+	type TransactionType,
 	transaction,
 } from "@vibenance/db/schema/transaction";
 import { DateTime } from "@vibenance/utils/date";
@@ -194,6 +195,16 @@ export const BankTransactionRepository = {
 
 	listCategories: async () => {
 		return await db.query.category.findMany();
+	},
+
+	updateType: async (transactionId: string, type: TransactionType) => {
+		return (
+			(await db
+				.update(transaction)
+				.set({ type: type })
+				.where(eq(transaction.id, transactionId))
+				.returning()) || null
+		);
 	},
 
 	updateCategory: async (transactionId: string, categoryId: string | null) => {

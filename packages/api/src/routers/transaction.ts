@@ -88,6 +88,12 @@ export const transactionRouter = {
 		return await BankTransactionService.listCategories();
 	}),
 
+	updateType: protectedProcedure
+		.input(z.object({ id: z.string(), type: transactionTypeEnumSchema }))
+		.handler(async ({ input }) => {
+			BankTransactionService.updateType(input.id, input.type);
+		}),
+
 	updateCategory: protectedProcedure
 		.input(z.object({ id: z.string(), categoryId: z.string().nullable() }))
 		.handler(async ({ input }) => {
